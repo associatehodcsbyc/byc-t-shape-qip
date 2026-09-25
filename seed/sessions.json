@@ -1,0 +1,126 @@
+{
+  "version": "1.0",
+  "programme": "HRDC QIP - Shaping Future-Ready Graduates (28-30 Sept 2026)",
+  "sessions": [
+    {
+      "sessionId": "d1s1",
+      "day": 1,
+      "date": "2026-09-28",
+      "slot": "I",
+      "time": "09:15-10:45",
+      "title": "Setting the Vision: Why Future-Ready Graduates Need Depth, Breadth and Rigour",
+      "facilitator": "Dean(s)",
+      "order": 1
+    },
+    {
+      "sessionId": "d1s2",
+      "day": 1,
+      "date": "2026-09-28",
+      "slot": "II",
+      "time": "11:15-12:45",
+      "title": "The T-Shaped Graduate: Understanding Vertical Depth, Horizontal Breadth and the 70:30 Principle",
+      "facilitator": "Dean(s)",
+      "order": 2
+    },
+    {
+      "sessionId": "d1s3",
+      "day": 1,
+      "date": "2026-09-28",
+      "slot": "III",
+      "time": "13:45-15:00",
+      "title": "Diagnosing Our Department: Applying the Academic Rigour Checklist and Disciplinary Depth Audit",
+      "facilitator": "Head of the Department",
+      "order": 3
+    },
+    {
+      "sessionId": "d1s4",
+      "day": 1,
+      "date": "2026-09-28",
+      "slot": "IV",
+      "time": "15:15-16:30",
+      "title": "From Diagnosis to Direction: Dimensions of Academic Quality and Case Studies in Depth vs. Breadth",
+      "facilitator": "Head of the Department",
+      "order": 4
+    },
+    {
+      "sessionId": "d2s1",
+      "day": 2,
+      "date": "2026-09-29",
+      "slot": "I",
+      "time": "09:15-10:45",
+      "title": "Locating the Threshold: Identifying Threshold Concepts and Mapping Disciplinary Depth",
+      "facilitator": "Internal Faculty - Nominated",
+      "order": 5
+    },
+    {
+      "sessionId": "d2s2",
+      "day": 2,
+      "date": "2026-09-29",
+      "slot": "II",
+      "time": "11:15-12:45",
+      "title": "Higher-Order Thinking in Action: Redesigning a Course Assessment Using the Rigour Model",
+      "facilitator": "Internal Faculty - Nominated",
+      "order": 6
+    },
+    {
+      "sessionId": "d2s3",
+      "day": 2,
+      "date": "2026-09-29",
+      "slot": "III",
+      "time": "13:45-15:00",
+      "title": "Measuring Cognitive Depth: Applying Webb's DOK and the Cognitive Rigour Matrix to a Syllabus",
+      "facilitator": "Internal Faculty - Nominated",
+      "order": 7
+    },
+    {
+      "sessionId": "d2s4",
+      "day": 2,
+      "date": "2026-09-29",
+      "slot": "IV",
+      "time": "15:15-16:30",
+      "title": "Building Breadth Through Depth: Issue-Based Redesign of the Working Document",
+      "facilitator": "Internal Faculty - Nominated",
+      "order": 8
+    },
+    {
+      "sessionId": "d3s1",
+      "day": 3,
+      "date": "2026-09-30",
+      "slot": "I",
+      "time": "09:15-10:45",
+      "title": "Designing the Vertical: Progressive Curriculum Mapping from Year 1 to Year 4",
+      "facilitator": "Internal Faculty - Nominated",
+      "order": 9
+    },
+    {
+      "sessionId": "d3s2",
+      "day": 3,
+      "date": "2026-09-30",
+      "slot": "II",
+      "time": "11:15-12:45",
+      "title": "Assessing for Depth: Authentic Tasks, Rubrics and Reducing Rote Learning",
+      "facilitator": "Internal Faculty - Nominated",
+      "order": 10
+    },
+    {
+      "sessionId": "d3s3",
+      "day": 3,
+      "date": "2026-09-30",
+      "slot": "III",
+      "time": "13:45-15:00",
+      "title": "From Practice to Scholarship: Introducing SoTL and Documenting Curricular Change",
+      "facilitator": "Internal Faculty - Nominated",
+      "order": 11
+    },
+    {
+      "sessionId": "d3s4",
+      "day": 3,
+      "date": "2026-09-30",
+      "slot": "IV",
+      "time": "15:15-16:30",
+      "title": "Consolidating the Department Action Plan: Priorities, Owners and Timelines for a T-Shaped Curriculum",
+      "facilitator": "Internal Faculty - Nominated",
+      "order": 12
+    }
+  ]
+}

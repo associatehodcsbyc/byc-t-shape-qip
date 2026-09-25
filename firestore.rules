@@ -1,0 +1,261 @@
+rules_version = '2';
+
+// ============================================================================
+// QIP Workshop App (CHRIST BYC) - Firestore Security Rules (REFERENCE DRAFT)
+// ----------------------------------------------------------------------------
+// These rules are the real security boundary of the app. The Firebase web
+// config (apiKey, projectId, appId) is public by design and WILL be visible
+// in the JS bundle; that is acceptable ONLY because these rules deny every
+// read/write that is not explicitly allowed below.
+//
+// MUST be verified with @firebase/rules-unit-testing on the Firestore
+// emulator before deployment (see tests required in the build prompt).
+// ============================================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- Identity helpers ----------
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function email() {
+      return request.auth.token.email.lower();
+    }
+
+    // Only CHRIST Google Workspace accounts, via Google sign-in only.
+    function isChristAccount() {
+      return signedIn()
+        && request.auth.token.email is string
+        && email().matches('^[a-z0-9._%+-]+@christuniversity[.]in$')
+        && request.auth.token.firebase.sign_in_provider == 'google.com'
+        && request.auth.token.email_verified == true;
+    }
+
+    function rosterPath() {
+      return /databases/$(database)/documents/roster/$(email());
+    }
+
+    // Signed-in CHRIST account that exists in the uploaded roster and is active.
+    function isActive() {
+      return isChristAccount()
+        && exists(rosterPath())
+        && get(rosterPath()).data.active == true;
+    }
+
+    function me() {
+      return get(rosterPath()).data;
+    }
+
+    function isAdmin()      { return isActive() && me().role == 'admin'; }
+    function isAppAdmin()   { return isAdmin() && me().adminType == 'app_admin'; }
+    function isHoD()        { return isActive() && me().role == 'hod'; }
+    function isHoDOf(dept)  { return isHoD() && me().department == dept; }
+    function myDept()       { return me().department; }
+
+    // ---------- Activity gate ----------
+    function statePath(dept, activityId) {
+      return /databases/$(database)/documents/activityState/$(dept + '__' + activityId);
+    }
+
+    function activityOpen(dept, activityId) {
+      return exists(statePath(dept, activityId))
+        && get(statePath(dept, activityId)).data.enabled == true
+        && get(statePath(dept, activityId)).data.locked == false;
+    }
+
+    function activityExists(activityId) {
+      return exists(/databases/$(database)/documents/activities/$(activityId));
+    }
+
+    // ---------- Roster (bulk-uploaded users) ----------
+    // Doc ID = lowercase email.
+    match /roster/{rEmail} {
+      allow get: if isChristAccount()
+        && (rEmail == email()
+            || isAdmin()
+            || (isHoD() && resource.data.department == myDept()));
+      // HoD list queries MUST filter: where('department','==', <own dept>)
+      allow list: if isAdmin()
+        || (isHoD() && resource.data.department == myDept());
+      allow create, update: if isAppAdmin()
+        && rEmail == request.resource.data.email
+        && request.resource.data.keys().hasOnly(
+             ['email', 'name', 'department', 'role', 'adminType', 'active',
+              'uploadedBy', 'uploadedAt'])
+        && request.resource.data.email.matches('^[a-z0-9._%+-]+@christuniversity[.]in$')
+        && request.resource.data.role in ['participant', 'hod', 'admin']
+        && request.resource.data.active is bool
+        && (request.resource.data.role != 'admin'
+            || request.resource.data.adminType in ['app_admin', 'dean', 'associate_dean', 'hrdc']);
+      allow delete: if isAppAdmin();
+    }
+
+    // ---------- Reference data ----------
+    match /departments/{deptId} {
+      allow read: if isActive();
+      allow write: if isAppAdmin();
+    }
+
+    match /sessions/{sessionId} {
+      allow read: if isActive();
+      allow write: if isAppAdmin();
+    }
+
+    match /activities/{activityId} {
+      allow read: if isActive();
+      allow write: if isAppAdmin();
+    }
+
+    // ---------- HoD enable / disable per department ----------
+    // Doc ID = <departmentId>__<activityId>
+    match /activityState/{stateId} {
+      // Participants must query with where('department','==', <own dept>)
+      allow read: if isActive()
+        && (resource.data.department == myDept() || isAdmin());
+
+      allow create, update: if (isHoDOf(request.resource.data.department) || isAppAdmin())
+        && stateId == request.resource.data.department + '__' + request.resource.data.activityId
+        && request.resource.data.keys().hasOnly(
+             ['department', 'activityId', 'sessionId', 'enabled', 'locked',
+              'updatedBy', 'updatedAt'])
+        && request.resource.data.enabled is bool
+        && request.resource.data.locked is bool
+        && request.resource.data.updatedBy == email()
+        && request.resource.data.updatedAt == request.time
+        && activityExists(request.resource.data.activityId)
+        && (resource == null
+            || (resource.data.department == request.resource.data.department
+                && resource.data.activityId == request.resource.data.activityId));
+
+      allow delete: if false;
+    }
+
+    // ---------- Participant responses ----------
+    // Doc ID = <activityId>__<lowercase email>  (one response per person per activity)
+    function activityDoc(activityId) {
+      return get(/databases/$(database)/documents/activities/$(activityId)).data;
+    }
+
+    function validResponseShape() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(
+               ['activityId', 'sessionId', 'department', 'email', 'uid', 'name',
+                'answers', 'status', 'groupLabel', 'confidential',
+                'createdAt', 'updatedAt', 'submittedAt'])
+        && d.confidential is bool
+        && d.answers is map
+        && d.answers.size() <= 300
+        && d.status in ['draft', 'submitted']
+        && (!('groupLabel' in d) || (d.groupLabel is string && d.groupLabel.size() <= 40))
+        && d.updatedAt == request.time;
+    }
+
+    // Confidential activities (department-perception ratings): individual responses are
+    // readable ONLY by their author and the App Admin. HoDs and Dean/AD/HRDC read the
+    // anonymous department summary in /summaries instead.
+    // HoD / admin list queries MUST include where('confidential', '==', false).
+    match /responses/{respId} {
+      allow read: if isActive()
+        && (resource.data.email == email()
+            || isAppAdmin()
+            || (resource.data.confidential == false
+                && (isAdmin() || isHoDOf(resource.data.department))));
+
+      allow create: if isActive()
+        && respId == request.resource.data.activityId + '__' + email()
+        && request.resource.data.email == email()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.department == myDept()
+        && request.resource.data.createdAt == request.time
+        && validResponseShape()
+        && activityDoc(request.resource.data.activityId).sessionId == request.resource.data.sessionId
+        && request.resource.data.confidential
+             == activityDoc(request.resource.data.activityId).get('confidential', false)
+        && activityOpen(myDept(), request.resource.data.activityId);
+
+      // Edits allowed while the activity is enabled and not locked.
+      allow update: if isActive()
+        && resource.data.email == email()
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['answers', 'status', 'groupLabel', 'updatedAt', 'submittedAt', 'name'])
+        && validResponseShape()
+        && activityOpen(resource.data.department, resource.data.activityId);
+
+      allow delete: if false;
+    }
+
+    // ---------- Submission progress (for the HoD live tracker) ----------
+    // Doc ID = <activityId>__<lowercase email>. Written in the same batch as the response.
+    // Holds status only - never answers - so it is safe for the HoD to read for every activity.
+    match /progress/{progId} {
+      allow read: if isActive()
+        && (resource.data.email == email()
+            || isAdmin()
+            || isHoDOf(resource.data.department));
+
+      allow create, update: if isActive()
+        && progId == request.resource.data.activityId + '__' + email()
+        && request.resource.data.keys().hasOnly(
+             ['activityId', 'sessionId', 'department', 'email', 'name', 'status', 'groupLabel', 'updatedAt'])
+        && request.resource.data.email == email()
+        && request.resource.data.department == myDept()
+        && request.resource.data.status in ['draft', 'submitted']
+        && request.resource.data.updatedAt == request.time
+        && (!('groupLabel' in request.resource.data)
+            || (request.resource.data.groupLabel is string && request.resource.data.groupLabel.size() <= 40))
+        && (resource == null
+            || (resource.data.email == email() && resource.data.activityId == request.resource.data.activityId))
+        && activityOpen(myDept(), request.resource.data.activityId);
+
+      allow delete: if false;
+    }
+
+    // ---------- Anonymous department summaries (confidential activities) ----------
+    // Doc ID = <departmentId>__<activityId>. Computed and published ONLY by the App Admin console.
+    match /summaries/{sumId} {
+      allow read: if isAdmin() || isHoDOf(resource.data.department);
+      allow create, update: if isAppAdmin()
+        && sumId == request.resource.data.department + '__' + request.resource.data.activityId
+        && request.resource.data.n is int
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if isAppAdmin();
+    }
+
+    // ---------- Carry-forward working document ----------
+    // Doc ID = lowercase email
+    match /workingDocs/{wEmail} {
+      allow read: if isActive()
+        && (wEmail == email()
+            || isAdmin()
+            || isHoDOf(resource.data.department));
+
+      allow create, update: if isActive()
+        && wEmail == email()
+        && request.resource.data.email == email()
+        && request.resource.data.department == myDept()
+        && request.resource.data.keys().hasOnly(
+             ['email', 'department', 'fields', 'updatedAt'])
+        && request.resource.data.fields is map
+        && request.resource.data.fields.size() <= 50
+        && request.resource.data.updatedAt == request.time;
+
+      allow delete: if false;
+    }
+
+    // ---------- Audit log (append-only) ----------
+    match /auditLog/{logId} {
+      allow create: if (isHoD() || isAdmin())
+        && request.resource.data.actor == email()
+        && request.resource.data.at == request.time;
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    // ---------- Everything else is denied ----------
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

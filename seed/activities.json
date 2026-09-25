@@ -1,0 +1,3904 @@
+{
+  "version": "1.1",
+  "groupProtocol": "GROUP ACTIVITY - 1) Sit with your group as directed by the facilitator. 2) Select your group number from the list; every member of the group must select the SAME number. 3) Discuss and agree. 4) Each member records the answers in their OWN response and submits. The HoD sees the responses grouped by group number. Where the instructions say 'your own course', record your own course, not the group's.",
+  "groupLabels": [
+    "Group 1",
+    "Group 2",
+    "Group 3",
+    "Group 4",
+    "Group 5",
+    "Group 6",
+    "Group 7",
+    "Group 8",
+    "Group 9",
+    "Group 10",
+    "Group 11",
+    "Group 12",
+    "Group 13",
+    "Group 14",
+    "Group 15",
+    "Group 16",
+    "Group 17",
+    "Group 18",
+    "Group 19",
+    "Group 20"
+  ],
+  "activities": [
+    {
+      "activityId": "d1s1_a1_four_pillars",
+      "sessionId": "d1s1",
+      "order": 1,
+      "title": "The Four Pillars: Where Do We Stand?",
+      "instructions": "T-shaped learning is the destination. Academic rigour is the depth. Higher-order thinking is the cognitive engine. SoTL is the improvement mechanism.",
+      "widgetType": "composite",
+      "config": {
+        "parts": [
+          {
+            "id": "p1",
+            "widgetType": "poll",
+            "config": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Which of the four pillars is currently the WEAKEST in our department?",
+                  "multi": false,
+                  "options": [
+                    {
+                      "id": "o1",
+                      "text": "T-shaped learning - the destination"
+                    },
+                    {
+                      "id": "o2",
+                      "text": "Academic rigour - the depth"
+                    },
+                    {
+                      "id": "o3",
+                      "text": "Higher-order thinking - the cognitive engine"
+                    },
+                    {
+                      "id": "o4",
+                      "text": "Scholarship of Teaching and Learning (SoTL) - the improvement mechanism"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "id": "p2",
+            "widgetType": "free_text",
+            "config": {
+              "questions": [
+                {
+                  "id": "q2",
+                  "prompt": "Why did you choose this pillar? Give one example from your own teaching.",
+                  "maxChars": 1500
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "sourceRef": "HoD_circle_-_4_concept_note_and_schedule.pdf - Concept Note, four interconnected ideas",
+      "groupMode": "individual",
+      "derived": false,
+      "confidential": false
+    },
+    {
+      "activityId": "d1s1_a2_tl_questionnaire",
+      "sessionId": "d1s1",
+      "order": 2,
+      "title": "Contemporary Teaching and Learning Assessment Questionnaire",
+      "instructions": "Rate each statement about our department as you experience it, on a scale of 1-5. 'Faculty' means faculty in our department, including you. CONFIDENTIAL: your HoD, Dean, Associate Dean and HRDC see only department averages (shown once at least 5 colleagues have responded) and written comments without names. They can see THAT you have submitted, but not your individual ratings. Individual responses are accessible only to the App Admin, who generates the department summary.",
+      "widgetType": "rating_scale",
+      "config": {
+        "scale": {
+          "min": 1,
+          "max": 5,
+          "labels": [
+            "Strongly Disagree",
+            "Disagree",
+            "Neutral",
+            "Agree",
+            "Strongly Agree"
+          ]
+        },
+        "sections": [
+          {
+            "id": "A",
+            "title": "A. Student-Centred Teaching and Learning",
+            "items": [
+              {
+                "id": "a1",
+                "text": "Faculty regularly use active learning strategies in classrooms."
+              },
+              {
+                "id": "a2",
+                "text": "Students are encouraged to participate, discuss, and collaborate during learning activities."
+              },
+              {
+                "id": "a3",
+                "text": "Teaching approaches promote critical thinking and problem-solving."
+              },
+              {
+                "id": "a4",
+                "text": "Experiential learning opportunities are integrated into courses."
+              }
+            ]
+          },
+          {
+            "id": "B",
+            "title": "B. Curriculum and Learning Design",
+            "items": [
+              {
+                "id": "b1",
+                "text": "The curriculum is regularly updated to reflect current developments in the discipline."
+              },
+              {
+                "id": "b2",
+                "text": "Courses are aligned with clearly defined learning outcomes."
+              },
+              {
+                "id": "b3",
+                "text": "Interdisciplinary and multidisciplinary learning opportunities are available."
+              },
+              {
+                "id": "b4",
+                "text": "Industry and societal needs are reflected in curriculum design."
+              }
+            ]
+          },
+          {
+            "id": "C",
+            "title": "C. Assessment and Feedback",
+            "items": [
+              {
+                "id": "c1",
+                "text": "Assessments measure higher-order thinking and application of knowledge."
+              },
+              {
+                "id": "c2",
+                "text": "Students receive timely and constructive feedback."
+              },
+              {
+                "id": "c3",
+                "text": "Multiple assessment methods are used to evaluate learning."
+              },
+              {
+                "id": "c4",
+                "text": "Assessment practices support continuous learning and improvement."
+              }
+            ]
+          },
+          {
+            "id": "D",
+            "title": "D. Technology and AI Integration",
+            "items": [
+              {
+                "id": "d1",
+                "text": "Digital technologies are effectively integrated into teaching and learning."
+              },
+              {
+                "id": "d2",
+                "text": "Faculty use learning management systems and digital resources effectively."
+              },
+              {
+                "id": "d3",
+                "text": "Students are guided on the ethical use of Artificial Intelligence tools."
+              },
+              {
+                "id": "d4",
+                "text": "AI is being explored to enhance teaching, learning, and assessment practices."
+              }
+            ]
+          },
+          {
+            "id": "E",
+            "title": "E. Student Engagement and Success",
+            "items": [
+              {
+                "id": "e1",
+                "text": "Students actively engage in classroom and co-curricular learning activities."
+              },
+              {
+                "id": "e2",
+                "text": "Mechanisms exist to identify and support struggling students."
+              },
+              {
+                "id": "e3",
+                "text": "Student feedback is regularly collected and acted upon."
+              },
+              {
+                "id": "e4",
+                "text": "The department promotes a culture of belonging and inclusivity."
+              }
+            ]
+          },
+          {
+            "id": "F",
+            "title": "F. Research and Innovation in Learning",
+            "items": [
+              {
+                "id": "f1",
+                "text": "Research-based learning is integrated into courses."
+              },
+              {
+                "id": "f2",
+                "text": "Students are encouraged to undertake research projects and inquiry-based assignments."
+              },
+              {
+                "id": "f3",
+                "text": "Faculty regularly innovate and experiment with teaching practices."
+              },
+              {
+                "id": "f4",
+                "text": "The department promotes creativity, innovation, and entrepreneurship."
+              }
+            ]
+          },
+          {
+            "id": "G",
+            "title": "G. Faculty Development and Learning Culture",
+            "items": [
+              {
+                "id": "g1",
+                "text": "Faculty participate regularly in professional development programmes."
+              },
+              {
+                "id": "g2",
+                "text": "Peer learning and sharing of best teaching practices are encouraged."
+              },
+              {
+                "id": "g3",
+                "text": "Teaching excellence is recognized and rewarded."
+              },
+              {
+                "id": "g4",
+                "text": "The department actively supports continuous improvement in teaching quality."
+              }
+            ]
+          },
+          {
+            "id": "H",
+            "title": "H. Quality Assurance and Continuous Improvement",
+            "items": [
+              {
+                "id": "h1",
+                "text": "Learning outcomes are systematically monitored and evaluated."
+              },
+              {
+                "id": "h2",
+                "text": "Data and evidence are used to improve teaching and learning practices."
+              },
+              {
+                "id": "h3",
+                "text": "The department regularly reviews its teaching-learning processes."
+              },
+              {
+                "id": "h4",
+                "text": "Quality enhancement initiatives are implemented based on identified needs."
+              }
+            ]
+          }
+        ],
+        "reflections": [
+          {
+            "id": "r1",
+            "prompt": "What are the three strongest aspects of teaching and learning in our department?",
+            "maxChars": 1500
+          },
+          {
+            "id": "r2",
+            "prompt": "What are the three areas that require immediate attention?",
+            "maxChars": 1500
+          },
+          {
+            "id": "r3",
+            "prompt": "What is one innovative teaching-learning initiative you can implement in your own courses in the next academic year?",
+            "maxChars": 1500
+          },
+          {
+            "id": "r4",
+            "prompt": "What should our department be known for in teaching and learning by 2030?",
+            "maxChars": 1500
+          },
+          {
+            "id": "r5",
+            "prompt": "What kind of learning culture exists in our department today?",
+            "maxChars": 1500
+          },
+          {
+            "id": "r6",
+            "prompt": "What are you most proud of in your own teaching and learning practice?",
+            "maxChars": 1500
+          }
+        ]
+      },
+      "sourceRef": "Hod_Circle_1.docx - Contemporary Teaching and Learning Assessment Questionnaire for Departments (reworded for faculty participants)",
+      "groupMode": "individual",
+      "derived": false,
+      "scoring": {
+        "method": "sum",
+        "max": 160,
+        "bands": [
+          {
+            "min": 128,
+            "max": 160,
+            "label": "Exemplary and Future-Ready Learning Culture"
+          },
+          {
+            "min": 96,
+            "max": 127,
+            "label": "Strong Teaching and Learning Practices"
+          },
+          {
+            "min": 64,
+            "max": 95,
+            "label": "Developing Teaching and Learning Culture"
+          },
+          {
+            "min": 32,
+            "max": 63,
+            "label": "Below 64 (no band defined in source)"
+          }
+        ]
+      },
+      "confidential": true
+    },
+    {
+      "activityId": "d1s1_a3_ideal_graduate",
+      "sessionId": "d1s1",
+      "order": 3,
+      "title": "Five Characteristics of an Ideal Graduate",
+      "instructions": "The University's Academic Vision states that graduates must possess deep disciplinary expertise, conceptual clarity, research capability, ethical reasoning, interdisciplinary awareness, employability and lifelong learning skills. Identify five characteristics of an ideal graduate of YOUR programme.",
+      "widgetType": "table_entry",
+      "config": {
+        "columns": [
+          {
+            "id": "characteristic",
+            "label": "Characteristic of an ideal graduate of our programme",
+            "type": "text"
+          }
+        ],
+        "minRows": 5,
+        "maxRows": 5
+      },
+      "sourceRef": "HoD_Circle_2.pdf - Case Study 4, Step 1 (p.14)",
+      "groupMode": "individual",
+      "derived": false,
+      "confidential": false
+    },
+    {
+      "activityId": "d1s2_a1_depth_ranking",
+      "sessionId": "d1s2",
+      "order": 1,
+      "title": "What Does Disciplinary Depth Mean?",
+      "instructions": "Rank the following characteristics in order of importance (1 = Most Important; 10 = Least Important).",
+      "widgetType": "rank_order",
+      "config": {
+        "options": [
+          {
+            "id": "o1",
+            "text": "Conceptual understanding"
+          },
+          {
+            "id": "o2",
+            "text": "Mastery of core theories"
+          },
+          {
+            "id": "o3",
+            "text": "Critical thinking"
+          },
+          {
+            "id": "o4",
+            "text": "Research capability"
+          },
+          {
+            "id": "o5",
+            "text": "Problem-solving"
+          },
+          {
+            "id": "o6",
+            "text": "Evidence-based reasoning"
+          },
+          {
+            "id": "o7",
+            "text": "Ethical application of knowledge"
+          },
+          {
+            "id": "o8",
+            "text": "Communication within the discipline"
+          },
+          {
+            "id": "o9",
+            "text": "Independent learning"
+          },
+          {
+            "id": "o10",
+            "text": "Innovation within the discipline"
+          }
+        ],
+        "reflections": [
+          {
+            "id": "r1",
+            "prompt": "Which three characteristics are currently the greatest strengths of your graduates? Why?",
+            "maxChars": 1500
+          },
+          {
+            "id": "r2",
+            "prompt": "Which three characteristics require the greatest improvement? Why?",
+            "maxChars": 1500
+          }
+        ]
+      },
+      "sourceRef": "HoD_Circle_2.pdf - Worksheet: Disciplinary Depth Audit, Part A (p.16)",
+      "groupMode": "individual",
+      "derived": false,
+      "confidential": false
+    },
+    {
+      "activityId": "d1s2_a2_draw_our_t",
+      "sessionId": "d1s2",
+      "order": 2,
+      "title": "Draw Our T: Vertical Depth vs Horizontal Breadth",
+      "instructions": "List the courses of your programme and classify each one. Vertical = specialised, in-depth domain knowledge. Horizontal = working knowledge across other areas, research methods, academic writing, digital tools, collaboration. Many experts believe the ideal T-shaped equation is 70% depth and 30% breadth.",
+      "widgetType": "table_entry",
+      "config": {
+        "columns": [
+          {
+            "id": "course",
+            "label": "Course code and title",
+            "type": "text"
+          },
+          {
+            "id": "semester",
+            "label": "Semester",
+            "type": "number",
+            "min": 1,
+            "max": 10
+          },
+          {
+            "id": "credits",
+            "label": "Credits",
+            "type": "number",
+            "min": 0,
+            "max": 20
+          },
+          {
+            "id": "strand",
+            "label": "Strand",
+            "type": "select",
+            "options": [
+              "Vertical - disciplinary depth",
+              "Horizontal - breadth / transferable",
+              "Both"
+            ]
+          }
+        ],
+        "minRows": 3,
+        "maxRows": 60,
+        "computed": {
+          "type": "ratio_by_category",
+          "valueColumn": "credits",
+          "categoryColumn": "strand",
+          "target": "70:30 (Vertical:Horizontal)"
+        },
+        "reflections": [
+          {
+            "id": "r0",
+            "prompt": "Programme analysed (name and year of syllabus)",
+            "maxChars": 200
+          },
+          {
+            "id": "r1",
+            "prompt": "How close is the programme to the 70:30 depth-to-breadth balance? Which courses are breadth 'in the syllabus' but not breadth 'in the graduate'?",
+            "maxChars": 1500
+          }
+        ]
+      },
+      "sourceRef": "HoD_Circle_2.pdf - T-shaped individual and the 70:30 equation (pp.3-4); paper_on_T_shaped.pdf - Tables 1 and 2",
+      "groupMode": "group",
+      "derived": true,
+      "groupSetup": "Programme teams: 3-6 faculty who teach in the same programme",
+      "confidential": false
+    },
+    {
+      "activityId": "d1s3_a1_rigour_checklist",
+      "sessionId": "d1s3",
+      "order": 1,
+      "title": "Academic Rigour Checklist - Departmental Audit Tool",
+      "instructions": "Rate our department as you experience it: 1 Not Evident, 2 Emerging, 3 Partially Established, 4 Well Established, 5 Fully Embedded. 'Faculty' means faculty in our department, including you. Your ratings are combined with your colleagues' to form the department profile. CONFIDENTIAL: your HoD, Dean, Associate Dean and HRDC see only department averages (shown once at least 5 colleagues have responded) and written comments without names. They can see THAT you have submitted, but not your individual ratings. Individual responses are accessible only to the App Admin, who generates the department summary.",
+      "widgetType": "rating_scale",
+      "config": {
+        "scale": {
+          "min": 1,
+          "max": 5,
+          "labels": [
+            "Not Evident",
+            "Emerging",
+            "Partially Established",
+            "Well Established",
+            "Fully Embedded"
+          ]
+        },
+        "sections": [
+          {
+            "id": "A",
+            "title": "Section A: Curriculum Rigour",
+            "items": [
+              {
+                "id": "a1",
+                "text": "Programme Outcomes emphasise disciplinary mastery."
+              },
+              {
+                "id": "a2",
+                "text": "Courses progressively increase in complexity from Year 1 to Year 4."
+              },
+              {
+                "id": "a3",
+                "text": "Learning outcomes focus on conceptual understanding rather than factual recall."
+              },
+              {
+                "id": "a4",
+                "text": "Threshold concepts are explicitly identified within courses."
+              },
+              {
+                "id": "a5",
+                "text": "Students revisit concepts at progressively deeper levels."
+              },
+              {
+                "id": "a6",
+                "text": "Curriculum integrates current disciplinary developments."
+              },
+              {
+                "id": "a7",
+                "text": "The curriculum reflects international standards."
+              },
+              {
+                "id": "a8",
+                "text": "Interdisciplinary learning complements rather than replaces disciplinary depth."
+              }
+            ]
+          },
+          {
+            "id": "B",
+            "title": "Section B: Teaching and Learning",
+            "items": [
+              {
+                "id": "b1",
+                "text": "Faculty explain underlying concepts rather than procedures alone."
+              },
+              {
+                "id": "b2",
+                "text": "Teaching encourages questioning and critical discussion."
+              },
+              {
+                "id": "b3",
+                "text": "Students engage in problem-based learning."
+              },
+              {
+                "id": "b4",
+                "text": "Inquiry-based learning is regularly used."
+              },
+              {
+                "id": "b5",
+                "text": "Students analyse authentic problems."
+              },
+              {
+                "id": "b6",
+                "text": "Research articles are discussed in class."
+              },
+              {
+                "id": "b7",
+                "text": "Students participate actively rather than passively."
+              },
+              {
+                "id": "b8",
+                "text": "Faculty use multiple teaching strategies."
+              },
+              {
+                "id": "b9",
+                "text": "Students receive regular formative feedback."
+              },
+              {
+                "id": "b10",
+                "text": "Technology enhances conceptual learning."
+              }
+            ]
+          },
+          {
+            "id": "C",
+            "title": "Section C: Reading and Scholarship",
+            "items": [
+              {
+                "id": "c1",
+                "text": "Students read original scholarly literature."
+              },
+              {
+                "id": "c2",
+                "text": "Classic texts are prescribed where appropriate."
+              },
+              {
+                "id": "c3",
+                "text": "Students critically evaluate literature."
+              },
+              {
+                "id": "c4",
+                "text": "Reading lists are updated annually."
+              },
+              {
+                "id": "c5",
+                "text": "Faculty model scholarly reading habits."
+              },
+              {
+                "id": "c6",
+                "text": "Students write literature reviews."
+              },
+              {
+                "id": "c7",
+                "text": "Students evaluate evidence rather than opinions."
+              },
+              {
+                "id": "c8",
+                "text": "Academic writing is explicitly taught."
+              }
+            ]
+          },
+          {
+            "id": "D",
+            "title": "Section D: Research-Led Teaching",
+            "items": [
+              {
+                "id": "d1",
+                "text": "Faculty integrate their own research into teaching."
+              },
+              {
+                "id": "d2",
+                "text": "Students undertake research projects progressively."
+              },
+              {
+                "id": "d3",
+                "text": "Research methodology is introduced early."
+              },
+              {
+                "id": "d4",
+                "text": "Students analyse research papers."
+              },
+              {
+                "id": "d5",
+                "text": "Students present research findings."
+              },
+              {
+                "id": "d6",
+                "text": "Research informs curriculum revision."
+              },
+              {
+                "id": "d7",
+                "text": "Industry and research challenges are discussed."
+              },
+              {
+                "id": "d8",
+                "text": "Students understand research ethics."
+              }
+            ]
+          },
+          {
+            "id": "E",
+            "title": "Section E: Assessment Rigour",
+            "items": [
+              {
+                "id": "e1",
+                "text": "Assessments align with learning outcomes."
+              },
+              {
+                "id": "e2",
+                "text": "Assessment measures conceptual understanding."
+              },
+              {
+                "id": "e3",
+                "text": "Students solve unfamiliar problems."
+              },
+              {
+                "id": "e4",
+                "text": "Assessment measures analysis and evaluation."
+              },
+              {
+                "id": "e5",
+                "text": "Students create original solutions."
+              },
+              {
+                "id": "e6",
+                "text": "Rubrics are transparent."
+              },
+              {
+                "id": "e7",
+                "text": "Feedback improves future performance."
+              },
+              {
+                "id": "e8",
+                "text": "Assessment includes authentic tasks."
+              },
+              {
+                "id": "e9",
+                "text": "Assessment includes reflection."
+              },
+              {
+                "id": "e10",
+                "text": "Assessment discourages rote learning."
+              }
+            ]
+          },
+          {
+            "id": "F",
+            "title": "Section F: Academic Culture",
+            "items": [
+              {
+                "id": "f1",
+                "text": "Faculty demonstrate high academic expectations."
+              },
+              {
+                "id": "f2",
+                "text": "Students value intellectual curiosity."
+              },
+              {
+                "id": "f3",
+                "text": "Academic integrity is consistently upheld."
+              },
+              {
+                "id": "f4",
+                "text": "Faculty engage in continuous professional development."
+              },
+              {
+                "id": "f5",
+                "text": "Peer review of teaching occurs regularly."
+              },
+              {
+                "id": "f6",
+                "text": "Departments benchmark internationally."
+              },
+              {
+                "id": "f7",
+                "text": "Innovation is encouraged without compromising rigour."
+              },
+              {
+                "id": "f8",
+                "text": "Evidence informs academic decision-making."
+              }
+            ]
+          }
+        ]
+      },
+      "sourceRef": "HoD_Circle_2.pdf - Academic Rigour Checklist, Sections A-F (pp.5-7), adapted from Biggs & Tang (2011) (reworded for faculty participants)",
+      "groupMode": "individual",
+      "derived": false,
+      "scoring": {
+        "method": "sum",
+        "max": 260,
+        "bands": [
+          {
+            "min": 220,
+            "max": 260,
+            "label": "Exemplary academic rigour",
+            "description": "The department demonstrates a mature culture of disciplinary excellence, research-informed teaching, and constructive alignment. Focus on innovation, international benchmarking, and continuous enhancement."
+          },
+          {
+            "min": 180,
+            "max": 219,
+            "label": "Strong academic rigour",
+            "description": "Most essential practices are established. Prioritise strengthening research integration, authentic assessment, and interdisciplinary connections while maintaining disciplinary depth."
+          },
+          {
+            "min": 140,
+            "max": 179,
+            "label": "Developing academic rigour",
+            "description": "Good foundations exist, but greater emphasis is needed on conceptual learning, curriculum progression, and evidence-based assessment. Develop a structured departmental improvement plan."
+          },
+          {
+            "min": 52,
+            "max": 139,
+            "label": "Significant enhancement required",
+            "description": "Review curriculum design, teaching practices, assessment strategies, and faculty development. Consider a comprehensive academic quality review and targeted interventions."
+          }
+        ]
+      },
+      "confidential": true
+    },
+    {
+      "activityId": "d1s3_a2_rigour_reflection",
+      "sessionId": "d1s3",
+      "order": 2,
+      "title": "Academic Rigour Checklist - Reflection and Initial Priorities",
+      "instructions": "Use your section scores from the Academic Rigour Checklist (previous activity) to answer. Then list up to three priorities you would propose, with the person responsible, a timeline and a success indicator. Suggested time: 15 min.",
+      "widgetType": "composite",
+      "config": {
+        "parts": [
+          {
+            "id": "p1",
+            "widgetType": "free_text",
+            "config": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Which section received the highest score? Why do you think this is a strength?",
+                  "maxChars": 1500
+                },
+                {
+                  "id": "q2",
+                  "prompt": "Which section requires the greatest improvement? What evidence supports your conclusion?",
+                  "maxChars": 1500
+                },
+                {
+                  "id": "q3",
+                  "prompt": "Identify three departmental practices that currently promote academic rigour.",
+                  "maxChars": 1500
+                },
+                {
+                  "id": "q4",
+                  "prompt": "Identify three practices that may unintentionally reduce academic rigour.",
+                  "maxChars": 1500
+                },
+                {
+                  "id": "q5",
+                  "prompt": "If you could improve only one aspect of academic rigour in your own courses this academic year, what would it be? Why?",
+                  "maxChars": 1500
+                }
+              ]
+            }
+          },
+          {
+            "id": "p2",
+            "widgetType": "table_entry",
+            "config": {
+              "columns": [
+                {
+                  "id": "priority",
+                  "label": "Priority",
+                  "type": "text"
+                },
+                {
+                  "id": "action",
+                  "label": "Action",
+                  "type": "text"
+                },
+                {
+                  "id": "person",
+                  "label": "Person Responsible",
+                  "type": "text"
+                },
+                {
+                  "id": "timeline",
+                  "label": "Timeline",
+                  "type": "text"
+                },
+                {
+                  "id": "indicator",
+                  "label": "Success Indicator",
+                  "type": "text"
+                }
+              ],
+              "minRows": 1,
+              "maxRows": 3
+            }
+          }
+        ]
+      },
+      "sourceRef": "HoD_Circle_2.pdf - Reflection Questions and Department Action Plan (p.8) (reworded for faculty participants)",
+      "groupMode": "individual",
+      "derived": false,
+      "confidential": false
+    },
+    {
+      "activityId": "d1s3_a3_curriculum_for_depth",
+      "sessionId": "d1s3",
+      "order": 3,
+      "title": "Disciplinary Depth Audit - Curriculum for Depth",
+      "instructions": "Rate the programme you teach in most, for each statement: 1 Not Evident, 2 Emerging, 3 Developing, 4 Well Established, 5 Fully Embedded. Suggested time: 5 min. CONFIDENTIAL: your HoD, Dean, Associate Dean and HRDC see only department averages (shown once at least 5 colleagues have responded) and written comments without names. They can see THAT you have submitted, but not your individual ratings. Individual responses are accessible only to the App Admin, who generates the department summary.",
+      "widgetType": "rating_scale",
+      "config": {
+        "scale": {
+          "min": 1,
+          "max": 5,
+          "labels": [
+            "Not Evident",
+            "Emerging",
+            "Developing",
+            "Well Established",
+            "Fully Embedded"
+          ]
+        },
+        "sections": [
+          {
+            "id": "B",
+            "title": "Part B - Curriculum for Depth",
+            "items": [
+              {
+                "id": "b1",
+                "text": "Students build a strong foundation in the first year."
+              },
+              {
+                "id": "b2",
+                "text": "Courses increase in conceptual complexity each year."
+              },
+              {
+                "id": "b3",
+                "text": "Threshold concepts are intentionally taught."
+              },
+              {
+                "id": "b4",
+                "text": "Students revisit concepts at increasing levels of sophistication (spiral curriculum)."
+              },
+              {
+                "id": "b5",
+                "text": "The curriculum emphasises \"why\" and \"how\", not just \"what\"."
+              },
+              {
+                "id": "b6",
+                "text": "Students connect theory with practice."
+              },
+              {
+                "id": "b7",
+                "text": "Advanced electives deepen disciplinary expertise."
+              },
+              {
+                "id": "b8",
+                "text": "The curriculum reflects current developments in the discipline."
+              }
+            ]
+          }
+        ]
+      },
+      "sourceRef": "HoD_Circle_2.pdf - Disciplinary Depth Audit, Part B (p.17)",
+      "groupMode": "individual",
+      "derived": false,
+      "scoring": {
+        "method": "sum",
+        "max": 40,
+        "bands": []
+      },
+      "confidential": true
+    },
+    {
+      "activityId": "d1s3_a4_teaching_for_mastery",
+      "sessionId": "d1s3",
+      "order": 4,
+      "title": "Disciplinary Depth Audit - Teaching for Disciplinary Mastery",
+      "instructions": "How frequently do YOU use the following practices in your own teaching?",
+      "widgetType": "choice_matrix",
+      "config": {
+        "options": [
+          "Never",
+          "Occasionally",
+          "Frequently",
+          "Consistently"
+        ],
+        "evidence": false,
+        "items": [
+          {
+            "id": "c1",
+            "text": "I explain underlying concepts rather than procedures"
+          },
+          {
+            "id": "c2",
+            "text": "I encourage students to ask \"why\" questions"
+          },
+          {
+            "id": "c3",
+            "text": "I discuss misconceptions and conceptual errors"
+          },
+          {
+            "id": "c4",
+            "text": "I use discipline-specific case studies"
+          },
+          {
+            "id": "c5",
+            "text": "I require students to justify their reasoning"
+          },
+          {
+            "id": "c6",
+            "text": "I integrate current research into my teaching"
+          },
+          {
+            "id": "c7",
+            "text": "I model expert thinking aloud"
+          },
+          {
+            "id": "c8",
+            "text": "I use authentic disciplinary problems"
+          }
+        ],
+        "reflections": [
+          {
+            "id": "r1",
+            "prompt": "Which of these practices has had the greatest impact on conceptual learning in your own classes? Which one will you use more often?",
+            "maxChars": 1500
+          }
+        ]
+      },
+      "sourceRef": "HoD_Circle_2.pdf - Disciplinary Depth Audit, Part C (p.17) (reworded for faculty participants)",
+      "groupMode": "individual",
+      "derived": false,
+      "confidential": false
+    },
+    {
+      "activityId": "d1s3_a5_reading_for_depth",
+      "sessionId": "d1s3",
+      "order": 5,
+      "title": "Disciplinary Depth Audit - Reading for Depth",
+      "instructions": "Tick the practices currently followed in the courses YOU teach.",
+      "widgetType": "checklist",
+      "config": {
+        "options": [
+          {
+            "id": "o1",
+            "text": "Students read foundational texts or classic works in the discipline."
+          },
+          {
+            "id": "o2",
+            "text": "Students regularly engage with peer-reviewed journal articles."
+          },
+          {
+            "id": "o3",
+            "text": "Reading lists include contemporary research."
+          },
+          {
+            "id": "o4",
+            "text": "Students critically analyse rather than merely summarise readings."
+          },
+          {
+            "id": "o5",
+            "text": "I model scholarly reading practices for my students."
+          },
+          {
+            "id": "o6",
+            "text": "Students write literature reviews."
+          },
+          {
+            "id": "o7",
+            "text": "Students discuss research papers in seminars."
+          },
+          {
+            "id": "o8",
+            "text": "Students compare multiple perspectives before forming conclusions."
+          }
+        ],
+        "allowOther": false,
+        "reflections": [
+          {
+            "id": "r1",
+            "prompt": "How could you strengthen students' scholarly reading habits in the courses you teach?",
+            "maxChars": 1500
+          }
+        ]
+      },
+      "sourceRef": "HoD_Circle_2.pdf - Disciplinary Depth Audit, Part E (p.19) (reworded for faculty participants)",
+      "groupMode": "individual",
+      "derived": false,
+      "confidential": false
+    },
+    {
+      "activityId": "d1s3_a6_research_inquiry",
+      "sessionId": "d1s3",
+      "order": 6,
+      "title": "Disciplinary Depth Audit - Research and Inquiry",
+      "instructions": "Answer Yes, Partly or No for the programme you teach in most. Suggested time: 5 min.",
+      "widgetType": "choice_matrix",
+      "config": {
+        "options": [
+          "Yes",
+          "Partly",
+          "No"
+        ],
+        "evidence": false,
+        "items": [
+          {
+            "id": "f1",
+            "text": "Students undertake inquiry-based projects."
+          },
+          {
+            "id": "f2",
+            "text": "Research methodology is introduced before the final year."
+          },
+          {
+            "id": "f3",
+            "text": "Students formulate research questions."
+          },
+          {
+            "id": "f4",
+            "text": "Students analyse and interpret evidence."
+          },
+          {
+            "id": "f5",
+            "text": "Students communicate research findings."
+          },
+          {
+            "id": "f6",
+            "text": "Students understand research ethics."
+          }
+        ],
+        "reflections": [
+          {
+            "id": "r1",
+            "prompt": "How effectively does our curriculum prepare students to think like researchers? What can you add in your own courses?",
+            "maxChars": 1500
+          }
+        ]
+      },
+      "sourceRef": "HoD_Circle_2.pdf - Disciplinary Depth Audit, Part F (p.19)",
+      "groupMode": "individual",
+      "derived": false,
+      "confidential": false
+    },
+    {
+      "activityId": "d1s4_a1_quality_dimensions",
+      "sessionId": "d1s4",
+      "order": 1,
+      "title": "Five Dimensions of Academic Quality",
+      "instructions": "Rate our department on each dimension as you experience it, and note one piece of evidence. CONFIDENTIAL: your HoD, Dean, Associate Dean and HRDC see only department averages (shown once at least 5 colleagues have responded) and written comments without names. They can see THAT you have submitted, but not your individual ratings. Individual responses are accessible only to the App Admin, who generates the department summary.",
+      "widgetType": "rating_scale",
+      "config": {
+        "scale": {
+          "min": 1,
+          "max": 5,
+          "labels": [
+            "Not Evident",
+            "Emerging",
+            "Developing",
+            "Well Established",
+            "Fully Embedded"
+          ]
+        },
+        "sections": [
+          {
+            "id": "Q",
+            "title": "Dimensions of Academic Quality",
+            "items": [
+              {
+                "id": "q1",
+                "text": "Curriculum Quality - curricula remain relevant, multidisciplinary, aligned with NEP 2020, and responsive to emerging industry and societal needs."
+              },
+              {
+                "id": "q2",
+                "text": "Teaching Quality - learner-centred pedagogies, active and experiential learning, inclusive practices, and effective integration of technology and AI."
+              },
+              {
+                "id": "q3",
+                "text": "Assessment Quality - a shift from memory-based examinations to authentic, application-oriented, research-focused and project-based evaluation."
+              },
+              {
+                "id": "q4",
+                "text": "Student Engagement - participation, mentoring, feedback mechanisms, and holistic development opportunities."
+              },
+              {
+                "id": "q5",
+                "text": "Learning Outcomes - students demonstrate knowledge application, critical thinking, employability, and future-readiness."
+              }
+            ]
+          }
+        ],
+        "evidence": true
+      },
+      "sourceRef": "Hod_Circle_1.docx - Session III: Dimensions of Academic Quality (reworded for faculty participants)",
+      "groupMode": "individual",
+      "derived": true,
+      "scoring": {
+        "method": "sum",
+        "max": 25,
+        "bands": []
+      },
+      "confidential": true
+    },
+    {
+      "activityId": "d1s4_a2_case1_breadth_replaces_depth",
+      "sessionId": "d1s4",
+      "order": 2,
+      "title": "Case Study 1 - When Breadth Replaces Depth",
+      "instructions": "The facilitator assigns one case to each group. Read the case aloud in your group (3 min), discuss the questions (15 min) and agree on your group's answers. One member presents to the room (3 min). Suggested time: 25 min.",
+      "widgetType": "composite",
+      "config": {
+        "context": "The Department of Business Analytics at University A redesigned its undergraduate programme to make students future ready. The curriculum introduced numerous interdisciplinary courses (AI, Design Thinking, Entrepreneurship, Sustainability, Communication Skills, Innovation Labs, Leadership, FinTech, Data Visualisation). Students enjoyed the programme and course evaluations improved. After four years, employers reported that graduates struggled to explain statistical concepts, design analytical models independently, interpret research findings, justify methodological choices, and solve unfamiliar quantitative problems. Students depended heavily on software tools without understanding the underlying principles.",
+        "parts": [
+          {
+            "id": "p1",
+            "widgetType": "free_text",
+            "config": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "What was the department trying to achieve?",
+                  "maxChars": 1500
+                },
+                {
+                  "id": "q2",
+                  "prompt": "What assumptions guided the curriculum redesign?",
+                  "maxChars": 1500
+                },
+                {
+                  "id": "q3",
+                  "prompt": "What unintended consequences emerged?",
+                  "maxChars": 1500
+                }
+              ]
+            }
+          },
+          {
+            "id": "p2",
+            "widgetType": "choice_matrix",
+            "config": {
+              "options": [
+                "Low",
+                "Moderate",
+                "High"
+              ],
+              "evidence": false,
+              "items": [
+                {
+                  "id": "d1",
+                  "text": "Conceptual learning"
+                },
+                {
+                  "id": "d2",
+                  "text": "Disciplinary depth"
+                },
+                {
+                  "id": "d3",
+                  "text": "Research capability"
+                },
+                {
+                  "id": "d4",
+                  "text": "Interdisciplinary learning"
+                },
+                {
+                  "id": "d5",
+                  "text": "Graduate readiness"
+                }
+              ]
+            }
+          },
+          {
+            "id": "p3",
+            "widgetType": "free_text",
+            "config": {
+              "questions": [
+                {
+                  "id": "q4",
+                  "prompt": "What balance between breadth and depth would you recommend?",
+                  "maxChars": 1500
+                }
+              ]
+            }
+          },
+          {
+            "id": "p4",
+            "widgetType": "poll",
+            "config": {
+              "questions": [
+                {
+                  "id": "q5",
+                  "prompt": "CHRIST context: Could this happen in your department?",
+                  "multi": false,
+                  "options": [
+                    {
+                      "id": "o1",
+                      "text": "Yes"
+                    },
+                    {
+                      "id": "o2",
+                      "text": "No"
+                    },
+                    {
+                      "id": "o3",
+                      "text": "Partly"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "id": "p5",
+            "widgetType": "free_text",
+            "config": {
+              "questions": [
+                {
+                  "id": "q6",
+                  "prompt": "Why?",
+                  "maxChars": 1500
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "sourceRef": "HoD_Circle_2.pdf - Case Study 1 (pp.10-11)",
+      "groupMode": "group",
+      "derived": false,
+      "groupSetup": "Case-study groups: 4-6 members, mixed programmes; the facilitator assigns one case per group",
+      "confidential": false
+    },
+    {
+      "activityId": "d1s4_a3_case2_results_vs_understanding",
+      "sessionId": "d1s4",
+      "order": 3,
+      "title": "Case Study 2 - Excellent Results but Poor Understanding",
+      "instructions": "The facilitator assigns one case to each group. Read the case aloud in your group (3 min), discuss the questions (15 min) and agree on your group's answers. One member presents to the room (3 min). Suggested time: 25 min.",
+      "widgetType": "composite",
+      "config": {
+        "context": "The Department of Mechanical Engineering consistently produced excellent examination results: nearly 90% First Class, syllabus completed on time, attendance above 90%, feedback averaging 4.7/5. Industry partners reported that graduates struggled to solve open-ended problems, explain why a solution worked, apply principles in unfamiliar contexts, and communicate technical reasoning. A curriculum review revealed that most assessments rewarded procedural knowledge and memorisation rather than conceptual understanding.",
+        "parts": [
+          {
+            "id": "p1",
+            "widgetType": "free_text",
+            "config": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Diagnosis: What indicators suggested success?",
+                  "maxChars": 1500
+                },
+                {
+                  "id": "q2",
+                  "prompt": "Diagnosis: What indicators suggested failure?",
+                  "maxChars": 1500
+                }
+              ]
+            }
+          },
+          {
+            "id": "p2",
+            "widgetType": "checklist",
+            "config": {
+              "allowOther": false,
+              "options": [
+                {
+                  "id": "o1",
+                  "text": "Excessive content coverage"
+                },
+                {
+                  "id": "o2",
+                  "text": "Recall-based assessment"
+                },
+                {
+                  "id": "o3",
+                  "text": "Limited inquiry"
+                },
+                {
+                  "id": "o4",
+                  "text": "Poor conceptual teaching"
+                },
+                {
+                  "id": "o5",
+                  "text": "Lack of research exposure"
+                },
+                {
+                  "id": "o6",
+                  "text": "Limited authentic assessment"
+                },
+                {
+                  "id": "o7",
+                  "text": "Faculty development needs"
+                }
+              ]
+            },
+            "label": "Root Cause Analysis - tick the likely causes"
+          },
+          {
+            "id": "p3",
+            "widgetType": "poll",
+            "config": {
+              "questions": [
+                {
+                  "id": "q3",
+                  "prompt": "Biggs' Constructive Alignment: which element appears weakest?",
+                  "multi": false,
+                  "options": [
+                    {
+                      "id": "o1",
+                      "text": "Learning Outcomes"
+                    },
+                    {
+                      "id": "o2",
+                      "text": "Teaching Activities"
+                    },
+                    {
+                      "id": "o3",
+                      "text": "Assessment"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "id": "p4",
+            "widgetType": "free_text",
+            "config": {
+              "questions": [
+                {
+                  "id": "q4",
+                  "prompt": "Explain your choice.",
+                  "maxChars": 1500
+                },
+                {
+                  "id": "q5",
+                  "prompt": "Department reflection: Can high examination scores coexist with weak learning? Discuss.",
+                  "maxChars": 1500
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "sourceRef": "HoD_Circle_2.pdf - Case Study 2 (pp.12)",
+      "groupMode": "group",
+      "derived": false,
+      "groupSetup": "Case-study groups: 4-6 members, mixed programmes; the facilitator assigns one case per group",
+      "confidential": false
+    },
+    {
+      "activityId": "d1s4_a4_case3_research_led",
+      "sessionId": "d1s4",
+      "order": 4,
+      "title": "Case Study 3 - Research-led Teaching in Practice",
+      "instructions": "The facilitator assigns one case to each group. Read the case aloud in your group (3 min), discuss the questions (15 min) and agree on your group's answers. One member presents to the room (3 min). Suggested time: 25 min.",
+      "widgetType": "composite",
+      "config": {
+        "context": "The Department of Biology redesigned its curriculum around inquiry rather than information delivery. Students read journal articles every week, discussed recent discoveries, completed laboratory investigations, presented research papers, designed mini research projects, analysed real-world datasets and participated in faculty research. Although examination averages initially declined slightly, postgraduate admissions and student research publications increased substantially over five years.",
+        "parts": [
+          {
+            "id": "p1",
+            "widgetType": "checklist",
+            "label": "Which practices contributed to deeper learning? Tick all that apply.",
+            "config": {
+              "allowOther": false,
+              "options": [
+                {
+                  "id": "o1",
+                  "text": "Reading research papers"
+                },
+                {
+                  "id": "o2",
+                  "text": "Inquiry"
+                },
+                {
+                  "id": "o3",
+                  "text": "Faculty mentoring"
+                },
+                {
+                  "id": "o4",
+                  "text": "Authentic assessment"
+                },
+                {
+                  "id": "o5",
+                  "text": "Research projects"
+                },
+                {
+                  "id": "o6",
+                  "text": "Laboratory investigation"
+                },
+                {
+                  "id": "o7",
+                  "text": "Critical discussion"
+                }
+              ]
+            }
+          },
+          {
+            "id": "p2",
+            "widgetType": "free_text",
+            "config": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Long-term outcomes: What competencies developed?",
+                  "maxChars": 1500
+                },
+                {
+                  "id": "q2",
+                  "prompt": "Transferability - which practices could you implement in your own courses IMMEDIATELY?",
+                  "maxChars": 1500
+                },
+                {
+                  "id": "q3",
+                  "prompt": "Transferability - WITHIN ONE YEAR?",
+                  "maxChars": 1500
+                },
+                {
+                  "id": "q4",
+                  "prompt": "Transferability - LONG TERM?",
+                  "maxChars": 1500
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "sourceRef": "HoD_Circle_2.pdf - Case Study 3 (p.13) (reworded for faculty participants)",
+      "groupMode": "group",
+      "derived": false,
+      "groupSetup": "Case-study groups: 4-6 members, mixed programmes; the facilitator assigns one case per group",
+      "confidential": false
+    },
+    {
+      "activityId": "d1s4_a5_case4_t_shaped_graduate",
+      "sessionId": "d1s4",
+      "order": 5,
+      "title": "Case Study 4 - Building a T-Shaped Graduate at CHRIST",
+      "instructions": "The facilitator assigns one case to each group. Read the case aloud in your group (3 min), discuss the questions (15 min) and agree on your group's answers. One member presents to the room (3 min). Suggested time: 25 min. Use the ideal-graduate characteristics you listed in Session I. Your group's three strategic priorities are carried forward to the Day 3 Priority Matrix.",
+      "widgetType": "composite",
+      "config": {
+        "context": "Your department has been asked to redesign its programme in line with the University's Academic Vision. You are a member of the curriculum review committee.",
+        "parts": [
+          {
+            "id": "p1",
+            "widgetType": "rating_scale",
+            "label": "Step 2 - Rate your current programme (1 = lowest, 5 = highest)",
+            "config": {
+              "scale": {
+                "min": 1,
+                "max": 5,
+                "labels": [
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5"
+                ]
+              },
+              "sections": [
+                {
+                  "id": "S",
+                  "title": "Programme rating",
+                  "items": [
+                    {
+                      "id": "s1",
+                      "text": "Disciplinary depth"
+                    },
+                    {
+                      "id": "s2",
+                      "text": "Research integration"
+                    },
+                    {
+                      "id": "s3",
+                      "text": "Assessment rigour"
+                    },
+                    {
+                      "id": "s4",
+                      "text": "Conceptual teaching"
+                    },
+                    {
+                      "id": "s5",
+                      "text": "Industry engagement"
+                    },
+                    {
+                      "id": "s6",
+                      "text": "Interdisciplinary learning"
+                    },
+                    {
+                      "id": "s7",
+                      "text": "Student inquiry"
+                    },
+                    {
+                      "id": "s8",
+                      "text": "Faculty expertise"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "id": "p2",
+            "widgetType": "free_text",
+            "label": "Step 3 - Gap Analysis",
+            "config": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Current Strengths",
+                  "maxChars": 1500
+                },
+                {
+                  "id": "q2",
+                  "prompt": "Current Weaknesses",
+                  "maxChars": 1500
+                },
+                {
+                  "id": "q3",
+                  "prompt": "Immediate Opportunities",
+                  "maxChars": 1500
+                },
+                {
+                  "id": "q4",
+                  "prompt": "Major Challenges",
+                  "maxChars": 1500
+                }
+              ]
+            }
+          },
+          {
+            "id": "p3",
+            "widgetType": "table_entry",
+            "label": "Step 4 - Develop Three Strategic Priorities",
+            "config": {
+              "columns": [
+                {
+                  "id": "priority",
+                  "label": "Priority",
+                  "type": "text"
+                },
+                {
+                  "id": "why",
+                  "label": "Why is it important?",
+                  "type": "text"
+                },
+                {
+                  "id": "timeline",
+                  "label": "Timeline",
+                  "type": "text"
+                }
+              ],
+              "minRows": 3,
+              "maxRows": 3
+            }
+          }
+        ]
+      },
+      "sourceRef": "HoD_Circle_2.pdf - Case Study 4, Steps 2-4 (pp.14-15) (reworded for faculty participants)",
+      "groupMode": "group",
+      "derived": false,
+      "carryForward": {
+        "readKeys": [],
+        "writeKeys": [
+          "strategicPriorities"
+        ],
+        "writeFrom": {
+          "strategicPriorities": "p3"
+        }
+      },
+      "groupSetup": "Case-study groups: 4-6 members, mixed programmes; the facilitator assigns one case per group",
+      "confidential": false
+    },
+    {
+      "activityId": "d1s4_a6_group_discussion",
+      "sessionId": "d1s4",
+      "order": 6,
+      "title": "Group Discussion - Across the Four Cases",
+      "instructions": "After the case presentations, discuss these questions across all four cases in your group. Suggested time: 15 min.",
+      "widgetType": "free_text",
+      "config": {
+        "questions": [
+          {
+            "id": "q1",
+            "prompt": "Which case study most closely resembles your department? Why?",
+            "maxChars": 1500
+          },
+          {
+            "id": "q2",
+            "prompt": "Which academic practice from the four cases would have the greatest impact if implemented at CHRIST University?",
+            "maxChars": 1500
+          },
+          {
+            "id": "q3",
+            "prompt": "What are the biggest barriers to strengthening disciplinary depth in your department?",
+            "maxChars": 1500
+          },
+          {
+            "id": "q4",
+            "prompt": "What can you, as a faculty member, do in your own courses to build a culture that values conceptual understanding, inquiry, and academic rigour?",
+            "maxChars": 1500
+          },
+          {
+            "id": "q5",
+            "prompt": "What one recommendation would you make to the HoD to strengthen academic rigour in our department?",
+            "maxChars": 1500
+          }
+        ]
+      },
+      "sourceRef": "HoD_Circle_2.pdf - Group Discussion (p.15) (reworded for faculty participants)",
+      "groupMode": "group",
+      "derived": false,
+      "groupSetup": "Same case-study groups as the previous activity",
+      "confidential": false
+    },
+    {
+      "activityId": "d2s1_a1_register_working_doc",
+      "sessionId": "d2s1",
+      "order": 1,
+      "title": "Register Your Working Document",
+      "instructions": "Each participant carries a single working document - one course unit or assessment - through Days 2 and 3. Use the curriculum document you brought.",
+      "widgetType": "working_doc",
+      "config": {
+        "fields": [
+          {
+            "key": "programme",
+            "label": "Programme",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "course",
+            "label": "Course code and title",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "semester",
+            "label": "Semester / Year",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "discipline",
+            "label": "Course / discipline",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "courseOutcomes",
+            "label": "Course outcome(s) addressed",
+            "type": "textarea",
+            "required": false
+          },
+          {
+            "key": "originalItem",
+            "label": "Original assessment item (as currently written)",
+            "type": "textarea",
+            "required": true
+          }
+        ]
+      },
+      "sourceRef": "HoDs_Circle_Session3_Updated_14_Aug_2026.pdf - Working Document Worksheet (p.10); Workshop Overview (p.2)",
+      "groupMode": "individual",
+      "derived": false,
+      "carryForward": {
+        "readKeys": [],
+        "writeKeys": [
+          "programme",
+          "course",
+          "semester",
+          "discipline",
+          "courseOutcomes",
+          "originalItem"
+        ]
+      },
+      "confidential": false
+    },
+    {
+      "activityId": "d2s1_a2_threshold_concepts",
+      "sessionId": "d2s1",
+      "order": 2,
+      "title": "Threshold Concepts in Our Programme",
+      "instructions": "Threshold concepts are transformative ideas that fundamentally change how students understand a discipline. Identify the threshold concepts in your programme.",
+      "widgetType": "table_entry",
+      "config": {
+        "columns": [
+          {
+            "id": "concept",
+            "label": "Threshold Concept",
+            "type": "text"
+          },
+          {
+            "id": "difficulty",
+            "label": "Why is it difficult?",
+            "type": "text"
+          },
+          {
+            "id": "misconceptions",
+            "label": "Common misconceptions",
+            "type": "text"
+          },
+          {
+            "id": "mastery",
+            "label": "How do students demonstrate mastery?",
+            "type": "text"
+          }
+        ],
+        "minRows": 3,
+        "maxRows": 8,
+        "reflections": [
+          {
+            "id": "r1",
+            "prompt": "Which threshold concept do students struggle with the most, and what changes in teaching could improve understanding?",
+            "maxChars": 1500
+          }
+        ]
+      },
+      "sourceRef": "HoD_Circle_2.pdf - Disciplinary Depth Audit, Part D - Threshold Concepts (Meyer & Land) (p.18)",
+      "groupMode": "group",
+      "derived": false,
+      "groupSetup": "Programme teams: 3-6 faculty who teach in the same programme",
+      "confidential": false
+    },
+    {
+      "activityId": "d2s1_a3_three_must_know",
+      "sessionId": "d2s1",
+      "order": 3,
+      "title": "The Three Concepts Every Graduate Must Master",
+      "instructions": "Agree, as a programme team, on the three concepts every graduate of your programme must deeply understand before graduation, and where in the programme each is built. Suggested time: 10 min.",
+      "widgetType": "table_entry",
+      "config": {
+        "columns": [
+          {
+            "id": "concept",
+            "label": "Concept students MUST deeply understand before graduation",
+            "type": "text"
+          },
+          {
+            "id": "where",
+            "label": "Where in the programme is it built? (course / semester)",
+            "type": "text"
+          }
+        ],
+        "minRows": 3,
+        "maxRows": 3
+      },
+      "sourceRef": "Deans_worksheet_copy_sep_25.docx - Part D, Dean's Challenge",
+      "groupMode": "group",
+      "derived": false,
+      "groupSetup": "Same programme teams as the previous activity",
+      "confidential": false
+    },
+    {
+      "activityId": "d2s2_a1_climbing_the_ladder",
+      "sessionId": "d2s2",
+      "order": 1,
+      "title": "Climbing the Ladder - A HOT Game (Optional)",
+      "instructions": "A successful answer banks that level's points and unlocks the next level. An unsuccessful answer ends the climb, but banked points are kept. After any successful level the group may stop and bank its score.",
+      "widgetType": "ladder_game",
+      "config": {
+        "stimulus": "Derrida argues that an archive is never a neutral container: the technology and the institution that preserve a record also shape what can be remembered, and therefore who holds power over memory itself (paraphrased from Derrida & Prenowitz, 1995, pp. 9-63).",
+        "secondsPerLevel": 60,
+        "totalMinutes": 10,
+        "levels": [
+          {
+            "level": 1,
+            "bloom": "Remember",
+            "points": 10,
+            "question": "According to the stimulus, what does an archive do besides store records?"
+          },
+          {
+            "level": 2,
+            "bloom": "Understand",
+            "points": 15,
+            "question": "In your own words, explain why Derrida says an archive is never neutral."
+          },
+          {
+            "level": 3,
+            "bloom": "Apply",
+            "points": 20,
+            "question": "Name one archive you are personally familiar with (a family record, an institutional archive, a digital platform), and state, in one sentence, who currently controls what it preserves."
+          },
+          {
+            "level": 4,
+            "bloom": "Analyse",
+            "points": 25,
+            "question": "Compare two archives you know of (for example, a national archive and a personal social media account). Which one's structure more visibly shapes what can be remembered, and how?"
+          },
+          {
+            "level": 5,
+            "bloom": "Evaluate",
+            "points": 30,
+            "question": "Using Derrida's claim, judge whether a specific digitisation project you are aware of has expanded or narrowed whose memory is preserved. Justify your judgement with one piece of evidence."
+          },
+          {
+            "level": 6,
+            "bloom": "Create",
+            "points": 35,
+            "question": "Propose one specific, realistic change to an archive or record-keeping system you are familiar with that would shift control over what is preserved toward a currently under-represented group."
+          }
+        ],
+        "debrief": "At which level did the question stop being answerable from memory of the stimulus alone, and start requiring something you brought to it yourself? That level is where recall ends and Higher-Order Thinking begins."
+      },
+      "sourceRef": "HoDs_Circle_Session3_Updated_14_Aug_2026.pdf - Segment 3: Climbing the Ladder (pp.7-8)",
+      "groupMode": "group",
+      "derived": false,
+      "timeLimitMin": 10,
+      "groupSetup": "Groups of 4-6 (any mix)",
+      "confidential": false
+    },
+    {
+      "activityId": "d2s2_a2_doing_to_deep_learning",
+      "sessionId": "d2s2",
+      "order": 2,
+      "title": "Activity 1 - Mapping the Shift from Doing to Deep Learning",
+      "instructions": "Step 1: Read both columns of 'Transforming Learning - From Doing to Deep Learning' silently. Step 2: Map your working document: which traditional stage dominates; mark each rigour-oriented stage Present (specific, checkable instance), Partial (scheduled or claimed but not required of every student) or Absent. Step 3: Identify the priority stage.",
+      "widgetType": "composite",
+      "config": {
+        "parts": [
+          {
+            "id": "p1",
+            "widgetType": "choice_matrix",
+            "label": "Traditional-sequence stage - present in this item?",
+            "config": {
+              "options": [
+                "Present",
+                "Absent"
+              ],
+              "evidence": true,
+              "items": [
+                {
+                  "id": "t1",
+                  "text": "Content"
+                },
+                {
+                  "id": "t2",
+                  "text": "Lecture"
+                },
+                {
+                  "id": "t3",
+                  "text": "Assignment"
+                },
+                {
+                  "id": "t4",
+                  "text": "Examination"
+                },
+                {
+                  "id": "t5",
+                  "text": "Grade"
+                }
+              ]
+            }
+          },
+          {
+            "id": "p2",
+            "widgetType": "choice_matrix",
+            "label": "Rigour-oriented stage",
+            "config": {
+              "options": [
+                "Present",
+                "Partial",
+                "Absent"
+              ],
+              "evidence": true,
+              "items": [
+                {
+                  "id": "r1",
+                  "text": "Meaningful content"
+                },
+                {
+                  "id": "r2",
+                  "text": "Active engagement"
+                },
+                {
+                  "id": "r3",
+                  "text": "Application"
+                },
+                {
+                  "id": "r4",
+                  "text": "Analysis"
+                },
+                {
+                  "id": "r5",
+                  "text": "Evaluation"
+                },
+                {
+                  "id": "r6",
+                  "text": "Synthesis"
+                },
+                {
+                  "id": "r7",
+                  "text": "Reflection"
+                }
+              ]
+            }
+          },
+          {
+            "id": "p3",
+            "widgetType": "free_text",
+            "config": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Priority stage: of the stages marked Partial or Absent, which single one would have the largest effect on student learning if a rigour-oriented element were added?",
+                  "maxChars": 500
+                },
+                {
+                  "id": "q2",
+                  "prompt": "What specific piece of evidence would you expect to see if that stage were genuinely present?",
+                  "maxChars": 1500
+                },
+                {
+                  "id": "q3",
+                  "prompt": "Debrief: Is your course closer to the traditional or the rigour-oriented approach, and at which stage does it diverge most?",
+                  "maxChars": 1500
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "sourceRef": "HoDs_Circle_Session3_Updated_14_Aug_2026.pdf - Segment 4, Activity 1 and Working Document Worksheet (pp.8-10)",
+      "groupMode": "group",
+      "derived": false,
+      "carryForward": {
+        "readKeys": [
+          "course",
+          "originalItem"
+        ],
+        "writeKeys": [
+          "priorityStage"
+        ],
+        "writeFrom": {
+          "priorityStage": "p3.q1"
+        }
+      },
+      "groupSetup": "Groups of 3-4 from the same or related discipline; each member maps their OWN working document",
+      "confidential": false
+    },
+    {
+      "activityId": "d2s2_a3_rewrite_working_doc",
+      "sessionId": "d2s2",
+      "order": 3,
+      "title": "Activity 2 - Selecting and Rewriting the Working Document",
+      "instructions": "Step 1 Select: the item from your working document (prefer one touching the priority stage). Step 2 Rewrite in pairs so that it requires analysis, evaluation or creation. Step 3 Merge and record the final version, with one sentence justifying each of the four conditions. This is a redesign, not a replacement.",
+      "widgetType": "composite",
+      "config": {
+        "parts": [
+          {
+            "id": "p1",
+            "widgetType": "checklist",
+            "label": "Quick-Reference Checklist - does your rewrite pass all four conditions?",
+            "config": {
+              "allowOther": false,
+              "options": [
+                {
+                  "id": "o1",
+                  "text": "Active: the task requires students to construct a response, not only receive or reproduce one."
+                },
+                {
+                  "id": "o2",
+                  "text": "Meaningful: the content is central to what the discipline considers important, not peripheral."
+                },
+                {
+                  "id": "o3",
+                  "text": "Higher-order: the task requires analysis, evaluation, or creation."
+                },
+                {
+                  "id": "o4",
+                  "text": "At expectation: the demand is calibrated to this course's level and credit weight."
+                }
+              ]
+            }
+          },
+          {
+            "id": "p2",
+            "widgetType": "working_doc",
+            "config": {
+              "fields": [
+                {
+                  "key": "rewrittenItem",
+                  "label": "Rewritten assessment (redesigned, not replaced, to meet HOT requirements)",
+                  "type": "textarea",
+                  "required": true
+                },
+                {
+                  "key": "addedComponents",
+                  "label": "Added components",
+                  "type": "textarea",
+                  "required": false
+                }
+              ]
+            }
+          },
+          {
+            "id": "p3",
+            "widgetType": "fixed_grid",
+            "label": "Justification against the four conditions",
+            "config": {
+              "rows": [
+                "Active",
+                "Meaningful",
+                "Higher-order",
+                "At expectation"
+              ],
+              "columns": [
+                "How the rewrite addresses it"
+              ]
+            }
+          },
+          {
+            "id": "p4",
+            "widgetType": "free_text",
+            "config": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Debrief: Did rewriting the item change what students would need to know, or only what they would need to do with what they know?",
+                  "maxChars": 1500
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "sourceRef": "HoDs_Circle_Session3_Updated_14_Aug_2026.pdf - Segment 5, Activity 2 (pp.11-12); Annexure 1 worked example (pp.14-16)",
+      "groupMode": "group",
+      "derived": false,
+      "carryForward": {
+        "readKeys": [
+          "course",
+          "originalItem",
+          "priorityStage"
+        ],
+        "writeKeys": [
+          "rewrittenItem",
+          "addedComponents"
+        ]
+      },
+      "groupSetup": "Same groups; rewrite in pairs, but each member records the rewrite of their OWN working document",
+      "confidential": false
+    },
+    {
+      "activityId": "d2s2_a4_hot_case_studies",
+      "sessionId": "d2s2",
+      "order": 4,
+      "title": "HOT Case Studies - Discussion",
+      "instructions": "Read the two case summaries above and discuss the questions in your group. Suggested time: 15 min.",
+      "widgetType": "free_text",
+      "config": {
+        "questions": [
+          {
+            "id": "q1",
+            "prompt": "UNESCO-IHE: What does the original problem suggest about the risk of depth without breadth, even where the depth itself is genuinely rigorous?",
+            "maxChars": 1500
+          },
+          {
+            "id": "q2",
+            "prompt": "UNESCO-IHE: What is the difference between a policy module assessed by a descriptive summary, and one that requires evaluating a real policy decision using technical training? Which produces breadth in the T-shaped sense?",
+            "maxChars": 1500
+          },
+          {
+            "id": "q3",
+            "prompt": "UNESCO-IHE: Where, in your own discipline, are graduates most likely to resemble the water professionals in this case?",
+            "maxChars": 1500
+          },
+          {
+            "id": "q4",
+            "prompt": "ENG405A-7B: Compare CIA-I Part A with CIA-III. Which more reliably produces HOT engagement as designed, and why?",
+            "maxChars": 1500
+          }
+        ],
+        "context": "CASE 1 - T-Shaped Reform in Water Professional Education (UNESCO-IHE; Uhlenbrook, Kolokytha & de Boer, 2012): graduates with strong technical training in hydrology and engineering were consistently unable to influence real water policy and governance outcomes, because their curricula had never required them to engage, at an analytical or evaluative level, with the social, institutional and policy dimensions of water management. The reform did not add policy content as a separate module; it required students to analyse and evaluate real policy problems using their technical expertise.\n\nCASE 2 - ENG405A-7B, Memory Machines: The Politics of Digital Preservation (CHRIST, English and Cultural Studies): the course's depth comes from archive theory (Derrida, Mbembe, Caswell) and decolonising frameworks; its breadth is concentrated in Units III and IV (digital archiving platforms, metadata standards, WCAG accessibility, community-based participatory methods). CO3 is assessed through the CIA-III capstone (build a small digital archive) at Analyse/Evaluate/Create. By contrast, CIA-I Part A (a critical essay on archive theory) uses HOT-adjacent verbs that a competent essay can satisfy at Understand or Apply level if the rubric does not require analysis, evaluation or synthesis."
+      },
+      "sourceRef": "HoDs_Circle_Session3_Updated_14_Aug_2026.pdf - Segment 2 Case Study 1 (p.6) and Segment 6 Case Study 2 (pp.12-13)",
+      "groupMode": "group",
+      "derived": false,
+      "groupSetup": "Same groups as Activities 1 and 2",
+      "confidential": false
+    },
+    {
+      "activityId": "d2s3_a1_crm_syllabus_map",
+      "sessionId": "d2s3",
+      "order": 1,
+      "title": "Cognitive Rigour Matrix - Map Your Syllabus",
+      "instructions": "Bloom's Taxonomy classifies the TYPE of cognitive process a task requires; Webb's DOK classifies the COMPLEXITY of engagement required. Add each course outcome, unit and assessment item from your working syllabus and place it in one cell of the matrix.",
+      "widgetType": "crm_matrix",
+      "config": {
+        "bloom": [
+          "Remember",
+          "Understand",
+          "Apply",
+          "Analyze",
+          "Evaluate",
+          "Create"
+        ],
+        "dok": [
+          "DOK 1 - Recall and Reproduction",
+          "DOK 2 - Skills and Concepts",
+          "DOK 3 - Strategic Thinking / Reasoning",
+          "DOK 4 - Extended Thinking"
+        ],
+        "itemTypes": [
+          "Course Outcome",
+          "Unit",
+          "Assessment item"
+        ],
+        "minItems": 5,
+        "maxItems": 40,
+        "reflections": [
+          {
+            "id": "r1",
+            "prompt": "What share of your items sit at DOK 3-4? Where is the course over-concentrated at lower levels?",
+            "maxChars": 1500
+          },
+          {
+            "id": "r2",
+            "prompt": "Which item uses a higher-order verb (e.g. 'analyse') but still sits at a low DOK level because it does not require sustained, independent reasoning?",
+            "maxChars": 1500
+          }
+        ]
+      },
+      "sourceRef": "HoDs_Circle_Session3_Updated_14_Aug_2026.pdf - Session 2: Depth of Knowledge, objectives and Cognitive Rigour Matrix Table 3 (pp.20-21); rDOK descriptors for Science and Mathematics (pp.26-29)",
+      "groupMode": "individual",
+      "derived": true,
+      "carryForward": {
+        "readKeys": [
+          "course"
+        ],
+        "writeKeys": []
+      },
+      "confidential": false
+    },
+    {
+      "activityId": "d2s3_a2_crm_before_after",
+      "sessionId": "d2s3",
+      "order": 2,
+      "title": "Before and After: Where Did the Rewrite Move?",
+      "instructions": "Individual. Place your ORIGINAL assessment item and your REWRITTEN item (both shown above from your working document) on Bloom's Taxonomy and on Webb's DOK. Suggested time: 10 min.",
+      "widgetType": "composite",
+      "config": {
+        "parts": [
+          {
+            "id": "p1",
+            "widgetType": "poll",
+            "config": {
+              "questions": [
+                {
+                  "id": "b_bloom",
+                  "prompt": "ORIGINAL item - Bloom level",
+                  "multi": false,
+                  "options": [
+                    {
+                      "id": "o1",
+                      "text": "Remember"
+                    },
+                    {
+                      "id": "o2",
+                      "text": "Understand"
+                    },
+                    {
+                      "id": "o3",
+                      "text": "Apply"
+                    },
+                    {
+                      "id": "o4",
+                      "text": "Analyze"
+                    },
+                    {
+                      "id": "o5",
+                      "text": "Evaluate"
+                    },
+                    {
+                      "id": "o6",
+                      "text": "Create"
+                    }
+                  ]
+                },
+                {
+                  "id": "b_dok",
+                  "prompt": "ORIGINAL item - DOK level",
+                  "multi": false,
+                  "options": [
+                    {
+                      "id": "o1",
+                      "text": "DOK 1 - Recall and Reproduction"
+                    },
+                    {
+                      "id": "o2",
+                      "text": "DOK 2 - Skills and Concepts"
+                    },
+                    {
+                      "id": "o3",
+                      "text": "DOK 3 - Strategic Thinking / Reasoning"
+                    },
+                    {
+                      "id": "o4",
+                      "text": "DOK 4 - Extended Thinking"
+                    }
+                  ]
+                },
+                {
+                  "id": "a_bloom",
+                  "prompt": "REWRITTEN item - Bloom level",
+                  "multi": false,
+                  "options": [
+                    {
+                      "id": "o1",
+                      "text": "Remember"
+                    },
+                    {
+                      "id": "o2",
+                      "text": "Understand"
+                    },
+                    {
+                      "id": "o3",
+                      "text": "Apply"
+                    },
+                    {
+                      "id": "o4",
+                      "text": "Analyze"
+                    },
+                    {
+                      "id": "o5",
+                      "text": "Evaluate"
+                    },
+                    {
+                      "id": "o6",
+                      "text": "Create"
+                    }
+                  ]
+                },
+                {
+                  "id": "a_dok",
+                  "prompt": "REWRITTEN item - DOK level",
+                  "multi": false,
+                  "options": [
+                    {
+                      "id": "o1",
+                      "text": "DOK 1 - Recall and Reproduction"
+                    },
+                    {
+                      "id": "o2",
+                      "text": "DOK 2 - Skills and Concepts"
+                    },
+                    {
+                      "id": "o3",
+                      "text": "DOK 3 - Strategic Thinking / Reasoning"
+                    },
+                    {
+                      "id": "o4",
+                      "text": "DOK 4 - Extended Thinking"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "id": "p2",
+            "widgetType": "free_text",
+            "config": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "If the DOK level did not rise, what would the task need to require for it to reach DOK 3 or 4?",
+                  "maxChars": 1500
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "sourceRef": "HoDs_Circle_Session3_Updated_14_Aug_2026.pdf - The Connective Arc Across the Three-Session Day (p.30)",
+      "groupMode": "individual",
+      "derived": true,
+      "carryForward": {
+        "readKeys": [
+          "originalItem",
+          "rewrittenItem"
+        ],
+        "writeKeys": []
+      },
+      "confidential": false
+    },
+    {
+      "activityId": "d2s4_a1_issue_based_redesign",
+      "sessionId": "d2s4",
+      "order": 1,
+      "title": "Issue-Based Redesign of the Working Document",
+      "instructions": "A topic-based unit organises content around a subject area; an issue-based unit organises the same content around a real-world question, requiring students to apply and integrate material from more than one domain. Reframing a unit this way typically raises it to DOK 3 or 4 and builds the horizontal component of the T at the same time.",
+      "widgetType": "composite",
+      "config": {
+        "parts": [
+          {
+            "id": "p1",
+            "widgetType": "working_doc",
+            "config": {
+              "fields": [
+                {
+                  "key": "unitTitle",
+                  "label": "Unit selected for redesign",
+                  "type": "text",
+                  "required": true
+                },
+                {
+                  "key": "topicFocus",
+                  "label": "Current topic-based focus (what the unit covers now)",
+                  "type": "textarea",
+                  "required": true
+                },
+                {
+                  "key": "issueQuestion",
+                  "label": "Real-world issue / question the unit will now be organised around",
+                  "type": "textarea",
+                  "required": true
+                },
+                {
+                  "key": "domainsConnected",
+                  "label": "Other domains the issue requires students to draw on",
+                  "type": "textarea",
+                  "required": true
+                },
+                {
+                  "key": "studentTask",
+                  "label": "What students will do (task / project)",
+                  "type": "textarea",
+                  "required": true
+                },
+                {
+                  "key": "targetDok",
+                  "label": "Target DOK level",
+                  "type": "select",
+                  "options": [
+                    "DOK 3",
+                    "DOK 4"
+                  ],
+                  "required": true
+                },
+                {
+                  "key": "evidence",
+                  "label": "Evidence of learning (assessment)",
+                  "type": "textarea",
+                  "required": false
+                }
+              ]
+            }
+          },
+          {
+            "id": "p2",
+            "widgetType": "checklist",
+            "label": "T-shaped check - which dimensions does the redesigned unit develop?",
+            "config": {
+              "allowOther": false,
+              "options": [
+                {
+                  "id": "o1",
+                  "text": "Disciplinary depth - strong conceptual and theoretical foundations"
+                },
+                {
+                  "id": "o2",
+                  "text": "Interdisciplinary breadth - awareness of knowledge beyond one's discipline"
+                },
+                {
+                  "id": "o3",
+                  "text": "Integration - the capacity to connect ideas across domains"
+                },
+                {
+                  "id": "o4",
+                  "text": "Transfer - the ability to apply learning to new contexts"
+                },
+                {
+                  "id": "o5",
+                  "text": "Collaboration - the ability to work productively with diverse people"
+                },
+                {
+                  "id": "o6",
+                  "text": "Adaptability - the capacity to continue learning as contexts change"
+                }
+              ]
+            }
+          },
+          {
+            "id": "p3",
+            "widgetType": "checklist",
+            "label": "Integration strategies used",
+            "config": {
+              "allowOther": true,
+              "options": [
+                {
+                  "id": "o1",
+                  "text": "Project-based learning (e.g. developing an application)"
+                },
+                {
+                  "id": "o2",
+                  "text": "Case studies (e.g. analysing software failures)"
+                },
+                {
+                  "id": "o3",
+                  "text": "Cross-disciplinary project (e.g. combining computing with business)"
+                },
+                {
+                  "id": "o4",
+                  "text": "Industry collaboration (live problem / guest input)"
+                },
+                {
+                  "id": "o5",
+                  "text": "Portfolio or peer assessment of group work"
+                }
+              ]
+            }
+          },
+          {
+            "id": "p4",
+            "widgetType": "free_text",
+            "config": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "What would change for students if a smaller version of this breadth were introduced earlier in the programme?",
+                  "maxChars": 1500
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "sourceRef": "HoDs_Circle_Session3_Updated_14_Aug_2026.pdf - Session 2: Issue-based design as the shared mechanism for depth and breadth (p.20); HoD_circle_-_4_concept_note_and_schedule.pdf - T-Shaped Learning dimensions; paper_on_T_shaped.pdf - Table 2 integration strategies",
+      "groupMode": "group",
+      "derived": true,
+      "carryForward": {
+        "readKeys": [
+          "course",
+          "rewrittenItem"
+        ],
+        "writeKeys": [
+          "unitTitle",
+          "topicFocus",
+          "issueQuestion",
+          "domainsConnected",
+          "studentTask",
+          "targetDok",
+          "evidence"
+        ]
+      },
+      "groupSetup": "Groups of 3 from the same programme; each member redesigns a unit of their OWN course",
+      "confidential": false
+    },
+    {
+      "activityId": "d3s1_a1_vertical_map",
+      "sessionId": "d3s1",
+      "order": 1,
+      "title": "Map the Progression: Year 1 to Year 4",
+      "instructions": "Fill in the progression for your programme. For 3-year programmes, leave the Year 4 column for the PG / honours pathway or mark N/A.",
+      "widgetType": "composite",
+      "config": {
+        "parts": [
+          {
+            "id": "p1",
+            "widgetType": "poll",
+            "config": {
+              "questions": [
+                {
+                  "id": "q0",
+                  "prompt": "Does our curriculum progressively take a student from exposure TO understanding TO application TO analysis TO mastery?",
+                  "multi": false,
+                  "options": [
+                    {
+                      "id": "o1",
+                      "text": "Yes"
+                    },
+                    {
+                      "id": "o2",
+                      "text": "Partly"
+                    },
+                    {
+                      "id": "o3",
+                      "text": "No"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "id": "p2",
+            "widgetType": "fixed_grid",
+            "config": {
+              "rows": [
+                "Core disciplinary knowledge",
+                "Conceptual understanding",
+                "Threshold concepts",
+                "Research capability",
+                "Problem solving",
+                "Critical thinking",
+                "Disciplinary application",
+                "Independent learning",
+                "Advanced/specialised knowledge"
+              ],
+              "columns": [
+                "Year 1 - Foundation",
+                "Year 2 - Development",
+                "Year 3 - Application",
+                "Year 4 - Mastery"
+              ]
+            }
+          }
+        ]
+      },
+      "sourceRef": "Deans_worksheet_copy_sep_25.docx - Part C: Building the Vertical Curriculum; HoD_circle_-_4_concept_note_and_schedule.pdf - Strategic Plan item 2 (Define the Vertical Curriculum)",
+      "groupMode": "group",
+      "derived": false,
+      "groupSetup": "Programme teams: all faculty teaching in the same programme (3-6 per group; split large programmes by year)",
+      "confidential": false
+    },
+    {
+      "activityId": "d3s1_a2_vertical_diagnostics",
+      "sessionId": "d3s1",
+      "order": 2,
+      "title": "Diagnostic Questions on Progression",
+      "instructions": "Use the Year 1 to Year 4 map your programme team has just completed to answer these questions. Suggested time: 15 min.",
+      "widgetType": "free_text",
+      "config": {
+        "questions": [
+          {
+            "id": "q1",
+            "prompt": "Where is disciplinary depth built?",
+            "maxChars": 1500
+          },
+          {
+            "id": "q2",
+            "prompt": "Where is there unnecessary repetition?",
+            "maxChars": 1500
+          },
+          {
+            "id": "q3",
+            "prompt": "Where is there a jump in complexity that students may not be ready for?",
+            "maxChars": 1500
+          },
+          {
+            "id": "q4",
+            "prompt": "What should a final-year graduate know that a Year 1 student does not?",
+            "maxChars": 1500
+          },
+          {
+            "id": "q5",
+            "prompt": "Are we genuinely increasing depth - or simply increasing the number of courses?",
+            "maxChars": 1500
+          }
+        ]
+      },
+      "sourceRef": "Deans_worksheet_copy_sep_25.docx - Part C: Dean's Diagnostic Questions (adapted to programme level)",
+      "groupMode": "group",
+      "derived": false,
+      "groupSetup": "Same programme teams as the previous activity",
+      "confidential": false
+    },
+    {
+      "activityId": "d3s1_a3_concept_progression",
+      "sessionId": "d3s1",
+      "order": 3,
+      "title": "Placing Concepts on the Vertical",
+      "instructions": "Carry forward the threshold concepts identified on Day 2 and place each one on the vertical.",
+      "widgetType": "table_entry",
+      "config": {
+        "columns": [
+          {
+            "id": "concept",
+            "label": "Concept",
+            "type": "text"
+          },
+          {
+            "id": "level",
+            "label": "Level",
+            "type": "select",
+            "options": [
+              "Foundational",
+              "Intermediate",
+              "Advanced"
+            ]
+          },
+          {
+            "id": "introduced",
+            "label": "Introduced in (course / semester)",
+            "type": "text"
+          },
+          {
+            "id": "deepened",
+            "label": "Revisited and deepened in",
+            "type": "text"
+          },
+          {
+            "id": "exitBloom",
+            "label": "Bloom level expected at exit",
+            "type": "select",
+            "options": [
+              "Remember",
+              "Understand",
+              "Apply",
+              "Analyze",
+              "Evaluate",
+              "Create"
+            ]
+          }
+        ],
+        "minRows": 3,
+        "maxRows": 15
+      },
+      "sourceRef": "HoD_circle_-_4_concept_note_and_schedule.pdf - Strategic Plan items 2-4 (foundational, intermediate and advanced concepts; cognitive progression using Bloom's Revised Taxonomy)",
+      "groupMode": "group",
+      "derived": true,
+      "groupSetup": "Same programme teams as the previous activity",
+      "confidential": false
+    },
+    {
+      "activityId": "d3s2_a1_assessment_audit",
+      "sessionId": "d3s2",
+      "order": 1,
+      "title": "Assessment Audit and Red Flag",
+      "instructions": "Audit the assessments in the courses YOU teach. Move assessment beyond memorisation toward conceptual understanding, unfamiliar problems, analysis, evaluation, original solutions, authentic tasks and reflection.",
+      "widgetType": "composite",
+      "config": {
+        "parts": [
+          {
+            "id": "p1",
+            "widgetType": "choice_matrix",
+            "config": {
+              "options": [
+                "Yes",
+                "Partly",
+                "No"
+              ],
+              "evidence": false,
+              "items": [
+                {
+                  "id": "a1",
+                  "text": "Do my assessments test conceptual understanding?"
+                },
+                {
+                  "id": "a2",
+                  "text": "Do my students solve unfamiliar problems?"
+                },
+                {
+                  "id": "a3",
+                  "text": "Are higher-order cognitive skills assessed in my courses?"
+                },
+                {
+                  "id": "a4",
+                  "text": "Do I use authentic tasks?"
+                },
+                {
+                  "id": "a5",
+                  "text": "Do I use research-based assessments?"
+                },
+                {
+                  "id": "a6",
+                  "text": "Are my rubrics transparent to students?"
+                },
+                {
+                  "id": "a7",
+                  "text": "Does my feedback improve subsequent learning?"
+                },
+                {
+                  "id": "a8",
+                  "text": "Is rote memorisation minimised in my assessments?"
+                }
+              ]
+            }
+          },
+          {
+            "id": "p2",
+            "widgetType": "free_text",
+            "config": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Red Flag: Identify one assessment practice in your own courses that may be creating an illusion of academic success without demonstrating deep learning.",
+                  "maxChars": 1500
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "sourceRef": "Deans_worksheet_copy_sep_25.docx - Part F: Assessment Rigour (reworded for faculty participants)",
+      "groupMode": "individual",
+      "derived": false,
+      "confidential": false
+    },
+    {
+      "activityId": "d3s2_a2_assessment_methods",
+      "sessionId": "d3s2",
+      "order": 2,
+      "title": "Assessment Methods for Disciplinary Depth",
+      "instructions": "How often do YOU use each method to evaluate deep understanding in your courses?",
+      "widgetType": "choice_matrix",
+      "config": {
+        "options": [
+          "Frequently",
+          "Occasionally",
+          "Rarely"
+        ],
+        "evidence": false,
+        "items": [
+          {
+            "id": "g1",
+            "text": "Open-ended problem solving"
+          },
+          {
+            "id": "g2",
+            "text": "Case analysis"
+          },
+          {
+            "id": "g3",
+            "text": "Research projects"
+          },
+          {
+            "id": "g4",
+            "text": "Concept maps"
+          },
+          {
+            "id": "g5",
+            "text": "Oral examinations/viva"
+          },
+          {
+            "id": "g6",
+            "text": "Critical reviews"
+          },
+          {
+            "id": "g7",
+            "text": "Design challenges"
+          },
+          {
+            "id": "g8",
+            "text": "Portfolio assessment"
+          }
+        ],
+        "reflections": [
+          {
+            "id": "r1",
+            "prompt": "Which assessment methods most effectively measure conceptual mastery rather than memorisation? Which one will you add to your own course?",
+            "maxChars": 1500
+          }
+        ]
+      },
+      "sourceRef": "HoD_Circle_2.pdf - Disciplinary Depth Audit, Part G (p.20) (reworded for faculty participants)",
+      "groupMode": "individual",
+      "derived": false,
+      "confidential": false
+    },
+    {
+      "activityId": "d3s2_a3_authentic_task_rubric",
+      "sessionId": "d3s2",
+      "order": 3,
+      "title": "Design an Authentic Task and Rubric",
+      "instructions": "Design one authentic assessment task for YOUR OWN course and an analytic rubric for it (weights must total 100%). Partners review each task against the four conditions before you submit. Suggested time: 35 min.",
+      "widgetType": "composite",
+      "config": {
+        "parts": [
+          {
+            "id": "p1",
+            "widgetType": "working_doc",
+            "config": {
+              "fields": [
+                {
+                  "key": "taskTitle",
+                  "label": "Task title",
+                  "type": "text",
+                  "required": true
+                },
+                {
+                  "key": "taskScenario",
+                  "label": "Authentic scenario / real-world context",
+                  "type": "textarea",
+                  "required": true
+                },
+                {
+                  "key": "taskProduct",
+                  "label": "What students produce",
+                  "type": "textarea",
+                  "required": true
+                },
+                {
+                  "key": "taskCOs",
+                  "label": "Course outcome(s) assessed",
+                  "type": "text",
+                  "required": true
+                },
+                {
+                  "key": "taskDok",
+                  "label": "Target DOK level",
+                  "type": "select",
+                  "options": [
+                    "DOK 3",
+                    "DOK 4"
+                  ],
+                  "required": true
+                }
+              ]
+            }
+          },
+          {
+            "id": "p2",
+            "widgetType": "table_entry",
+            "label": "Analytic rubric",
+            "config": {
+              "columns": [
+                {
+                  "id": "criterion",
+                  "label": "Criterion",
+                  "type": "text"
+                },
+                {
+                  "id": "weight",
+                  "label": "Weight (%)",
+                  "type": "number",
+                  "min": 0,
+                  "max": 100
+                },
+                {
+                  "id": "excellent",
+                  "label": "Excellent",
+                  "type": "text"
+                },
+                {
+                  "id": "proficient",
+                  "label": "Proficient",
+                  "type": "text"
+                },
+                {
+                  "id": "developing",
+                  "label": "Developing",
+                  "type": "text"
+                },
+                {
+                  "id": "beginning",
+                  "label": "Beginning",
+                  "type": "text"
+                }
+              ],
+              "minRows": 3,
+              "maxRows": 6,
+              "computed": {
+                "type": "sum",
+                "column": "weight",
+                "expect": 100
+              }
+            }
+          },
+          {
+            "id": "p3",
+            "widgetType": "checklist",
+            "label": "Check the task against the four conditions",
+            "config": {
+              "allowOther": false,
+              "options": [
+                {
+                  "id": "o1",
+                  "text": "Active"
+                },
+                {
+                  "id": "o2",
+                  "text": "Meaningful"
+                },
+                {
+                  "id": "o3",
+                  "text": "Higher-order"
+                },
+                {
+                  "id": "o4",
+                  "text": "At expectation"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "sourceRef": "HoD_circle_-_4_concept_note_and_schedule.pdf - Features of Academic Rigour 13 (Authentic Assessment) and 18 (Constructive Feedback); paper_on_T_shaped.pdf - Table 2 assessment methods; HoDs_Circle_Session3_Updated_14_Aug_2026.pdf - four conditions (p.11). Rubric template: not in sources.",
+      "groupMode": "group",
+      "derived": true,
+      "carryForward": {
+        "readKeys": [
+          "course",
+          "rewrittenItem",
+          "issueQuestion"
+        ],
+        "writeKeys": [
+          "taskTitle",
+          "taskScenario",
+          "taskProduct",
+          "taskCOs",
+          "taskDok"
+        ]
+      },
+      "groupSetup": "Pairs or groups of 3 from related courses; each member designs a task for their OWN course",
+      "confidential": false
+    },
+    {
+      "activityId": "d3s3_a1_locate_redesign",
+      "sessionId": "d3s3",
+      "order": 1,
+      "title": "Quick Activity - Locate Your Own Redesign",
+      "instructions": "Individual, 3 minutes. Think of the assessment you redesigned on Day 2 (shown above). Keep this note: you will return to it in the next activities.",
+      "widgetType": "free_text",
+      "config": {
+        "questions": [
+          {
+            "id": "q1",
+            "prompt": "Write one sentence describing what you changed.",
+            "maxChars": 500
+          },
+          {
+            "id": "q2",
+            "prompt": "Now write one honest sentence answering: \"How would I actually know if it worked?\"",
+            "maxChars": 500
+          }
+        ]
+      },
+      "sourceRef": "HoDs_Circle_Session3_Updated_14_Aug_2026.pdf - Session 3, Quick Activity (p.30)",
+      "groupMode": "individual",
+      "derived": false,
+      "timeLimitMin": 3,
+      "carryForward": {
+        "readKeys": [
+          "originalItem",
+          "rewrittenItem"
+        ],
+        "writeKeys": []
+      },
+      "confidential": false
+    },
+    {
+      "activityId": "d3s3_a2_sort_scholarship",
+      "sessionId": "d3s3",
+      "order": 2,
+      "title": "Quick Activity - Sort the Scholarship",
+      "instructions": "Individual, 4 minutes. Sort each example into one of Boyer's four scholarships, then give one example from our department for each category.",
+      "widgetType": "composite",
+      "config": {
+        "parts": [
+          {
+            "id": "p1",
+            "widgetType": "poll",
+            "config": {
+              "questions": [
+                {
+                  "id": "a",
+                  "prompt": "(a) A faculty member publishes original lab findings.",
+                  "multi": false,
+                  "options": [
+                    {
+                      "id": "o1",
+                      "text": "Discovery"
+                    },
+                    {
+                      "id": "o2",
+                      "text": "Integration"
+                    },
+                    {
+                      "id": "o3",
+                      "text": "Application"
+                    },
+                    {
+                      "id": "o4",
+                      "text": "Teaching"
+                    }
+                  ]
+                },
+                {
+                  "id": "b",
+                  "prompt": "(b) A faculty member writes a synthesis connecting three disciplines.",
+                  "multi": false,
+                  "options": [
+                    {
+                      "id": "o1",
+                      "text": "Discovery"
+                    },
+                    {
+                      "id": "o2",
+                      "text": "Integration"
+                    },
+                    {
+                      "id": "o3",
+                      "text": "Application"
+                    },
+                    {
+                      "id": "o4",
+                      "text": "Teaching"
+                    }
+                  ]
+                },
+                {
+                  "id": "c",
+                  "prompt": "(c) A faculty member applies research to solve a local farming problem.",
+                  "multi": false,
+                  "options": [
+                    {
+                      "id": "o1",
+                      "text": "Discovery"
+                    },
+                    {
+                      "id": "o2",
+                      "text": "Integration"
+                    },
+                    {
+                      "id": "o3",
+                      "text": "Application"
+                    },
+                    {
+                      "id": "o4",
+                      "text": "Teaching"
+                    }
+                  ]
+                },
+                {
+                  "id": "d",
+                  "prompt": "(d) A faculty member systematically studies a new teaching method and shares the findings.",
+                  "multi": false,
+                  "options": [
+                    {
+                      "id": "o1",
+                      "text": "Discovery"
+                    },
+                    {
+                      "id": "o2",
+                      "text": "Integration"
+                    },
+                    {
+                      "id": "o3",
+                      "text": "Application"
+                    },
+                    {
+                      "id": "o4",
+                      "text": "Teaching"
+                    }
+                  ]
+                },
+                {
+                  "id": "least",
+                  "prompt": "Which category does your department currently produce the LEAST of?",
+                  "multi": false,
+                  "options": [
+                    {
+                      "id": "o1",
+                      "text": "Discovery"
+                    },
+                    {
+                      "id": "o2",
+                      "text": "Integration"
+                    },
+                    {
+                      "id": "o3",
+                      "text": "Application"
+                    },
+                    {
+                      "id": "o4",
+                      "text": "Teaching"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "id": "p2",
+            "widgetType": "fixed_grid",
+            "label": "One example from your own department for each category",
+            "config": {
+              "rows": [
+                "Discovery",
+                "Integration",
+                "Application",
+                "Teaching"
+              ],
+              "columns": [
+                "Example"
+              ]
+            }
+          }
+        ]
+      },
+      "sourceRef": "HoDs_Circle_Session3_Updated_14_Aug_2026.pdf - Session 3, Boyer's Four Scholarships and Quick Activity (pp.31-32)",
+      "groupMode": "individual",
+      "derived": false,
+      "timeLimitMin": 4,
+      "confidential": false
+    },
+    {
+      "activityId": "d3s3_a3_meera_ladder",
+      "sessionId": "d3s3",
+      "order": 3,
+      "title": "Quick Activity - Where Are You on Meera's Ladder?",
+      "instructions": "Individual, 3 minutes. Return to the redesign you noted earlier and place it honestly on Dr. Meera's four-step ladder: theory-guided only / privately reflective / evidence-based (Scholarly Teaching) / made public (SoTL).",
+      "widgetType": "composite",
+      "config": {
+        "parts": [
+          {
+            "id": "p1",
+            "widgetType": "poll",
+            "config": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Honestly place your redesign on Dr. Meera's four-step ladder.",
+                  "multi": false,
+                  "options": [
+                    {
+                      "id": "o1",
+                      "text": "Theory-guided redesign only"
+                    },
+                    {
+                      "id": "o2",
+                      "text": "Privately reflective"
+                    },
+                    {
+                      "id": "o3",
+                      "text": "Evidence-based (Scholarly Teaching)"
+                    },
+                    {
+                      "id": "o4",
+                      "text": "Made public (SoTL)"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "id": "p2",
+            "widgetType": "free_text",
+            "config": {
+              "questions": [
+                {
+                  "id": "q2",
+                  "prompt": "The single next step that would move it one rung higher (not the whole ladder, just one step).",
+                  "maxChars": 500
+                },
+                {
+                  "id": "q3",
+                  "prompt": "What is actually stopping you from taking that one step?",
+                  "maxChars": 500
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "sourceRef": "HoDs_Circle_Session3_Updated_14_Aug_2026.pdf - Session 3, Potter & Kustra (2011) and Worked Example: Dr. Meera (pp.32-33)",
+      "groupMode": "individual",
+      "derived": false,
+      "timeLimitMin": 3,
+      "confidential": false
+    },
+    {
+      "activityId": "d3s3_a4_felten_audit",
+      "sessionId": "d3s3",
+      "order": 4,
+      "title": "Quick Activity - Audit One of Your Own Activities (Felten's Five Principles)",
+      "instructions": "Individual, 5 minutes. Choose one existing teaching-related activity and score it against Felten's five principles. Most activities score well on the first three and weakly on the last two; check whether that holds for yours.",
+      "widgetType": "composite",
+      "config": {
+        "parts": [
+          {
+            "id": "p1",
+            "widgetType": "free_text",
+            "config": {
+              "questions": [
+                {
+                  "id": "q0",
+                  "prompt": "The teaching-related activity you are auditing (a curriculum tweak, an assessment redesign, informal feedback collection):",
+                  "maxChars": 300
+                }
+              ]
+            }
+          },
+          {
+            "id": "p2",
+            "widgetType": "choice_matrix",
+            "config": {
+              "options": [
+                "Yes",
+                "Partial",
+                "No"
+              ],
+              "evidence": false,
+              "items": [
+                {
+                  "id": "f1",
+                  "text": "Inquiry focused on student learning"
+                },
+                {
+                  "id": "f2",
+                  "text": "Grounded in context"
+                },
+                {
+                  "id": "f3",
+                  "text": "Methodologically sound"
+                },
+                {
+                  "id": "f4",
+                  "text": "Conducted in partnership with students"
+                },
+                {
+                  "id": "f5",
+                  "text": "Appropriately public"
+                }
+              ]
+            }
+          },
+          {
+            "id": "p3",
+            "widgetType": "free_text",
+            "config": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "The smallest possible step that would raise your weakest score by one level (Partial to Yes, or No to Partial).",
+                  "maxChars": 500
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "sourceRef": "HoDs_Circle_Session3_Updated_14_Aug_2026.pdf - Session 3, Felten (2013) Five Principles and Quick Activity (pp.34-37)",
+      "groupMode": "individual",
+      "derived": false,
+      "timeLimitMin": 5,
+      "confidential": false
+    },
+    {
+      "activityId": "d3s3_a5_department_position",
+      "sessionId": "d3s3",
+      "order": 5,
+      "title": "Quick Activities - Our Department's SoTL Position",
+      "instructions": "Individual. Answer after the facilitator presents the SoTL timeline, the two published case studies and the limitations. Suggested time: 10 min.",
+      "widgetType": "composite",
+      "config": {
+        "parts": [
+          {
+            "id": "p1",
+            "widgetType": "poll",
+            "config": {
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Which idea on the 1990-2023 timeline feels most absent from our department's current practice?",
+                  "multi": false,
+                  "options": [
+                    {
+                      "id": "o1",
+                      "text": "The basic legitimacy of teaching as scholarship (Boyer, 1990)"
+                    },
+                    {
+                      "id": "o2",
+                      "text": "The public/private distinction (Potter & Kustra, 2011)"
+                    },
+                    {
+                      "id": "o3",
+                      "text": "The quality principles (Felten, 2013)"
+                    }
+                  ]
+                },
+                {
+                  "id": "q2",
+                  "prompt": "Which limitation feels most relevant to our department right now?",
+                  "multi": false,
+                  "options": [
+                    {
+                      "id": "o1",
+                      "text": "The participation gap"
+                    },
+                    {
+                      "id": "o2",
+                      "text": "The messiness critique"
+                    },
+                    {
+                      "id": "o3",
+                      "text": "Scholarship of Practice"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "id": "p2",
+            "widgetType": "free_text",
+            "config": {
+              "questions": [
+                {
+                  "id": "q3",
+                  "prompt": "One concrete reason why that idea has been slow to take hold in our context.",
+                  "maxChars": 500
+                },
+                {
+                  "id": "q4",
+                  "prompt": "Participation gap: one activity where students could realistically be consulted before, not just after, it runs. / Messiness: one inquiry you have been putting off because it felt 'not rigorous enough'. / Scholarship of Practice: one piece of your own academic practice this year (a course redesign, mentoring or committee work) that deserves to be written up and shared.",
+                  "maxChars": 800
+                },
+                {
+                  "id": "q5",
+                  "prompt": "Could a small group in our department take on a collective, department-wide SoTL inquiry (as in Kahn et al., 2013)? Name one colleague you could realistically approach.",
+                  "maxChars": 500
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "sourceRef": "HoDs_Circle_Session3_Updated_14_Aug_2026.pdf - Session 3, Timeline, Published Case Studies, Limitations and Quick Activities (pp.38-42) (reworded for faculty participants)",
+      "groupMode": "individual",
+      "derived": false,
+      "confidential": false
+    },
+    {
+      "activityId": "d3s3_a6_sotl_inquiry_plan",
+      "sessionId": "d3s3",
+      "order": 6,
+      "title": "SoTL Inquiry Plan for Your Redesign",
+      "instructions": "Individual. Turn your Day 2 redesign into a small, honest inquiry you can run next semester. A small claim needs only modest evidence; what matters is that it is systematic and shared. Suggested time: 15 min.",
+      "widgetType": "composite",
+      "config": {
+        "parts": [
+          {
+            "id": "p1",
+            "widgetType": "poll",
+            "config": {
+              "questions": [
+                {
+                  "id": "type",
+                  "prompt": "Which question type is closest to your inquiry?",
+                  "multi": false,
+                  "options": [
+                    {
+                      "id": "o1",
+                      "text": "Why are students struggling with a particular concept?"
+                    },
+                    {
+                      "id": "o2",
+                      "text": "Does a new assessment strategy improve higher-order thinking?"
+                    },
+                    {
+                      "id": "o3",
+                      "text": "Does interdisciplinary learning improve students' ability to transfer knowledge?"
+                    },
+                    {
+                      "id": "o4",
+                      "text": "What forms of feedback actually improve student performance?"
+                    },
+                    {
+                      "id": "o5",
+                      "text": "How does authentic assessment influence student engagement?"
+                    },
+                    {
+                      "id": "o6",
+                      "text": "What happens when AI-enabled tools are integrated into learning?"
+                    },
+                    {
+                      "id": "o7",
+                      "text": "Which pedagogies produce stronger evidence of conceptual understanding?"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "id": "p2",
+            "widgetType": "working_doc",
+            "config": {
+              "fields": [
+                {
+                  "key": "sotlQuestion",
+                  "label": "Inquiry question (about student learning, not your technique)",
+                  "type": "textarea",
+                  "required": true
+                },
+                {
+                  "key": "sotlIntervention",
+                  "label": "Intervention (your redesign)",
+                  "type": "textarea",
+                  "required": true
+                },
+                {
+                  "key": "sotlEvidence",
+                  "label": "Evidence to be collected (e.g. identical concept test before and after, two sections)",
+                  "type": "textarea",
+                  "required": true
+                },
+                {
+                  "key": "sotlPartnership",
+                  "label": "How students will test-drive the measurement tool before it is used",
+                  "type": "textarea",
+                  "required": false
+                },
+                {
+                  "key": "sotlPublic",
+                  "label": "Where it will be made public (teaching circle, conference, repository, journal)",
+                  "type": "text",
+                  "required": true
+                },
+                {
+                  "key": "sotlTimeline",
+                  "label": "Timeline",
+                  "type": "text",
+                  "required": true
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "sourceRef": "HoDs_Circle_Session3_Updated_14_Aug_2026.pdf - Session 3, Felten's five principles and Dr. Arjun worked example (pp.34-36); HoD_circle_-_4_concept_note_and_schedule.pdf - SoTL example questions",
+      "groupMode": "individual",
+      "derived": true,
+      "carryForward": {
+        "readKeys": [
+          "rewrittenItem",
+          "taskTitle"
+        ],
+        "writeKeys": [
+          "sotlQuestion",
+          "sotlIntervention",
+          "sotlEvidence",
+          "sotlPartnership",
+          "sotlPublic",
+          "sotlTimeline"
+        ]
+      },
+      "confidential": false
+    },
+    {
+      "activityId": "d3s4_a1_strategic_plan_15",
+      "sessionId": "d3s4",
+      "order": 1,
+      "title": "My Contribution to the Strategic Plan 2026-27",
+      "instructions": "The University's 15 strategic focus areas for 2026-27 are listed below. For the areas where you can contribute through your own teaching, write what you will do, by when, and what evidence you will show. Leave the rest blank.",
+      "widgetType": "fixed_grid",
+      "config": {
+        "rows": [
+          "1. Departmental Academic Rigour Audit - complete the Academic Rigour Checklist and identify strengths, gaps and priorities.",
+          "2. Define the Vertical Curriculum - map disciplinary depth from Year I to Year IV (foundational, intermediate and advanced concepts).",
+          "3. Threshold Concepts Mapping - identify threshold concepts for every major course and redesign teaching around conceptual mastery.",
+          "4. Curriculum Progression Framework - every semester increases cognitive complexity using Bloom's Revised Taxonomy.",
+          "5. Reading Culture Initiative - foundational books, landmark papers and weekly scholarly reading discussions.",
+          "6. Research-led Teaching - faculty research, journal discussions, mini research projects and inquiry-based learning in UG teaching.",
+          "7. Assessment Reform - assessments evaluate conceptual understanding, reasoning, problem solving and authentic application.",
+          "8. Faculty Development - FDPs on conceptual teaching, inquiry-based learning, constructive alignment and authentic assessment.",
+          "9. Department Benchmarking - curriculum, pedagogy and research practices against leading international universities.",
+          "10. Academic Mentoring - for academically talented students and students requiring conceptual support.",
+          "11. Student Research Culture - UG research seminars, poster presentations and publication opportunities.",
+          "12. Academic Quality Reviews - peer observation and departmental academic quality reviews focusing on conceptual teaching.",
+          "13. AI for Deep Learning - AI tools for conceptual understanding, simulations and scholarly exploration with academic integrity.",
+          "14. Signature Department Initiative - one distinctive practice that demonstrates disciplinary excellence.",
+          "15. Annual Review - measure progress using academic rigour scores, student learning evidence and curriculum improvements."
+        ],
+        "columns": [
+          "What I will do in my course(s)",
+          "Timeline",
+          "Evidence I will show"
+        ]
+      },
+      "sourceRef": "HoD_circle_-_4_concept_note_and_schedule.pdf / Deans_worksheet_copy_sep_25.docx - Strategic Plan: Teaching-learning for Global Competence (2026-2027), 15 strategic focus areas (reworded for faculty participants)",
+      "groupMode": "individual",
+      "derived": false,
+      "confidential": false
+    },
+    {
+      "activityId": "d3s4_a2_priority_matrix",
+      "sessionId": "d3s4",
+      "order": 2,
+      "title": "Priority Matrix",
+      "instructions": "As a group, identify three to five priorities for our department and score each one. Start from the three strategic priorities your group set on Day 1 (Case Study 4).",
+      "widgetType": "table_entry",
+      "config": {
+        "columns": [
+          {
+            "id": "priority",
+            "label": "Priority",
+            "type": "text"
+          },
+          {
+            "id": "impact",
+            "label": "Impact 1-5",
+            "type": "number",
+            "min": 1,
+            "max": 5
+          },
+          {
+            "id": "urgency",
+            "label": "Urgency 1-5",
+            "type": "number",
+            "min": 1,
+            "max": 5
+          },
+          {
+            "id": "feasibility",
+            "label": "Feasibility 1-5",
+            "type": "number",
+            "min": 1,
+            "max": 5
+          }
+        ],
+        "minRows": 3,
+        "maxRows": 5,
+        "computed": {
+          "type": "row_sum",
+          "columns": [
+            "impact",
+            "urgency",
+            "feasibility"
+          ],
+          "label": "Overall (/15)"
+        }
+      },
+      "sourceRef": "Deans_worksheet_copy_sep_25.docx - Part I: Departmental Priority Matrix",
+      "groupMode": "group",
+      "derived": false,
+      "carryForward": {
+        "readKeys": [
+          "strategicPriorities"
+        ],
+        "writeKeys": []
+      },
+      "groupSetup": "Groups of 4-6, mixed programmes",
+      "confidential": false
+    },
+    {
+      "activityId": "d3s4_a3_department_action_plan",
+      "sessionId": "d3s4",
+      "order": 3,
+      "title": "Department Curriculum Action Plan",
+      "instructions": "Propose the department's curriculum action plan from your group's perspective. The HoD will consolidate all groups' proposals.",
+      "widgetType": "fixed_grid",
+      "config": {
+        "rows": [
+          "1. Curriculum Depth",
+          "2. Teaching & Learning",
+          "3. Assessment Rigour",
+          "4. Research Integration",
+          "5. Scholarly Culture",
+          "6. Faculty Development",
+          "7. Student Research",
+          "8. Benchmarking"
+        ],
+        "columns": [
+          "What will we change?",
+          "Programme(s) / course(s)",
+          "What our group will contribute",
+          "Support needed from HoD / department",
+          "Timeline",
+          "Evidence of success"
+        ]
+      },
+      "sourceRef": "Deans_worksheet_copy_sep_25.docx - Part J: School Action Plan (adapted to department level) (reworded for faculty participants)",
+      "groupMode": "group",
+      "derived": false,
+      "groupSetup": "Same groups as the Priority Matrix",
+      "confidential": false
+    },
+    {
+      "activityId": "d3s4_a4_signature_initiative",
+      "sessionId": "d3s4",
+      "order": 4,
+      "title": "Propose a Signature Academic Initiative for Our Department",
+      "instructions": "Propose ONE distinctive initiative that would demonstrate disciplinary excellence in our department. The HoD will review all groups' proposals. Suggested time: 20 min.",
+      "widgetType": "working_doc",
+      "config": {
+        "fields": [
+          {
+            "key": "sigName",
+            "label": "Name",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "sigProblem",
+            "label": "Problem it addresses",
+            "type": "textarea",
+            "required": true
+          },
+          {
+            "key": "sigDifferent",
+            "label": "What will be different?",
+            "type": "textarea",
+            "required": true
+          },
+          {
+            "key": "sigProgrammes",
+            "label": "Which programmes are involved?",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "sigStudent",
+            "label": "Student impact",
+            "type": "textarea",
+            "required": true
+          },
+          {
+            "key": "sigFaculty",
+            "label": "Faculty impact",
+            "type": "textarea",
+            "required": false
+          },
+          {
+            "key": "sigEvidence",
+            "label": "Evidence of success",
+            "type": "textarea",
+            "required": true
+          },
+          {
+            "key": "sigLaunch",
+            "label": "Launch date",
+            "type": "text",
+            "required": false
+          },
+          {
+            "key": "sigReview",
+            "label": "Review date",
+            "type": "text",
+            "required": false
+          }
+        ]
+      },
+      "sourceRef": "Deans_worksheet_copy_sep_25.docx - Part K: Signature Initiative",
+      "groupMode": "group",
+      "derived": false,
+      "carryForward": {
+        "readKeys": [],
+        "writeKeys": [
+          "sigName",
+          "sigProblem",
+          "sigDifferent",
+          "sigProgrammes",
+          "sigStudent",
+          "sigFaculty",
+          "sigEvidence",
+          "sigLaunch",
+          "sigReview"
+        ]
+      },
+      "groupSetup": "Same groups as the Priority Matrix",
+      "confidential": false
+    },
+    {
+      "activityId": "d3s4_a5_ninety_day_plan",
+      "sessionId": "d3s4",
+      "order": 5,
+      "title": "My Next 90 Days",
+      "instructions": "Individual. Set a realistic deadline (on or before 29 December 2026) and the evidence you will produce for each action. Suggested time: 10 min.",
+      "widgetType": "fixed_grid",
+      "config": {
+        "rows": [
+          "Complete the rigour audit for my course(s)",
+          "Identify the top 3 gaps in my course(s)",
+          "Place my course(s) on the programme's vertical map",
+          "Identify the threshold concepts in my course(s)",
+          "Redesign one assessment for higher-order learning",
+          "Identify my own professional development needs",
+          "Add one research-led teaching activity to my course",
+          "Begin my SoTL inquiry"
+        ],
+        "columns": [
+          "Deadline",
+          "Evidence"
+        ]
+      },
+      "sourceRef": "Deans_worksheet_copy_sep_25.docx - Part L: 90-Day Action Plan (adapted to the individual faculty member) (reworded for faculty participants)",
+      "groupMode": "individual",
+      "derived": false,
+      "confidential": false
+    },
+    {
+      "activityId": "d3s4_a6_scorecard_15",
+      "sessionId": "d3s4",
+      "order": 6,
+      "title": "15-Point Academic Excellence Scorecard (Baseline)",
+      "instructions": "Individual. Rate our department's current position on each area as you experience it, with one piece of evidence where you can. This becomes the baseline for next year's review. Suggested time: 5 min. CONFIDENTIAL: your HoD, Dean, Associate Dean and HRDC see only department averages (shown once at least 5 colleagues have responded) and written comments without names. They can see THAT you have submitted, but not your individual ratings. Individual responses are accessible only to the App Admin, who generates the department summary.",
+      "widgetType": "rating_scale",
+      "config": {
+        "scale": {
+          "min": 1,
+          "max": 5,
+          "labels": [
+            "Not Evident",
+            "Emerging",
+            "Developing",
+            "Well Established",
+            "Fully Embedded"
+          ]
+        },
+        "evidence": true,
+        "sections": [
+          {
+            "id": "S",
+            "title": "Rate our department's current position, as you experience it",
+            "items": [
+              {
+                "id": "s1",
+                "text": "Academic Rigour Audit completed"
+              },
+              {
+                "id": "s2",
+                "text": "Vertical curriculum mapped Year 1-4"
+              },
+              {
+                "id": "s3",
+                "text": "Threshold concepts identified"
+              },
+              {
+                "id": "s4",
+                "text": "Cognitive progression established"
+              },
+              {
+                "id": "s5",
+                "text": "Scholarly reading embedded"
+              },
+              {
+                "id": "s6",
+                "text": "Research-led teaching embedded"
+              },
+              {
+                "id": "s7",
+                "text": "Assessment rigour strengthened"
+              },
+              {
+                "id": "s8",
+                "text": "Faculty development undertaken"
+              },
+              {
+                "id": "s9",
+                "text": "International benchmarking undertaken"
+              },
+              {
+                "id": "s10",
+                "text": "Academic mentoring strengthened"
+              },
+              {
+                "id": "s11",
+                "text": "Student research culture developed"
+              },
+              {
+                "id": "s12",
+                "text": "Academic quality reviews conducted"
+              },
+              {
+                "id": "s13",
+                "text": "AI used to deepen learning"
+              },
+              {
+                "id": "s14",
+                "text": "Signature academic initiative developed"
+              },
+              {
+                "id": "s15",
+                "text": "Annual evidence-based review established"
+              }
+            ]
+          }
+        ]
+      },
+      "sourceRef": "Deans_worksheet_copy_sep_25.docx - Part B: The 15-Point Academic Excellence Scorecard (adapted to department level) (reworded for faculty participants)",
+      "groupMode": "individual",
+      "derived": false,
+      "scoring": {
+        "method": "sum",
+        "max": 75,
+        "bands": []
+      },
+      "confidential": true
+    },
+    {
+      "activityId": "d3s4_a7_dare_closing",
+      "sessionId": "d3s4",
+      "order": 7,
+      "title": "Closing Reflection: D-A-R-E for My Course",
+      "instructions": "Individual. The last activity of the QIP: reflect on your own course using the D-A-R-E logic and record one commitment. Suggested time: 10 min.",
+      "widgetType": "free_text",
+      "config": {
+        "questions": [
+          {
+            "id": "q1",
+            "prompt": "D - DIAGNOSE: Where is my course now?",
+            "maxChars": 1500
+          },
+          {
+            "id": "q2",
+            "prompt": "A - ALIGN: Where should disciplinary depth and rigour be in my course?",
+            "maxChars": 1500
+          },
+          {
+            "id": "q3",
+            "prompt": "R - REDESIGN: What must change in my curriculum, teaching, assessment and research integration?",
+            "maxChars": 1500
+          },
+          {
+            "id": "q4",
+            "prompt": "E - EVIDENCE: What measurable evidence will show that my students are learning more deeply?",
+            "maxChars": 1500
+          },
+          {
+            "id": "q5",
+            "prompt": "My commitment: what I want our department to be known for by 2030, and the one change I will make in my teaching next semester to contribute to it.",
+            "maxChars": 1500
+          }
+        ]
+      },
+      "sourceRef": "Deans_worksheet_copy_sep_25.docx - The Dean's Leadership Logic: D-A-R-E model; Hod_Circle_1.docx - Closing: Reflection and Way Forward (reworded for faculty participants)",
+      "groupMode": "individual",
+      "derived": false,
+      "confidential": false
+    }
+  ]
+}
