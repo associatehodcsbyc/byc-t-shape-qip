@@ -6,6 +6,7 @@ import { LoginPage } from './pages/LoginPage';
 import { ParticipantLanding } from './pages/ParticipantLanding';
 import { HoDLanding } from './pages/HoDLanding';
 import { AdminLanding } from './pages/AdminLanding';
+import { ActivityRunnerPage } from './pages/ActivityRunnerPage';
 
 const RootRedirect: React.FC = () => {
   const { user, rosterUser, loading, isParticipant, isHoD, isAdmin } = useAuth();
@@ -61,6 +62,15 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['admin']}>
                 <AdminLanding />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/activity/:activityId"
+            element={
+              <ProtectedRoute allowedRoles={['participant', 'hod', 'admin']}>
+                <ActivityRunnerPage />
               </ProtectedRoute>
             }
           />

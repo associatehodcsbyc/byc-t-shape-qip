@@ -1,5 +1,11 @@
 import { initializeTestEnvironment } from '@firebase/rules-unit-testing';
 import { doc, setDoc } from 'firebase/firestore';
+import { readFileSync } from 'fs';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const emulatorHost = process.env.FIRESTORE_EMULATOR_HOST;
 let projectId = process.env.GCLOUD_PROJECT || process.env.FIREBASE_PROJECT;
@@ -98,10 +104,17 @@ async function seed() {
     },
   });
 
+  const sessionsRaw = JSON.parse(
+    readFileSync(resolve(__dirname, '../seed/sessions.json'), 'utf8')
+  );
+  const activitiesRaw = JSON.parse(
+    readFileSync(resolve(__dirname, '../seed/activities.json'), 'utf8')
+  );
+
   await testEnv.withSecurityRulesDisabled(async (context) => {
     const db = context.firestore();
 
-    // Seed departments
+    // 1. Seed departments
     for (const dept of SEED_DEPARTMENTS) {
       await setDoc(doc(db, 'departments', dept.id), {
         name: dept.name,
@@ -110,7 +123,7 @@ async function seed() {
       console.log(`   ✓ Department: ${dept.name} (${dept.id})`);
     }
 
-    // Seed roster users
+    // 2. Seed roster users
     for (const u of SEED_USERS) {
       await setDoc(doc(db, 'roster', u.email), {
         ...u,
@@ -119,8 +132,47 @@ async function seed() {
       });
       console.log(`   ✓ Roster: ${u.email} (${u.role}${u.adminType ? ` / ${u.adminType}` : ''}) [active: ${u.active}]`);
     }
+
+    // 3. Seed sessions
+    for (const s of sessionsRaw.sessions) {
+      await setDoc(doc(db, 'sessions', s.sessionId), s);
+    }
+    console.log(`   ✓ Seeded ${sessionsRaw.sessions.length} sessions`);
+
+    // 4. Seed activities
+    for (const a of activitiesRaw.activities) {
+      await setDoc(doc(db, 'activities', a.activityId), a);
+    }
+    console.log(`   ✓ Seeded ${activitiesRaw.activities.length} activities`);
+
+    // 5. Seed app config
+    await setDoc(doc(db, 'config', 'app'), {
+      groupProtocol: activitiesRaw.groupProtocol,
+      groupLabels: activitiesRaw.groupLabels,
+      updatedAt: new Date(),
+    });
+    console.log(`   ✓ Seeded config/app`);
+
+    // 6. Enable activities for computer-science
+    const now = new Date();
+    for (const a of activitiesRaw.activities) {
+      // Lock case 2 to test locked view
+      const isLocked = a.activityId === 'd1s4_a3_case2_results_vs_understanding';
+
+      await setDoc(doc(db, 'activityState', `computer-science__${a.activityId}`), {
+        department: 'computer-science',
+        activityId: a.activityId,
+        sessionId: a.sessionId,
+        enabled: true,
+        locked: isLocked,
+        updatedBy: 'seed-emulator@christuniversity.in',
+        updatedAt: now,
+      });
+    }
+    console.log(`   ✓ Initialized activityState for computer-science (All enabled, Case 2 locked)`);
   });
 
+  await testEnv.cleanup();
   console.log('✅ Seeding complete!');
   process.exit(0);
 }

@@ -5,11 +5,13 @@ import { db } from '../config/firebase';
 import { useAuth } from '../context/AuthContext';
 import { Header } from '../components/Header';
 import { RosterUpload } from '../components/RosterUpload';
+import { ContentImport } from '../components/ContentImport';
 import { RosterUser, Department } from '../types';
 
 export const AdminLanding: React.FC = () => {
   const { rosterUser, isAppAdmin, isDeanOrLeadership } = useAuth();
 
+  const [activeAdminTab, setActiveAdminTab] = useState<'roster' | 'content'>('roster');
   const [roster, setRoster] = useState<RosterUser[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
@@ -163,8 +165,47 @@ export const AdminLanding: React.FC = () => {
           </div>
         )}
 
-        {/* Roster Upload Component (App Admin Only) */}
+        {/* Admin Navigation Tabs */}
         {isAppAdmin && (
+          <div className="border-b border-slate-200 mb-6">
+            <nav className="flex space-x-6">
+              <button
+                type="button"
+                id="admin-tab-roster"
+                onClick={() => setActiveAdminTab('roster')}
+                className={`py-3 px-1 text-sm font-bold border-b-2 transition ${
+                  activeAdminTab === 'roster'
+                    ? 'border-christ-navy text-christ-navy'
+                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                }`}
+              >
+                👥 Roster Management
+              </button>
+              <button
+                type="button"
+                id="admin-tab-content"
+                onClick={() => setActiveAdminTab('content')}
+                className={`py-3 px-1 text-sm font-bold border-b-2 transition ${
+                  activeAdminTab === 'content'
+                    ? 'border-christ-navy text-christ-navy'
+                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                }`}
+              >
+                📦 Content Import (Sessions & Activities)
+              </button>
+            </nav>
+          </div>
+        )}
+
+        {/* Content Import Tab View */}
+        {isAppAdmin && activeAdminTab === 'content' && (
+          <div className="mb-8">
+            <ContentImport />
+          </div>
+        )}
+
+        {/* Roster Upload Component (App Admin Only) */}
+        {isAppAdmin && activeAdminTab === 'roster' && (
           <RosterUpload
             existingEmails={existingEmails}
             existingDeptIds={existingDeptIds}
@@ -173,7 +214,9 @@ export const AdminLanding: React.FC = () => {
         )}
 
         {/* Roster Table Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8">
+        {activeAdminTab === 'roster' && (
+          <>
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-slate-200 mb-6 gap-4">
             <div>
               <h3 className="text-lg font-bold text-slate-900">
@@ -321,6 +364,8 @@ export const AdminLanding: React.FC = () => {
             ))}
           </div>
         </div>
+          </>
+        )}
       </main>
     </div>
   );

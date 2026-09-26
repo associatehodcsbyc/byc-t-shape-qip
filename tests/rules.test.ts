@@ -1024,4 +1024,35 @@ describe('QIP Workshop — Firestore Security Rules', () => {
       })
     );
   });
+
+  // -------------------------------------------------------------------------
+  // 18. config/app — active participant CAN read, cannot write; non-roster CANNOT read
+  // -------------------------------------------------------------------------
+  it('18a. Active participant CAN read config/app', async () => {
+    // Seed config/app with security rules disabled
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore() as unknown as Firestore, 'config', 'app'), {
+        groupProtocol: 'Test protocol',
+        groupLabels: ['Group 1', 'Group 2'],
+      });
+    });
+
+    const db = authedDb('cs_part1');
+    await assertSucceeds(getDoc(doc(db, 'config', 'app')));
+  });
+
+  it('18b. Active participant CANNOT write config/app', async () => {
+    const db = authedDb('cs_part1');
+    await assertFails(
+      setDoc(doc(db, 'config', 'app'), {
+        groupProtocol: 'Hacked protocol',
+        groupLabels: [],
+      })
+    );
+  });
+
+  it('18c. Non-roster CHRIST user CANNOT read config/app', async () => {
+    const db = authedDb('not_in_roster');
+    await assertFails(getDoc(doc(db, 'config', 'app')));
+  });
 });
