@@ -72,7 +72,7 @@ function authedDb(key: string): Firestore {
 
 beforeAll(async () => {
   testEnv = await initializeTestEnvironment({
-    projectId: 'byc-t-shape-qip',
+    projectId: process.env.GCLOUD_PROJECT || 'demo-byc-qip',
     firestore: {
       rules: readFileSync(resolve(__dirname, '../firestore.rules'), 'utf8'),
       host: '127.0.0.1',

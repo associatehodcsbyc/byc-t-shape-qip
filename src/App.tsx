@@ -51,7 +51,7 @@ function App() {
           <Route
             path="/hod"
             element={
-              <ProtectedRoute allowedRoles={['hod']}>
+              <ProtectedRoute allowedRoles={['hod', 'admin']}>
                 <HoDLanding />
               </ProtectedRoute>
             }

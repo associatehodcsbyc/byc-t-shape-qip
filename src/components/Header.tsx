@@ -53,6 +53,41 @@ export const Header: React.FC = () => {
 
         {rosterUser && (
           <div className="flex items-center gap-4">
+            <nav className="flex items-center gap-2 text-xs font-semibold">
+              {rosterUser.role === 'admin' && (
+                <>
+                  <a
+                    href="/admin"
+                    className="px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-white transition"
+                  >
+                    Admin Console
+                  </a>
+                  <a
+                    href="/hod"
+                    className="px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-white transition"
+                  >
+                    Session Board
+                  </a>
+                </>
+              )}
+              {rosterUser.role === 'hod' && (
+                <a
+                  href="/hod"
+                  className="px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-white transition"
+                >
+                  HoD Console
+                </a>
+              )}
+              {rosterUser.role === 'participant' && (
+                <a
+                  href="/participant"
+                  className="px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-white transition"
+                >
+                  My Activities
+                </a>
+              )}
+            </nav>
+
             <div className="text-right hidden sm:block">
               <div className="text-sm font-semibold flex items-center gap-2 justify-end">
                 {rosterUser.name}

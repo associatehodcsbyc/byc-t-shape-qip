@@ -6,12 +6,13 @@ import { useAuth } from '../context/AuthContext';
 import { Header } from '../components/Header';
 import { RosterUpload } from '../components/RosterUpload';
 import { ContentImport } from '../components/ContentImport';
+import { SessionBoard } from '../components/hod/SessionBoard';
 import { RosterUser, Department } from '../types';
 
 export const AdminLanding: React.FC = () => {
   const { rosterUser, isAppAdmin, isDeanOrLeadership } = useAuth();
 
-  const [activeAdminTab, setActiveAdminTab] = useState<'roster' | 'content'>('roster');
+  const [activeAdminTab, setActiveAdminTab] = useState<'roster' | 'content' | 'sessions'>('roster');
   const [roster, setRoster] = useState<RosterUser[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
@@ -165,22 +166,23 @@ export const AdminLanding: React.FC = () => {
           </div>
         )}
 
-        {/* Admin Navigation Tabs */}
-        {isAppAdmin && (
-          <div className="border-b border-slate-200 mb-6">
-            <nav className="flex space-x-6">
-              <button
-                type="button"
-                id="admin-tab-roster"
-                onClick={() => setActiveAdminTab('roster')}
-                className={`py-3 px-1 text-sm font-bold border-b-2 transition ${
-                  activeAdminTab === 'roster'
-                    ? 'border-christ-navy text-christ-navy'
-                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                }`}
-              >
-                👥 Roster Management
-              </button>
+        {/* Admin / Leadership Navigation Tabs */}
+        <div className="border-b border-slate-200 mb-6">
+          <nav className="flex space-x-6">
+            <button
+              type="button"
+              id="admin-tab-roster"
+              onClick={() => setActiveAdminTab('roster')}
+              className={`py-3 px-1 text-sm font-bold border-b-2 transition ${
+                activeAdminTab === 'roster'
+                  ? 'border-christ-navy text-christ-navy'
+                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+              }`}
+            >
+              👥 {isAppAdmin ? 'Roster Management' : 'Faculty Roster'}
+            </button>
+
+            {isAppAdmin && (
               <button
                 type="button"
                 id="admin-tab-content"
@@ -193,7 +195,27 @@ export const AdminLanding: React.FC = () => {
               >
                 📦 Content Import (Sessions & Activities)
               </button>
-            </nav>
+            )}
+
+            <button
+              type="button"
+              id="admin-tab-sessions"
+              onClick={() => setActiveAdminTab('sessions')}
+              className={`py-3 px-1 text-sm font-bold border-b-2 transition ${
+                activeAdminTab === 'sessions'
+                  ? 'border-christ-navy text-christ-navy'
+                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+              }`}
+            >
+              📋 {isAppAdmin ? 'Session Board & Activity Gates' : 'Session Board & Live Tracker'}
+            </button>
+          </nav>
+        </div>
+
+        {/* Session Board & Gates Tab View */}
+        {activeAdminTab === 'sessions' && (
+          <div className="mb-8">
+            <SessionBoard />
           </div>
         )}
 
