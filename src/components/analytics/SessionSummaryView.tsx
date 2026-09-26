@@ -164,7 +164,7 @@ export const SessionSummaryView: React.FC = () => {
       <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-wrap items-center justify-between gap-4 print:hidden">
         <div className="flex-1 min-w-[220px]">
           <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
-            Select Session (1 of 12)
+            Select Session ({sessions.findIndex((s) => s.sessionId === selectedSessionId) + 1} of {sessions.length})
           </label>
           <select
             value={selectedSessionId}

@@ -14,8 +14,9 @@ export const ContentImport: React.FC = () => {
   const [committing, setCommitting] = useState<boolean>(false);
   const [progress, setProgress] = useState<{ current: number; total: number } | null>(null);
   const [diffResult, setDiffResult] = useState<DryRunDiffResult | null>(null);
-  const [filterType, setFilterType] = useState<'all' | 'new' | 'changed' | 'unchanged'>('all');
+  const [filterType, setFilterType] = useState<'all' | 'new' | 'changed' | 'unchanged' | 'removed'>('all');
   const [activeTab, setActiveTab] = useState<'activities' | 'sessions'>('activities');
+  const [confirmRemoval, setConfirmRemoval] = useState<boolean>(false);
   const [commitSuccess, setCommitSuccess] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -24,6 +25,7 @@ export const ContentImport: React.FC = () => {
     setLoadingDiff(true);
     setCommitSuccess(null);
     setErrorMessage(null);
+    setConfirmRemoval(false);
 
     try {
       const res = await computeContentDryRun(
@@ -46,6 +48,11 @@ export const ContentImport: React.FC = () => {
   const handleCommit = async () => {
     if (!diffResult || !user?.email) return;
 
+    if (diffResult.activities.removedCount > 0 && !confirmRemoval) {
+      setErrorMessage('Please confirm deletion of removed activities before proceeding.');
+      return;
+    }
+
     setCommitting(true);
     setErrorMessage(null);
     setCommitSuccess(null);
@@ -60,13 +67,16 @@ export const ContentImport: React.FC = () => {
         user.email,
         (current, total) => {
           setProgress({ current, total });
-        }
+        },
+        diffResult.removedActivityIds
       );
 
       if (res.success) {
+        const removalMsg = res.activitiesRemoved > 0 ? ` and removed ${res.activitiesRemoved} obsolete activities` : '';
         setCommitSuccess(
-          `Successfully committed ${res.sessionsCommitted} sessions and ${res.activitiesCommitted} activities to Firestore.`
+          `Successfully committed ${res.sessionsCommitted} sessions, ${res.activitiesCommitted} activities${removalMsg} in Firestore.`
         );
+        setConfirmRemoval(false);
         // Re-run diff to show updated state (everything unchanged)
         await runDryRun();
       }
@@ -89,6 +99,20 @@ export const ContentImport: React.FC = () => {
     return item.type === filterType;
   }) || [];
 
+  const hasChangesToCommit =
+    (diffResult?.sessions.newCount || 0) > 0 ||
+    (diffResult?.sessions.changedCount || 0) > 0 ||
+    (diffResult?.activities.newCount || 0) > 0 ||
+    (diffResult?.activities.changedCount || 0) > 0 ||
+    (diffResult?.activities.removedCount || 0) > 0;
+
+  const isCommitBlocked =
+    loadingDiff ||
+    committing ||
+    !diffResult?.validation.valid ||
+    !hasChangesToCommit ||
+    ((diffResult?.activities.removedCount || 0) > 0 && !confirmRemoval);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
@@ -97,7 +121,7 @@ export const ContentImport: React.FC = () => {
             Content Management (Sessions & Activities)
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
-            Validate seed against JSON Schema, review dry-run diff (new / changed / unchanged), and commit to Firestore.
+            Validate seed against JSON Schema, review dry-run diff (new / changed / unchanged / removed), and commit to Firestore.
           </p>
         </div>
 
@@ -114,15 +138,7 @@ export const ContentImport: React.FC = () => {
           <button
             type="button"
             id="commit-content-import-btn"
-            disabled={
-              loadingDiff ||
-              committing ||
-              !diffResult?.validation.valid ||
-              (diffResult?.sessions.newCount === 0 &&
-                diffResult?.sessions.changedCount === 0 &&
-                diffResult?.activities.newCount === 0 &&
-                diffResult?.activities.changedCount === 0)
-            }
+            disabled={isCommitBlocked}
             onClick={handleCommit}
             className="px-4 py-2 rounded-lg bg-christ-navy text-white text-xs font-bold hover:bg-slate-800 transition shadow-sm disabled:opacity-40 ring-1 ring-christ-gold"
           >
@@ -204,6 +220,34 @@ export const ContentImport: React.FC = () => {
         </div>
       )}
 
+      {/* Removed Activities Warning and Confirmation Box */}
+      {diffResult && diffResult.activities.removedCount > 0 && (
+        <div className="p-4 rounded-xl bg-amber-50 border-2 border-amber-300 text-amber-950 text-xs space-y-2.5">
+          <div className="flex items-center gap-2 font-bold text-amber-900">
+            <span className="text-base">⚠️</span>
+            <span>
+              {diffResult.activities.removedCount} activit{diffResult.activities.removedCount === 1 ? 'y' : 'ies'} present in Firestore will be removed:
+            </span>
+          </div>
+          <div className="font-mono text-[11px] text-amber-900 bg-white/80 p-2.5 rounded-lg border border-amber-200">
+            {diffResult.removedActivityIds.join(', ')}
+          </div>
+          <p className="text-[11px] text-amber-800 leading-relaxed">
+            Committing will permanently delete these activity documents from Firestore. Associated <code>activityState</code> records are preserved (per security rules) and ignored by the application. Participant responses, progress documents, and audit logs are never deleted.
+          </p>
+          <label className="flex items-center gap-2 cursor-pointer font-semibold pt-1 select-none text-slate-900">
+            <input
+              type="checkbox"
+              id="confirm-removal-checkbox"
+              checked={confirmRemoval}
+              onChange={(e) => setConfirmRemoval(e.target.checked)}
+              className="w-4 h-4 rounded text-christ-navy border-slate-300 focus:ring-christ-navy"
+            />
+            <span>I understand and confirm deletion of {diffResult.activities.removedCount} removed activit{diffResult.activities.removedCount === 1 ? 'y' : 'ies'} from Firestore</span>
+          </label>
+        </div>
+      )}
+
       {/* Dry Run Summary Cards */}
       {diffResult && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -249,7 +293,7 @@ export const ContentImport: React.FC = () => {
                 seed/activities.json
               </span>
             </div>
-            <div className="grid grid-cols-3 gap-2 text-center text-xs">
+            <div className={`grid ${diffResult.activities.removedCount > 0 ? 'grid-cols-4' : 'grid-cols-3'} gap-2 text-center text-xs`}>
               <div className="bg-emerald-50 border border-emerald-200 p-2.5 rounded-lg">
                 <span className="text-emerald-700 font-bold block text-lg">
                   {diffResult.activities.newCount}
@@ -262,6 +306,14 @@ export const ContentImport: React.FC = () => {
                 </span>
                 <span className="text-amber-800 text-[11px] font-semibold">Changed</span>
               </div>
+              {diffResult.activities.removedCount > 0 && (
+                <div className="bg-rose-50 border border-rose-300 p-2.5 rounded-lg">
+                  <span className="text-rose-700 font-bold block text-lg">
+                    {diffResult.activities.removedCount}
+                  </span>
+                  <span className="text-rose-800 text-[11px] font-semibold">Removed</span>
+                </div>
+              )}
               <div className="bg-slate-50 border border-slate-200 p-2.5 rounded-lg">
                 <span className="text-slate-600 font-bold block text-lg">
                   {diffResult.activities.unchangedCount}
@@ -306,7 +358,7 @@ export const ContentImport: React.FC = () => {
             {/* Filter buttons */}
             <div className="flex items-center gap-1.5 text-xs">
               <span className="text-slate-500 mr-1">Filter diff:</span>
-              {(['all', 'new', 'changed', 'unchanged'] as const).map((ft) => (
+              {(['all', 'new', 'changed', 'unchanged', 'removed'] as const).map((ft) => (
                 <button
                   key={ft}
                   type="button"
@@ -369,6 +421,8 @@ export const ContentImport: React.FC = () => {
                                 ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                                 : type === 'changed'
                                 ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                                : type === 'removed'
+                                ? 'bg-rose-100 text-rose-800 border border-rose-300'
                                 : 'bg-slate-100 text-slate-600 border border-slate-200'
                             }`}
                           >

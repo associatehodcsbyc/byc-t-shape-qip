@@ -17,7 +17,6 @@ const VALID_WIDGET_TYPES = new Set([
   'free_text',
   'working_doc',
   'poll',
-  'ladder_game',
 ]);
 
 const ACTIVITY_ID_REGEX = /^d[1-3]s[1-4]_a[0-9]+_[a-z0-9_]+$/;

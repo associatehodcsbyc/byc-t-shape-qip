@@ -284,7 +284,7 @@ export function exportQipReportPackXlsx(
     'Email ID',
     'Department',
     ...sessions.map((s) => `${s.sessionId.toUpperCase()} (${s.slot})`),
-    'Total Sessions Attended (out of 12)',
+    'Total Sessions Attended (out of ' + sessions.length + ')',
     'Attendance %',
     'E-Certificate Eligible (100%)',
   ];
@@ -309,7 +309,7 @@ export function exportQipReportPackXlsx(
   XLSX.utils.book_append_sheet(wb, ws1, 'Session Attendance');
 
   // --------------------------------------------------------------------------
-  // SHEET 2: E-Certificate Eligibility (Present in all 12 sessions)
+  // SHEET 2: E-Certificate Eligibility (Present in all sessions)
   // --------------------------------------------------------------------------
   const sheet2Headers = [
     'Certificate No',
@@ -336,7 +336,7 @@ export function exportQipReportPackXlsx(
   });
 
   if (certificateRecipients.length === 0) {
-    sheet2Rows.push(['No participants have completed all 12 sessions yet.']);
+    sheet2Rows.push([`No participants have completed all ${sessions.length} sessions yet.`]);
   }
 
   const ws2 = XLSX.utils.aoa_to_sheet(sheet2Rows);

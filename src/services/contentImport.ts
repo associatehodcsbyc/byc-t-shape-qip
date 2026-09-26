@@ -14,7 +14,7 @@ import { validateActivitiesSeed, ValidationResult } from '../utils/schemaValidat
 export interface DiffItem<T> {
   id: string;
   item: T;
-  type: 'new' | 'changed' | 'unchanged';
+  type: 'new' | 'changed' | 'unchanged' | 'removed';
   diffNotes?: string[];
 }
 
@@ -32,8 +32,10 @@ export interface DryRunDiffResult {
     newCount: number;
     changedCount: number;
     unchangedCount: number;
+    removedCount: number;
     items: DiffItem<Activity>[];
   };
+  removedActivityIds: string[];
   groupProtocol: string;
   groupLabels: string[];
 }
@@ -100,6 +102,9 @@ export async function computeContentDryRun(
   let actChanged = 0;
   let actUnchanged = 0;
 
+  const seedActIds = new Set(activitiesSeed.activities.map((a) => a.activityId));
+  const removedActivityIds: string[] = [];
+
   for (const a of activitiesSeed.activities) {
     const existing = existingActivities.get(a.activityId);
     if (!existing) {
@@ -119,6 +124,19 @@ export async function computeContentDryRun(
     }
   }
 
+  // 6. Check for removed activities (exist in Firestore but absent in seed)
+  for (const [existingId, existingData] of existingActivities.entries()) {
+    if (!seedActIds.has(existingId)) {
+      removedActivityIds.push(existingId);
+      actDiffItems.push({
+        id: existingId,
+        item: existingData as Activity,
+        type: 'removed',
+        diffNotes: ['Activity exists in Firestore but is absent in seed'],
+      });
+    }
+  }
+
   return {
     validation,
     sessions: {
@@ -133,8 +151,10 @@ export async function computeContentDryRun(
       newCount: actNew,
       changedCount: actChanged,
       unchangedCount: actUnchanged,
+      removedCount: removedActivityIds.length,
       items: actDiffItems,
     },
+    removedActivityIds,
     groupProtocol: activitiesSeed.groupProtocol || '',
     groupLabels: activitiesSeed.groupLabels || [],
   };
@@ -142,6 +162,9 @@ export async function computeContentDryRun(
 
 /**
  * Commits the validated seed data to Firestore in batched writes.
+ * Deletes removed activities from the activities collection.
+ * Does NOT delete activityState documents (rules deny delete: allow delete: if false).
+ * Never touches responses, progress, or auditLog documents.
  */
 export async function commitContentImport(
   sessions: Session[],
@@ -149,9 +172,15 @@ export async function commitContentImport(
   groupProtocol: string,
   groupLabels: string[],
   adminEmail: string,
-  onProgress?: (processed: number, total: number) => void
-): Promise<{ success: boolean; sessionsCommitted: number; activitiesCommitted: number }> {
-  const total = sessions.length + activities.length;
+  onProgress?: (processed: number, total: number) => void,
+  removedActivityIds: string[] = []
+): Promise<{
+  success: boolean;
+  sessionsCommitted: number;
+  activitiesCommitted: number;
+  activitiesRemoved: number;
+}> {
+  const total = sessions.length + activities.length + (removedActivityIds ? removedActivityIds.length : 0);
   let processed = 0;
 
   // We write in batches of up to 400 (well within Firestore 500 limit)
@@ -189,6 +218,42 @@ export async function commitContentImport(
     }
   }
 
+  // Handle deletion of removed activities documents only (activityState is preserved per rules)
+  let activitiesRemoved = 0;
+  if (removedActivityIds && removedActivityIds.length > 0) {
+    try {
+      for (let i = 0; i < removedActivityIds.length; i += BATCH_SIZE) {
+        const chunk = removedActivityIds.slice(i, i + BATCH_SIZE);
+        const batch = writeBatch(db);
+        for (const actId of chunk) {
+          batch.delete(doc(db, 'activities', actId));
+        }
+        await batch.commit();
+      }
+
+      activitiesRemoved = removedActivityIds.length;
+      processed += removedActivityIds.length;
+      if (onProgress) {
+        onProgress(processed, total);
+      }
+
+      // Write one auditLog entry listing the removed activities
+      await addDoc(collection(db, 'auditLog'), {
+        actor: adminEmail,
+        action: 'activities_removed',
+        target: 'activities',
+        details: {
+          removedActivityIds,
+          count: removedActivityIds.length,
+        },
+        at: serverTimestamp(),
+      });
+    } catch (err) {
+      console.error('Failed to delete removed activities or write audit log:', err);
+      throw err;
+    }
+  }
+
   // Attempt to store config/app if permitted by rules (graceful fallback)
   try {
     const configRef = doc(db, 'config', 'app');
@@ -201,7 +266,7 @@ export async function commitContentImport(
     console.warn('config/app document could not be written to Firestore (may require rule permission):', err);
   }
 
-  // Write audit log entry
+  // Write audit log entry for content import
   try {
     await addDoc(collection(db, 'auditLog'), {
       actor: adminEmail,
@@ -210,6 +275,7 @@ export async function commitContentImport(
       details: {
         sessionsCount: sessions.length,
         activitiesCount: activities.length,
+        activitiesRemovedCount: activitiesRemoved,
       },
       at: serverTimestamp(),
     });
@@ -221,5 +287,6 @@ export async function commitContentImport(
     success: true,
     sessionsCommitted: sessions.length,
     activitiesCommitted: activities.length,
+    activitiesRemoved,
   };
 }

@@ -55,9 +55,9 @@ SCALE_AGREE = {"min": 1, "max": 5, "labels": ["Strongly Disagree", "Disagree", "
 activities = []
 
 def add(session, n, slug, title, widget, config, source, instructions="", group=False,
-        derived=False, timeLimitMin=None, carry=None, scoring=None):
+        derived=False, timeLimitMin=None, carry=None, scoring=None, activityId=None):
     a = {
-        "activityId": f"{session}_a{n}_{slug}", "sessionId": session, "order": n,
+        "activityId": activityId or f"{session}_a{n}_{slug}", "sessionId": session, "order": n,
         "title": title, "instructions": instructions, "widgetType": widget,
         "config": config, "sourceRef": source,
         "groupMode": "group" if group else "individual", "derived": derived,
@@ -443,21 +443,7 @@ add("d2s1", 3, "three_must_know", "The Three Concepts Every Graduate Must Master
     f"{DW} - Part D, Dean's Challenge", group=True)
 
 # ---- D2 S-II
-add("d2s2", 1, "climbing_the_ladder", "Climbing the Ladder - A HOT Game (Optional)", "ladder_game", {
-    "stimulus": "Derrida argues that an archive is never a neutral container: the technology and the institution that preserve a record also shape what can be remembered, and therefore who holds power over memory itself (paraphrased from Derrida & Prenowitz, 1995, pp. 9-63).",
-    "secondsPerLevel": 60, "totalMinutes": 10,
-    "levels": [
-        {"level": 1, "bloom": "Remember", "points": 10, "question": "According to the stimulus, what does an archive do besides store records?"},
-        {"level": 2, "bloom": "Understand", "points": 15, "question": "In your own words, explain why Derrida says an archive is never neutral."},
-        {"level": 3, "bloom": "Apply", "points": 20, "question": "Name one archive you are personally familiar with (a family record, an institutional archive, a digital platform), and state, in one sentence, who currently controls what it preserves."},
-        {"level": 4, "bloom": "Analyse", "points": 25, "question": "Compare two archives you know of (for example, a national archive and a personal social media account). Which one's structure more visibly shapes what can be remembered, and how?"},
-        {"level": 5, "bloom": "Evaluate", "points": 30, "question": "Using Derrida's claim, judge whether a specific digitisation project you are aware of has expanded or narrowed whose memory is preserved. Justify your judgement with one piece of evidence."},
-        {"level": 6, "bloom": "Create", "points": 35, "question": "Propose one specific, realistic change to an archive or record-keeping system you are familiar with that would shift control over what is preserved toward a currently under-represented group."}],
-    "debrief": "At which level did the question stop being answerable from memory of the stimulus alone, and start requiring something you brought to it yourself? That level is where recall ends and Higher-Order Thinking begins."},
-    f"{LC3} - Segment 3: Climbing the Ladder (pp.7-8)", group=True, timeLimitMin=10,
-    instructions="A successful answer banks that level's points and unlocks the next level. An unsuccessful answer ends the climb, but banked points are kept. After any successful level the group may stop and bank its score.")
-
-add("d2s2", 2, "doing_to_deep_learning", "Activity 1 - Mapping the Shift from Doing to Deep Learning", "composite", {
+add("d2s2", 1, "doing_to_deep_learning", "Mapping the Shift from Doing to Deep Learning", "composite", {
     "parts": [
         {"id": "p1", "widgetType": "choice_matrix", "label": "Traditional-sequence stage - present in this item?",
          "config": {"options": ["Present", "Absent"], "evidence": True, "items": items("t", [
@@ -472,9 +458,10 @@ add("d2s2", 2, "doing_to_deep_learning", "Activity 1 - Mapping the Shift from Do
             q("q3", "Debrief: Is your course closer to the traditional or the rigour-oriented approach, and at which stage does it diverge most?")]}},
     ]}, f"{LC3} - Segment 4, Activity 1 and Working Document Worksheet (pp.8-10)", group=True,
     instructions="Step 1: Read both columns of 'Transforming Learning - From Doing to Deep Learning' silently. Step 2: Map your working document: which traditional stage dominates; mark each rigour-oriented stage Present (specific, checkable instance), Partial (scheduled or claimed but not required of every student) or Absent. Step 3: Identify the priority stage.",
-    carry={"readKeys": ["course", "originalItem"], "writeKeys": ["priorityStage"], "writeFrom": {"priorityStage": "p3.q1"}})
+    carry={"readKeys": ["course", "originalItem"], "writeKeys": ["priorityStage"], "writeFrom": {"priorityStage": "p3.q1"}},
+    activityId="d2s2_a2_doing_to_deep_learning")
 
-add("d2s2", 3, "rewrite_working_doc", "Activity 2 - Selecting and Rewriting the Working Document", "composite", {
+add("d2s2", 2, "rewrite_working_doc", "Selecting and Rewriting the Working Document", "composite", {
     "parts": [
         {"id": "p1", "widgetType": "checklist", "label": "Quick-Reference Checklist - does your rewrite pass all four conditions?",
          "config": {"allowOther": False, "options": opts([
@@ -492,14 +479,16 @@ add("d2s2", 3, "rewrite_working_doc", "Activity 2 - Selecting and Rewriting the 
             q("q1", "Debrief: Did rewriting the item change what students would need to know, or only what they would need to do with what they know?")]}},
     ]}, f"{LC3} - Segment 5, Activity 2 (pp.11-12); Annexure 1 worked example (pp.14-16)", group=True,
     instructions="Step 1 Select: the item from your working document (prefer one touching the priority stage). Step 2 Rewrite in pairs so that it requires analysis, evaluation or creation. Step 3 Merge and record the final version, with one sentence justifying each of the four conditions. This is a redesign, not a replacement.",
-    carry={"readKeys": ["course", "originalItem", "priorityStage"], "writeKeys": ["rewrittenItem", "addedComponents"]})
+    carry={"readKeys": ["course", "originalItem", "priorityStage"], "writeKeys": ["rewrittenItem", "addedComponents"]},
+    activityId="d2s2_a3_rewrite_working_doc")
 
-add("d2s2", 4, "hot_case_studies", "HOT Case Studies - Discussion", "free_text", {"questions": [
+add("d2s2", 3, "hot_case_studies", "HOT Case Studies - Discussion", "free_text", {"questions": [
     q("q1", "UNESCO-IHE: What does the original problem suggest about the risk of depth without breadth, even where the depth itself is genuinely rigorous?"),
     q("q2", "UNESCO-IHE: What is the difference between a policy module assessed by a descriptive summary, and one that requires evaluating a real policy decision using technical training? Which produces breadth in the T-shaped sense?"),
     q("q3", "UNESCO-IHE: Where, in your own discipline, are graduates most likely to resemble the water professionals in this case?"),
     q("q4", "ENG405A-7B: Compare CIA-I Part A with CIA-III. Which more reliably produces HOT engagement as designed, and why?")]},
-    f"{LC3} - Segment 2 Case Study 1 (p.6) and Segment 6 Case Study 2 (pp.12-13)", group=True)
+    f"{LC3} - Segment 2 Case Study 1 (p.6) and Segment 6 Case Study 2 (pp.12-13)", group=True,
+    activityId="d2s2_a4_hot_case_studies")
 
 # ---- D2 S-III
 BLOOM = ["Remember", "Understand", "Apply", "Analyze", "Evaluate", "Create"]
@@ -810,7 +799,6 @@ GROUP_SETUP = {
     "d1s4_a6_group_discussion": "Same case-study groups as the previous activity",
     "d2s1_a2_threshold_concepts": "Programme teams: 3-6 faculty who teach in the same programme",
     "d2s1_a3_three_must_know": "Same programme teams as the previous activity",
-    "d2s2_a1_climbing_the_ladder": "Groups of 4-6 (any mix)",
     "d2s2_a2_doing_to_deep_learning": "Groups of 3-4 from the same or related discipline; each member maps their OWN working document",
     "d2s2_a3_rewrite_working_doc": "Same groups; rewrite in pairs, but each member records the rewrite of their OWN working document",
     "d2s2_a4_hot_case_studies": "Same groups as Activities 1 and 2",
@@ -907,7 +895,7 @@ json.dump({"version": "1.1", "groupProtocol": GROUP_PROTOCOL, "groupLabels": [f"
 
 # ---------------------------------------------------------------- JSON Schema
 WIDGETS = ["rating_scale", "choice_matrix", "rank_order", "checklist", "table_entry", "fixed_grid",
-           "crm_matrix", "free_text", "working_doc", "poll", "ladder_game", "composite"]
+           "crm_matrix", "free_text", "working_doc", "poll", "composite"]
 schema = {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "title": "QIP activities seed",

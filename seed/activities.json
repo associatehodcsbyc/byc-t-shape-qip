@@ -1839,68 +1839,10 @@
       "confidential": false
     },
     {
-      "activityId": "d2s2_a1_climbing_the_ladder",
-      "sessionId": "d2s2",
-      "order": 1,
-      "title": "Climbing the Ladder - A HOT Game (Optional)",
-      "instructions": "A successful answer banks that level's points and unlocks the next level. An unsuccessful answer ends the climb, but banked points are kept. After any successful level the group may stop and bank its score.",
-      "widgetType": "ladder_game",
-      "config": {
-        "stimulus": "Derrida argues that an archive is never a neutral container: the technology and the institution that preserve a record also shape what can be remembered, and therefore who holds power over memory itself (paraphrased from Derrida & Prenowitz, 1995, pp. 9-63).",
-        "secondsPerLevel": 60,
-        "totalMinutes": 10,
-        "levels": [
-          {
-            "level": 1,
-            "bloom": "Remember",
-            "points": 10,
-            "question": "According to the stimulus, what does an archive do besides store records?"
-          },
-          {
-            "level": 2,
-            "bloom": "Understand",
-            "points": 15,
-            "question": "In your own words, explain why Derrida says an archive is never neutral."
-          },
-          {
-            "level": 3,
-            "bloom": "Apply",
-            "points": 20,
-            "question": "Name one archive you are personally familiar with (a family record, an institutional archive, a digital platform), and state, in one sentence, who currently controls what it preserves."
-          },
-          {
-            "level": 4,
-            "bloom": "Analyse",
-            "points": 25,
-            "question": "Compare two archives you know of (for example, a national archive and a personal social media account). Which one's structure more visibly shapes what can be remembered, and how?"
-          },
-          {
-            "level": 5,
-            "bloom": "Evaluate",
-            "points": 30,
-            "question": "Using Derrida's claim, judge whether a specific digitisation project you are aware of has expanded or narrowed whose memory is preserved. Justify your judgement with one piece of evidence."
-          },
-          {
-            "level": 6,
-            "bloom": "Create",
-            "points": 35,
-            "question": "Propose one specific, realistic change to an archive or record-keeping system you are familiar with that would shift control over what is preserved toward a currently under-represented group."
-          }
-        ],
-        "debrief": "At which level did the question stop being answerable from memory of the stimulus alone, and start requiring something you brought to it yourself? That level is where recall ends and Higher-Order Thinking begins."
-      },
-      "sourceRef": "HoDs_Circle_Session3_Updated_14_Aug_2026.pdf - Segment 3: Climbing the Ladder (pp.7-8)",
-      "groupMode": "group",
-      "derived": false,
-      "timeLimitMin": 10,
-      "groupSetup": "Groups of 4-6 (any mix)",
-      "confidential": false
-    },
-    {
       "activityId": "d2s2_a2_doing_to_deep_learning",
       "sessionId": "d2s2",
-      "order": 2,
-      "title": "Activity 1 - Mapping the Shift from Doing to Deep Learning",
+      "order": 1,
+      "title": "Mapping the Shift from Doing to Deep Learning",
       "instructions": "Step 1: Read both columns of 'Transforming Learning - From Doing to Deep Learning' silently. Step 2: Map your working document: which traditional stage dominates; mark each rigour-oriented stage Present (specific, checkable instance), Partial (scheduled or claimed but not required of every student) or Absent. Step 3: Identify the priority stage.",
       "widgetType": "composite",
       "config": {
@@ -2028,8 +1970,8 @@
     {
       "activityId": "d2s2_a3_rewrite_working_doc",
       "sessionId": "d2s2",
-      "order": 3,
-      "title": "Activity 2 - Selecting and Rewriting the Working Document",
+      "order": 2,
+      "title": "Selecting and Rewriting the Working Document",
       "instructions": "Step 1 Select: the item from your working document (prefer one touching the priority stage). Step 2 Rewrite in pairs so that it requires analysis, evaluation or creation. Step 3 Merge and record the final version, with one sentence justifying each of the four conditions. This is a redesign, not a replacement.",
       "widgetType": "composite",
       "config": {
@@ -2131,7 +2073,7 @@
     {
       "activityId": "d2s2_a4_hot_case_studies",
       "sessionId": "d2s2",
-      "order": 4,
+      "order": 3,
       "title": "HOT Case Studies - Discussion",
       "instructions": "Read the two case summaries above and discuss the questions in your group. Suggested time: 15 min.",
       "widgetType": "free_text",

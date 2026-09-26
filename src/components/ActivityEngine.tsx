@@ -489,18 +489,6 @@ export const ActivityEngine: React.FC<ActivityEngineProps> = ({
             readOnly={isReadOnly}
           />
         );
-      case 'ladder_game':
-        return (
-          <div className="p-8 text-center bg-slate-50 border border-slate-200 rounded-2xl">
-            <span className="text-3xl mb-2 block">🪜</span>
-            <h4 className="text-base font-bold text-slate-800">
-              Optional activity — conducted by the facilitator
-            </h4>
-            <p className="text-xs text-slate-500 mt-1">
-              Climbing the Ladder: shared stimulus, 6 Bloom levels, 60s per level.
-            </p>
-          </div>
-        );
       default:
         return (
           <div className="p-8 text-center bg-slate-50 border border-slate-200 rounded-2xl">

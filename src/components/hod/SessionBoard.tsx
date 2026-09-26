@@ -326,7 +326,7 @@ export const SessionBoard: React.FC = () => {
                 : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
             }`}
           >
-            All 12 Sessions
+            All {sessions.length} Sessions
           </button>
           <button
             onClick={() => setActiveDay(1)}
@@ -458,7 +458,7 @@ export const SessionBoard: React.FC = () => {
                         <div className="flex-1 min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
                             <span className="text-xs font-mono font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
-                              Act {act.order}
+                              Activity {act.order}
                             </span>
 
                             {/* Current State Badge */}

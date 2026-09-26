@@ -238,8 +238,9 @@ export const ParticipantLanding: React.FC = () => {
                             key={act.activityId}
                             className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between text-xs text-slate-400 select-none"
                           >
-                            <span className="truncate pr-2">
-                              {act.order}. {act.title}
+                            <span className="truncate pr-2 flex items-center gap-1.5">
+                              <span className="font-mono font-bold text-slate-500">Activity {act.order}:</span>
+                              <span>{act.title}</span>
                             </span>
                             <span className="text-[11px] italic shrink-0">
                               Awaiting HoD
@@ -260,8 +261,11 @@ export const ParticipantLanding: React.FC = () => {
                         >
                           <div className="flex-1 pr-3">
                             <div className="flex items-center gap-1.5 mb-0.5">
+                              <span className="text-[10px] font-mono font-bold text-christ-navy bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200 shrink-0">
+                                Activity {act.order}
+                              </span>
                               <span className="font-bold text-slate-800">
-                                {act.order}. {act.title}
+                                {act.title}
                               </span>
                               {act.derived && (
                                 <span className="text-[9px] bg-amber-100 text-amber-900 px-1.5 py-0.2 rounded font-semibold">

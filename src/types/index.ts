@@ -74,8 +74,7 @@ export type WidgetType =
   | 'poll'
   | 'fixed_grid'
   | 'crm_matrix'
-  | 'working_doc'
-  | 'ladder_game';
+  | 'working_doc';
 
 export interface ReflectionConfig {
   id: string;
