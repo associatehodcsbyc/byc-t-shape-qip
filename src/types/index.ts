@@ -292,3 +292,27 @@ export interface AppConfig {
   groupLabels: string[];
   updatedAt?: any;
 }
+
+export interface ItemStat {
+  mean: number;
+  sd: number;
+  dist: number[]; // [count1, count2, count3, count4, count5]
+}
+
+export interface SectionStat {
+  mean: number;
+  sd: number;
+}
+
+export interface ActivitySummary {
+  department: string;
+  activityId: string;
+  n: number;
+  itemStats?: Record<string, ItemStat>;
+  sectionStats?: Record<string, SectionStat>;
+  totalStats?: { mean: number; sd: number };
+  bandCounts?: Record<string, number>;
+  comments?: string[];
+  suppressed: boolean;
+  updatedAt: any;
+}

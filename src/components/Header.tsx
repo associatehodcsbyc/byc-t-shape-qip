@@ -68,15 +68,29 @@ export const Header: React.FC = () => {
                   >
                     Session Board
                   </a>
+                  <a
+                    href="/analytics"
+                    className="px-2.5 py-1 rounded bg-christ-gold/20 hover:bg-christ-gold/30 text-christ-gold transition border border-christ-gold/30"
+                  >
+                    Analytics & Reports
+                  </a>
                 </>
               )}
               {rosterUser.role === 'hod' && (
-                <a
-                  href="/hod"
-                  className="px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-white transition"
-                >
-                  HoD Console
-                </a>
+                <>
+                  <a
+                    href="/hod"
+                    className="px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-white transition"
+                  >
+                    HoD Console
+                  </a>
+                  <a
+                    href="/analytics"
+                    className="px-2.5 py-1 rounded bg-christ-gold/20 hover:bg-christ-gold/30 text-christ-gold transition border border-christ-gold/30"
+                  >
+                    Analytics & Reports
+                  </a>
+                </>
               )}
               {rosterUser.role === 'participant' && (
                 <a

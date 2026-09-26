@@ -255,6 +255,15 @@ export const SessionBoard: React.FC = () => {
             Control which activities are Enabled, Locked, or Disabled for faculty participants. Open the Live
             Submission Tracker or launch Projector Mode during sessions.
           </p>
+          <div className="mt-3">
+            <Link
+              to="/analytics"
+              id="sessionboard-goto-analytics"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition shadow-sm"
+            >
+              📊 View Analytics & Department Reports
+            </Link>
+          </div>
         </div>
 
         {/* Department Selector / Badge */}
