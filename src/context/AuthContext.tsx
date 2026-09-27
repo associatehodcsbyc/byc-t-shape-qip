@@ -12,6 +12,9 @@ interface AuthContextType {
   clearError: () => void;
   isParticipant: boolean;
   isHoD: boolean;
+  isCoordinator: boolean;
+  isHoDStrict: boolean;
+  isHoDOrCoordinator: boolean;
   isAdmin: boolean;
   isAppAdmin: boolean;
   isDeanOrLeadership: boolean;
@@ -88,10 +91,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const isParticipant = rosterUser?.role === 'participant';
-  const isHoD = rosterUser?.role === 'hod';
+  const isCoordinator = rosterUser?.role === 'coordinator';
+  const isHoDStrict = rosterUser?.role === 'hod';
+  // QIP Coordinator has all the privileges of the HoD of the department:
+  const isHoD = rosterUser?.role === 'hod' || isCoordinator;
+  const isHoDOrCoordinator = isHoD;
   const isAdmin = rosterUser?.role === 'admin';
-  const isAppAdmin = isAdmin && rosterUser?.adminType === 'app_admin';
-  const isDeanOrLeadership = isAdmin && rosterUser?.adminType !== 'app_admin';
+  const normAdminType = rosterUser?.adminType?.toLowerCase().replace(/-/g, '_');
+  const isAppAdmin = isAdmin && normAdminType === 'app_admin';
+  const isDeanOrLeadership = isAdmin && normAdminType !== 'app_admin';
 
   return (
     <AuthContext.Provider
@@ -103,6 +111,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         clearError,
         isParticipant,
         isHoD,
+        isCoordinator,
+        isHoDStrict,
+        isHoDOrCoordinator,
         isAdmin,
         isAppAdmin,
         isDeanOrLeadership,

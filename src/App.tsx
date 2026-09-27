@@ -52,7 +52,7 @@ function App() {
           <Route
             path="/hod"
             element={
-              <ProtectedRoute allowedRoles={['hod', 'admin']}>
+              <ProtectedRoute allowedRoles={['hod', 'coordinator', 'admin']}>
                 <HoDLanding />
               </ProtectedRoute>
             }
@@ -70,7 +70,7 @@ function App() {
           <Route
             path="/activity/:activityId"
             element={
-              <ProtectedRoute allowedRoles={['participant', 'hod', 'admin']}>
+              <ProtectedRoute allowedRoles={['participant', 'hod', 'coordinator', 'admin']}>
                 <ActivityRunnerPage />
               </ProtectedRoute>
             }
@@ -79,7 +79,7 @@ function App() {
           <Route
             path="/analytics"
             element={
-              <ProtectedRoute allowedRoles={['hod', 'admin']}>
+              <ProtectedRoute allowedRoles={['hod', 'coordinator', 'admin']}>
                 <AnalyticsPage />
               </ProtectedRoute>
             }

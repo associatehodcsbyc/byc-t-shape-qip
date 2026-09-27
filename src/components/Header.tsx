@@ -21,6 +21,9 @@ export const Header: React.FC = () => {
     if (rosterUser.role === 'hod') {
       return <span className="bg-purple-100 text-purple-800 text-xs font-semibold px-2.5 py-0.5 rounded border border-purple-200">HoD</span>;
     }
+    if (rosterUser.role === 'coordinator') {
+      return <span className="bg-teal-100 text-teal-800 text-xs font-semibold px-2.5 py-0.5 rounded border border-teal-200">QIP Coordinator</span>;
+    }
     if (isAppAdmin) {
       return <span className="bg-amber-100 text-amber-900 text-xs font-semibold px-2.5 py-0.5 rounded border border-amber-300">App Admin</span>;
     }
@@ -76,13 +79,13 @@ export const Header: React.FC = () => {
                   </a>
                 </>
               )}
-              {rosterUser.role === 'hod' && (
+              {(rosterUser.role === 'hod' || rosterUser.role === 'coordinator') && (
                 <>
                   <a
                     href="/hod"
                     className="px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-white transition"
                   >
-                    HoD Console
+                    {rosterUser.role === 'coordinator' ? 'Coordinator Console' : 'HoD Console'}
                   </a>
                   <a
                     href="/analytics"

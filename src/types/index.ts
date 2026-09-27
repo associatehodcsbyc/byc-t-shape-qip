@@ -1,4 +1,4 @@
-export type Role = 'participant' | 'hod' | 'admin';
+export type Role = 'participant' | 'hod' | 'coordinator' | 'admin';
 
 export type AdminType = 'app_admin' | 'dean' | 'associate_dean' | 'hrdc';
 

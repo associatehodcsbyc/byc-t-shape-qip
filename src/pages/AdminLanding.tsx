@@ -7,6 +7,7 @@ import { Header } from '../components/Header';
 import { RosterUpload } from '../components/RosterUpload';
 import { ContentImport } from '../components/ContentImport';
 import { SessionBoard } from '../components/hod/SessionBoard';
+import { SingleEntryModal } from '../components/admin/SingleEntryModal';
 import { RosterUser, Department } from '../types';
 
 export const AdminLanding: React.FC = () => {
@@ -20,6 +21,16 @@ export const AdminLanding: React.FC = () => {
   const [selectedDept, setSelectedDept] = useState<string>('all');
   const [selectedRole, setSelectedRole] = useState<string>('all');
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+
+  const [isSingleEntryModalOpen, setIsSingleEntryModalOpen] = useState(false);
+  const [singleEntryInitialTab, setSingleEntryInitialTab] = useState<'department' | 'faculty'>('faculty');
+
+  const handleSingleEntrySuccess = (_type: 'department' | 'faculty', message: string) => {
+    setIsSingleEntryModalOpen(false);
+    setStatusMessage(message);
+    fetchRosterAndDepartments();
+    setTimeout(() => setStatusMessage(null), 5000);
+  };
 
   const fetchRosterAndDepartments = async () => {
     setLoading(true);
@@ -226,6 +237,45 @@ export const AdminLanding: React.FC = () => {
           </div>
         )}
 
+        {/* Direct Single-Entry Action Bar for App Admin */}
+        {isAppAdmin && activeAdminTab === 'roster' && (
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-gradient-to-r from-blue-50/70 via-indigo-50/40 to-slate-50 rounded-xl shadow-xs border border-blue-200/80 px-5 py-3.5 mb-6 gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-christ-navy uppercase tracking-wider">Quick Actions</span>
+                <span className="bg-blue-100 text-blue-900 text-[10px] font-extrabold px-1.5 py-0.5 rounded">Single Entry</span>
+              </div>
+              <p className="text-xs text-slate-600 mt-0.5">
+                Insert individual department or faculty member directly into backend collections
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                id="quick-add-faculty-btn"
+                onClick={() => {
+                  setSingleEntryInitialTab('faculty');
+                  setIsSingleEntryModalOpen(true);
+                }}
+                className="px-3.5 py-2 text-xs font-bold text-white bg-christ-navy hover:bg-slate-800 rounded-lg shadow-xs transition flex items-center gap-1.5"
+              >
+                <span>👤</span> + Add Single Faculty
+              </button>
+              <button
+                type="button"
+                id="quick-add-dept-btn"
+                onClick={() => {
+                  setSingleEntryInitialTab('department');
+                  setIsSingleEntryModalOpen(true);
+                }}
+                className="px-3.5 py-2 text-xs font-bold text-slate-700 bg-white hover:bg-slate-100 rounded-lg border border-slate-300 transition shadow-xs flex items-center gap-1.5"
+              >
+                <span>🏛️</span> + Add Single Department
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Roster Upload Component (App Admin Only) */}
         {isAppAdmin && activeAdminTab === 'roster' && (
           <RosterUpload
@@ -250,6 +300,19 @@ export const AdminLanding: React.FC = () => {
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
+              {isAppAdmin && (
+                <button
+                  type="button"
+                  id="roster-header-add-faculty-btn"
+                  onClick={() => {
+                    setSingleEntryInitialTab('faculty');
+                    setIsSingleEntryModalOpen(true);
+                  }}
+                  className="px-3 py-2 text-xs font-semibold text-white bg-christ-navy hover:bg-slate-800 rounded-lg shadow-sm transition flex items-center gap-1.5"
+                >
+                  <span>👤</span> + Add Faculty
+                </button>
+              )}
               <button
                 onClick={handleExportRoster}
                 id="export-roster-btn"
@@ -299,6 +362,7 @@ export const AdminLanding: React.FC = () => {
               <option value="all">All Roles</option>
               <option value="participant">Participant</option>
               <option value="hod">HoD</option>
+              <option value="coordinator">QIP Coordinator</option>
               <option value="admin">Admin</option>
             </select>
           </div>
@@ -345,9 +409,11 @@ export const AdminLanding: React.FC = () => {
                             ? 'bg-amber-100 text-amber-900'
                             : u.role === 'hod'
                             ? 'bg-purple-100 text-purple-900'
+                            : u.role === 'coordinator'
+                            ? 'bg-teal-100 text-teal-900'
                             : 'bg-blue-100 text-blue-900'
                         }`}>
-                          {u.role}
+                          {u.role === 'coordinator' ? 'QIP Coordinator' : u.role}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-slate-500">{u.adminType || '-'}</td>
@@ -375,8 +441,25 @@ export const AdminLanding: React.FC = () => {
 
         {/* Registered Departments Cards */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <h3 className="text-base font-bold text-slate-900 mb-2">Registered Departments ({departments.length})</h3>
-          <p className="text-xs text-slate-500 mb-4">All departments active for QIP 2026</p>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 mb-4 gap-2">
+            <div>
+              <h3 className="text-base font-bold text-slate-900">Registered Departments ({departments.length})</h3>
+              <p className="text-xs text-slate-500">All departments active for QIP 2026</p>
+            </div>
+            {isAppAdmin && (
+              <button
+                type="button"
+                id="dept-header-add-dept-btn"
+                onClick={() => {
+                  setSingleEntryInitialTab('department');
+                  setIsSingleEntryModalOpen(true);
+                }}
+                className="px-3 py-1.5 text-xs font-bold text-christ-navy bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 transition shadow-sm flex items-center gap-1.5 self-start sm:self-auto"
+              >
+                <span>🏛️</span> + Add Department
+              </button>
+            )}
+          </div>
           <div className="flex flex-wrap gap-2">
             {departments.map((d) => (
               <div key={d.id} className="bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg text-xs">
@@ -388,6 +471,17 @@ export const AdminLanding: React.FC = () => {
         </div>
           </>
         )}
+
+        {/* Single-Entry Department & Faculty Modal */}
+        <SingleEntryModal
+          isOpen={isSingleEntryModalOpen}
+          initialTab={singleEntryInitialTab}
+          departments={departments}
+          existingEmails={existingEmails}
+          existingDeptIds={existingDeptIds}
+          onClose={() => setIsSingleEntryModalOpen(false)}
+          onSuccess={handleSingleEntrySuccess}
+        />
       </main>
     </div>
   );

@@ -49,8 +49,8 @@ service cloud.firestore {
     }
 
     function isAdmin()      { return isActive() && me().role == 'admin'; }
-    function isAppAdmin()   { return isAdmin() && me().adminType == 'app_admin'; }
-    function isHoD()        { return isActive() && me().role == 'hod'; }
+    function isAppAdmin()   { return isAdmin() && (me().adminType == 'app_admin' || me().adminType == 'app-admin'); }
+    function isHoD()        { return isActive() && (me().role == 'hod' || me().role == 'coordinator' || me().role == 'qip_coordinator'); }
     function isHoDOf(dept)  { return isHoD() && me().department == dept; }
     function myDept()       { return me().department; }
 
@@ -85,10 +85,10 @@ service cloud.firestore {
              ['email', 'name', 'department', 'role', 'adminType', 'active',
               'uploadedBy', 'uploadedAt'])
         && request.resource.data.email.matches('^[a-z0-9._%+-]+@christuniversity[.]in$')
-        && request.resource.data.role in ['participant', 'hod', 'admin']
+        && request.resource.data.role in ['participant', 'hod', 'coordinator', 'qip_coordinator', 'admin']
         && request.resource.data.active is bool
         && (request.resource.data.role != 'admin'
-            || request.resource.data.adminType in ['app_admin', 'dean', 'associate_dean', 'hrdc']);
+            || request.resource.data.adminType in ['app_admin', 'app-admin', 'dean', 'associate_dean', 'hrdc']);
       allow delete: if isAppAdmin();
     }
 

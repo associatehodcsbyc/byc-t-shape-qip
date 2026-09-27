@@ -16,7 +16,7 @@ import {
 import { LiveTrackerModal } from './LiveTrackerModal';
 
 export const SessionBoard: React.FC = () => {
-  const { user, rosterUser, isHoD, isAppAdmin, isDeanOrLeadership } = useAuth();
+  const { user, rosterUser, isHoD, isCoordinator, isAppAdmin, isDeanOrLeadership } = useAuth();
 
   // Departments and active selection
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -231,14 +231,22 @@ export const SessionBoard: React.FC = () => {
           <div className="flex flex-wrap items-center gap-2">
             <span
               className={`px-2.5 py-0.5 rounded text-xs font-bold uppercase tracking-wider ${
-                isHoD
+                isCoordinator
+                  ? 'bg-teal-100 text-teal-900 border border-teal-200'
+                  : isHoD
                   ? 'bg-purple-100 text-purple-900 border border-purple-200'
                   : isAppAdmin
                   ? 'bg-amber-100 text-amber-900 border border-amber-300'
                   : 'bg-emerald-100 text-emerald-900 border border-emerald-300'
               }`}
             >
-              {isHoD ? 'HoD Control Console' : isAppAdmin ? 'App Admin Console' : 'Leadership View (Read-Only)'}
+              {isCoordinator
+                ? 'QIP Coordinator Console'
+                : isHoD
+                ? 'HoD Control Console'
+                : isAppAdmin
+                ? 'App Admin Console'
+                : 'Leadership View (Read-Only)'}
             </span>
 
             {isReadOnly && (
