@@ -186,7 +186,7 @@ export function extractAnonymousShuffledComments(responses: ActivityResponse[]):
 
 /**
  * Generates an anonymous department summary for a confidential activity.
- * SPEC §8A: If n < 5, suppressed: true with no statistics or comments.
+ * Anonymity threshold: If n < 3, suppressed: true with no statistics or comments.
  */
 export function generateConfidentialSummary(
   responses: ActivityResponse[],
@@ -195,7 +195,7 @@ export function generateConfidentialSummary(
 ): ActivitySummary {
   const n = responses.length;
 
-  if (n < 5) {
+  if (n < 3) {
     return {
       department,
       activityId: activity.activityId,

@@ -30,6 +30,20 @@ interface ActivityAnalyticsProps {
   departmentsList?: Department[];
 }
 
+export function sortActivities(list: Activity[]): Activity[] {
+  return [...list].sort((a, b) => {
+    const ma = a.sessionId.match(/^d(\d+)s(\d+)/i);
+    const mb = b.sessionId.match(/^d(\d+)s(\d+)/i);
+    const dayA = ma ? parseInt(ma[1], 10) : 0;
+    const dayB = mb ? parseInt(mb[1], 10) : 0;
+    if (dayA !== dayB) return dayA - dayB;
+    const sessA = ma ? parseInt(ma[2], 10) : 0;
+    const sessB = mb ? parseInt(mb[2], 10) : 0;
+    if (sessA !== sessB) return sessA - sessB;
+    return (a.order || 0) - (b.order || 0);
+  });
+}
+
 export const ActivityAnalytics: React.FC<ActivityAnalyticsProps> = ({
   initialActivityId,
   activitiesList = [],
@@ -37,7 +51,9 @@ export const ActivityAnalytics: React.FC<ActivityAnalyticsProps> = ({
 }) => {
   const { rosterUser, isHoD, isAppAdmin } = useAuth();
 
-  const [activities, setActivities] = useState<Activity[]>(activitiesList);
+  const [activities, setActivities] = useState<Activity[]>(() =>
+    activitiesList.length > 0 ? sortActivities(activitiesList) : []
+  );
   const [departments, setDepartments] = useState<Department[]>(departmentsList);
   const [selectedActId, setSelectedActId] = useState<string>(
     initialActivityId || activitiesList[0]?.activityId || 'd1s1_a1_four_pillars'
@@ -65,16 +81,18 @@ export const ActivityAnalytics: React.FC<ActivityAnalyticsProps> = ({
           if (!aSnap.empty) {
             const list: Activity[] = [];
             aSnap.forEach((d) => list.push(d.data() as Activity));
-            list.sort((a, b) => a.order - b.order);
-            setActivities(list);
-            if (!initialActivityId && list[0]) {
-              setSelectedActId(list[0].activityId);
+            const sorted = sortActivities(list);
+            setActivities(sorted);
+            if (!initialActivityId && sorted[0]) {
+              setSelectedActId(sorted[0].activityId);
             }
           } else {
-            setActivities(defaultActivities.activities as Activity[]);
+            const sorted = sortActivities(defaultActivities.activities as Activity[]);
+            setActivities(sorted);
           }
         } catch {
-          setActivities(defaultActivities.activities as Activity[]);
+          const sorted = sortActivities(defaultActivities.activities as Activity[]);
+          setActivities(sorted);
         }
       }
 
@@ -105,9 +123,13 @@ export const ActivityAnalytics: React.FC<ActivityAnalyticsProps> = ({
     }
   }, [isHoD, rosterUser?.department]);
 
+  const sortedActivities = useMemo(() => {
+    return sortActivities(activities);
+  }, [activities]);
+
   const currentActivity = useMemo(() => {
-    return activities.find((a) => a.activityId === selectedActId) || activities[0];
-  }, [activities, selectedActId]);
+    return sortedActivities.find((a) => a.activityId === selectedActId) || sortedActivities[0];
+  }, [sortedActivities, selectedActId]);
 
   const isConfidential = currentActivity?.confidential === true;
 
@@ -166,7 +188,7 @@ export const ActivityAnalytics: React.FC<ActivityAnalyticsProps> = ({
             department: 'all',
             activityId: currentActivity.activityId,
             n: combinedN,
-            suppressed: combinedN < 5,
+            suppressed: combinedN < 3,
             updatedAt: null,
           });
         }
@@ -328,7 +350,9 @@ export const ActivityAnalytics: React.FC<ActivityAnalyticsProps> = ({
             )}
           </div>
           <h2 className="text-2xl font-black text-slate-900 mt-2 tracking-tight">
-            {currentActivity ? `Activity ${currentActivity.order}: ${currentActivity.title}` : 'Activity Analysis'}
+            {currentActivity
+              ? `${currentActivity.sessionId.toUpperCase()}A${currentActivity.order}-${currentActivity.title}`
+              : 'Activity Analysis'}
           </h2>
           <p className="text-xs text-slate-500 mt-1">
             Raw answers are dynamically recomputed on demand. Showing responses for{' '}
@@ -405,11 +429,14 @@ export const ActivityAnalytics: React.FC<ActivityAnalyticsProps> = ({
             id="analytics-activity-selector"
             className="w-full text-xs font-semibold bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
-            {activities.map((act) => (
-              <option key={act.activityId} value={act.activityId}>
-                Act {act.order}: {act.title} ({act.widgetType})
-              </option>
-            ))}
+            {sortedActivities.map((act) => {
+              const prefix = `${act.sessionId.toUpperCase()}A${act.order}`;
+              return (
+                <option key={act.activityId} value={act.activityId}>
+                  {prefix}-{act.title}
+                </option>
+              );
+            })}
           </select>
         </div>
 
@@ -500,10 +527,10 @@ export const ActivityAnalytics: React.FC<ActivityAnalyticsProps> = ({
           </div>
           <h3 className="text-lg font-bold text-amber-900">Department Summary Suppressed</h3>
           <p className="text-sm text-amber-800 max-w-lg mx-auto">
-            Summary appears when at least 5 colleagues have responded.
+            Summary appears when at least 3 colleagues have responded.
           </p>
           <p className="text-xs text-amber-700 font-mono">
-            Currently submitted: {summary.n} / 5 minimum required responses.
+            Currently submitted: {summary.n} / 3 minimum required responses.
           </p>
         </div>
       )}

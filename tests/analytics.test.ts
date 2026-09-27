@@ -45,13 +45,13 @@ describe('Phase 5 — Analytics & Aggregation Engine Unit Tests', () => {
     });
   });
 
-  // 2. The N < 5 Suppression Rule (SPEC §8A)
-  describe('Confidential Summary N < 5 Suppression Rule (SPEC §8A)', () => {
+  // 2. The N < 3 Suppression Rule
+  describe('Confidential Summary N < 3 Suppression Rule', () => {
     const tlActivity = seedActivities.find(
       (a) => a.activityId === 'd1s1_a2_tl_questionnaire'
     )!;
 
-    it('suppresses statistics and comments when n < 5', () => {
+    it('suppresses statistics and comments when n < 3', () => {
       const responses: ActivityResponse[] = [
         {
           activityId: tlActivity.activityId,
@@ -79,38 +79,12 @@ describe('Phase 5 — Analytics & Aggregation Engine Unit Tests', () => {
           createdAt: null,
           updatedAt: null,
         },
-        {
-          activityId: tlActivity.activityId,
-          sessionId: tlActivity.sessionId,
-          department: 'computer-science',
-          email: 'p3@christuniversity.in',
-          uid: 'u3',
-          name: 'P3',
-          answers: { q1: 3, q2: 2, reflections: { r1: 'Confidential feedback 3' } },
-          status: 'submitted',
-          confidential: true,
-          createdAt: null,
-          updatedAt: null,
-        },
-        {
-          activityId: tlActivity.activityId,
-          sessionId: tlActivity.sessionId,
-          department: 'computer-science',
-          email: 'p4@christuniversity.in',
-          uid: 'u4',
-          name: 'P4',
-          answers: { q1: 5, q2: 5, reflections: { r1: 'Confidential feedback 4' } },
-          status: 'submitted',
-          confidential: true,
-          createdAt: null,
-          updatedAt: null,
-        },
       ];
 
-      expect(responses.length).toBe(4);
+      expect(responses.length).toBe(2);
       const summary = generateConfidentialSummary(responses, tlActivity, 'computer-science');
 
-      expect(summary.n).toBe(4);
+      expect(summary.n).toBe(2);
       expect(summary.suppressed).toBe(true);
       expect(summary.itemStats).toBeUndefined();
       expect(summary.sectionStats).toBeUndefined();
@@ -118,9 +92,9 @@ describe('Phase 5 — Analytics & Aggregation Engine Unit Tests', () => {
       expect(summary.comments).toBeUndefined();
     });
 
-    it('unsuppresses and computes complete statistics & shuffled comments when n >= 5', () => {
+    it('unsuppresses and computes complete statistics & shuffled comments when n >= 3', () => {
       const responses: ActivityResponse[] = [];
-      for (let i = 1; i <= 5; i++) {
+      for (let i = 1; i <= 3; i++) {
         responses.push({
           activityId: tlActivity.activityId,
           sessionId: tlActivity.sessionId,
@@ -140,17 +114,17 @@ describe('Phase 5 — Analytics & Aggregation Engine Unit Tests', () => {
         });
       }
 
-      expect(responses.length).toBe(5);
+      expect(responses.length).toBe(3);
       const summary = generateConfidentialSummary(responses, tlActivity, 'computer-science');
 
-      expect(summary.n).toBe(5);
+      expect(summary.n).toBe(3);
       expect(summary.suppressed).toBe(false);
       expect(summary.itemStats).toBeDefined();
       expect(summary.sectionStats).toBeDefined();
       expect(summary.totalStats).toBeDefined();
       expect(summary.bandCounts).toBeDefined();
       expect(summary.comments).toBeDefined();
-      expect(summary.comments?.length).toBe(5);
+      expect(summary.comments?.length).toBe(3);
       // Verify names are not included in comments
       summary.comments?.forEach((c) => {
         expect(c).not.toContain('P1');

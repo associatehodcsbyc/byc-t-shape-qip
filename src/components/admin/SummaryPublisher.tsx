@@ -118,7 +118,7 @@ export const SummaryPublisher: React.FC = () => {
       });
 
       const note = summary.suppressed
-        ? `Published as suppressed (N=${summary.n} < 5).`
+        ? `Published as suppressed (N=${summary.n} < 3).`
         : `Published statistics & anonymous comments for N=${summary.n} responses.`;
       notify(`Summary updated for ${activity.title} (${deptId}). ${note}`, 'success');
     } catch (err: any) {
@@ -200,7 +200,7 @@ export const SummaryPublisher: React.FC = () => {
             Summary Publisher for Confidential Activities
           </h2>
           <p className="text-sm text-purple-200 mt-1 max-w-2xl">
-            Recomputes anonymous department statistics (means, SDs, score distributions, and shuffled comments) for the 5 confidential rating activities. If $N &lt; 5$, results are automatically suppressed to protect faculty anonymity.
+            Recomputes anonymous department statistics (means, SDs, score distributions, and shuffled comments) for the 5 confidential rating activities. If $N &lt; 3$, results are automatically suppressed to protect faculty anonymity.
           </p>
         </div>
 
@@ -321,7 +321,7 @@ export const SummaryPublisher: React.FC = () => {
                             <span className="text-slate-400 italic">Not published yet</span>
                           ) : summary.suppressed ? (
                             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-200">
-                              🔒 Suppressed (N &lt; 5)
+                              🔒 Suppressed (N &lt; 3)
                             </span>
                           ) : (
                             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">

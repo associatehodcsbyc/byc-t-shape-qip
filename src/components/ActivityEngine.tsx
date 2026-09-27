@@ -33,9 +33,16 @@ interface ActivityEngineProps {
   onBack?: () => void;
 }
 
-const DEFAULT_GROUP_LABELS = Array.from({ length: 20 }, (_, i) => `Group ${i + 1}`);
+const DEFAULT_DEPARTMENTS: { id: string; name: string }[] = [
+  { id: 'computer-science', name: 'Computer Science' },
+  { id: 'commerce', name: 'Commerce' },
+  { id: 'management', name: 'Management' },
+  { id: 'sciences', name: 'Sciences' },
+  { id: 'economics-byc', name: 'Economics-BYC' },
+];
+
 const DEFAULT_GROUP_PROTOCOL =
-  'GROUP ACTIVITY — 1) Sit with your group as directed by the facilitator. 2) Select your group number from the list; every member of the group must select the SAME number. 3) Discuss and agree. 4) Each member records the answers in their OWN response and submits. The HoD sees the responses grouped by group number.';
+  'GROUP ACTIVITY — 1) Sit with your group as directed by the facilitator. 2) Select your department / group from the list; every member of the group must select the SAME group. 3) Discuss and agree. 4) Each member records the answers in their OWN response and submits. The HoD sees the responses grouped by group number. Where the instructions say "your own course", record your own course, not the group\'s.';
 
 export const ActivityEngine: React.FC<ActivityEngineProps> = ({
   activity,
@@ -63,7 +70,40 @@ export const ActivityEngine: React.FC<ActivityEngineProps> = ({
 
   // App Config (Group Protocol & Group Labels)
   const [groupProtocol, setGroupProtocol] = useState<string>(DEFAULT_GROUP_PROTOCOL);
-  const [groupLabels, setGroupLabels] = useState<string[]>(DEFAULT_GROUP_LABELS);
+  const [departmentsList, setDepartmentsList] = useState<{ id: string; name: string }[]>(DEFAULT_DEPARTMENTS);
+
+  // Determine user's department object
+  const userDeptObj = React.useMemo(() => {
+    return (
+      departmentsList.find((d) => d.id === userDept) ||
+      (userDept
+        ? {
+            id: userDept,
+            name: userDept
+              .replace(/-/g, ' ')
+              .replace(/\b\w/g, (c) => c.toUpperCase()),
+          }
+        : null)
+    );
+  }, [departmentsList, userDept]);
+
+  // Programme Name input display logic
+  const showProgrammeInput =
+    activity.activityId === 'd1s1_a3_ideal_graduate' ||
+    activity.groupMode === 'group' ||
+    activity.activityId.includes('ideal_graduate') ||
+    activity.activityId.includes('draw_our_t') ||
+    activity.activityId.includes('threshold_concepts') ||
+    activity.activityId.includes('three_concepts');
+
+  const isKnownGroup = (val: string) => {
+    if (!val) return true;
+    if (userDeptObj && val === userDeptObj.name) return true;
+    if (userDeptObj && [1, 2, 3, 4, 5, 6].some((n) => val === `${userDeptObj.name} - Group ${n}`.slice(0, 40))) return true;
+    if (departmentsList.some((d) => val === d.name || [1, 2, 3, 4, 5, 6].some((n) => val === `${d.name} - Group ${n}`.slice(0, 40)))) return true;
+    if ([1, 2, 3, 4, 5, 6].some((n) => val === `Cross-Department - Group ${n}`)) return true;
+    return false;
+  };
 
   // Working Document (for Carry-Forward)
   const [workingDocFields, setWorkingDocFields] = useState<Record<string, any>>({});
@@ -86,7 +126,7 @@ export const ActivityEngine: React.FC<ActivityEngineProps> = ({
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const existingDocExists = useRef<boolean>(false);
 
-  // 1. Fetch config/app, existing response, workingDoc, and pre-selected groupLabel
+  // 1. Fetch config/app, departments, existing response, workingDoc, and pre-selected groupLabel
   useEffect(() => {
     if (!emailLower || !activity.activityId) return;
 
@@ -100,10 +140,25 @@ export const ActivityEngine: React.FC<ActivityEngineProps> = ({
           if (cfgSnap.exists() && mounted) {
             const data = cfgSnap.data();
             if (data.groupProtocol) setGroupProtocol(data.groupProtocol);
-            if (Array.isArray(data.groupLabels)) setGroupLabels(data.groupLabels);
           }
         } catch {
           // Graceful fallback to default seed group protocol
+        }
+
+        // Load active departments for group selector
+        try {
+          const dSnap = await getDocs(collection(db, 'departments'));
+          if (!dSnap.empty && mounted) {
+            const list: { id: string; name: string }[] = [];
+            dSnap.forEach((d) => {
+              const data = d.data();
+              list.push({ id: d.id, name: data.name || d.id });
+            });
+            list.sort((a, b) => a.name.localeCompare(b.name));
+            setDepartmentsList(list);
+          }
+        } catch {
+          // Graceful fallback
         }
 
         // Load existing response
@@ -285,7 +340,7 @@ export const ActivityEngine: React.FC<ActivityEngineProps> = ({
 
     // Validate group choice in group mode
     if (activity.groupMode === 'group' && !groupLabel) {
-      setErrorMessage('Please select your Group before submitting.');
+      setErrorMessage('Please select your Department / Group before submitting.');
       return;
     }
 
@@ -646,26 +701,63 @@ export const ActivityEngine: React.FC<ActivityEngineProps> = ({
 
           {/* Group Dropdown Selector (if groupMode == 'group') */}
           {activity.groupMode === 'group' && (
-            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 shrink-0 w-full sm:w-56">
+            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 shrink-0 w-full sm:w-64">
               <label
                 htmlFor="group-select"
                 className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1"
               >
-                Select Your Group *
+                Select Department / Group *
               </label>
               <select
                 id="group-select"
                 disabled={isReadOnly}
                 value={groupLabel}
-                onChange={(e) => setGroupLabel(e.target.value)}
+                onChange={(e) => setGroupLabel(e.target.value.slice(0, 40))}
                 className="w-full text-xs font-semibold rounded-lg border border-slate-300 p-2 bg-white text-slate-900 focus:ring-2 focus:ring-christ-navy disabled:bg-slate-100"
               >
-                <option value="">-- Choose Group --</option>
-                {groupLabels.map((g) => (
-                  <option key={g} value={g}>
-                    {g}
-                  </option>
-                ))}
+                <option value="">-- Choose Department / Group --</option>
+                {/* User's Department First */}
+                {userDeptObj && (
+                  <optgroup label={`Your Department (${userDeptObj.name})`}>
+                    <option value={userDeptObj.name.slice(0, 40)}>{userDeptObj.name} (General)</option>
+                    {[1, 2, 3, 4, 5, 6].map((num) => {
+                      const val = `${userDeptObj.name} - Group ${num}`.slice(0, 40);
+                      return (
+                        <option key={`my-dept-${num}`} value={val}>
+                          {userDeptObj.name} - Group {num}
+                        </option>
+                      );
+                    })}
+                  </optgroup>
+                )}
+                {/* Other Registered Departments */}
+                {departmentsList
+                  .filter((d) => !userDeptObj || d.id !== userDeptObj.id)
+                  .map((dept) => (
+                    <optgroup key={dept.id} label={dept.name}>
+                      <option value={dept.name.slice(0, 40)}>{dept.name}</option>
+                      {[1, 2, 3, 4, 5, 6].map((num) => {
+                        const val = `${dept.name} - Group ${num}`.slice(0, 40);
+                        return (
+                          <option key={`${dept.id}-${num}`} value={val}>
+                            {dept.name} - Group {num}
+                          </option>
+                        );
+                      })}
+                    </optgroup>
+                  ))}
+                {/* Cross-Department / Interdisciplinary Groups */}
+                <optgroup label="Cross-Department / Mixed Programme Groups">
+                  {[1, 2, 3, 4, 5, 6].map((num) => (
+                    <option key={`mixed-${num}`} value={`Cross-Department - Group ${num}`}>
+                      Cross-Department - Group {num}
+                    </option>
+                  ))}
+                </optgroup>
+                {/* Preserved custom or existing groupLabel */}
+                {groupLabel && !isKnownGroup(groupLabel) && (
+                  <option value={groupLabel}>{groupLabel} (Current)</option>
+                )}
               </select>
             </div>
           )}
@@ -764,7 +856,35 @@ export const ActivityEngine: React.FC<ActivityEngineProps> = ({
       )}
 
       {/* Active Widget Body */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-7">
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-7 space-y-6">
+        {showProgrammeInput && (
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-sm">
+            <label
+              htmlFor="programme-name-input"
+              className="block text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5"
+            >
+              <span>🎓</span> Programme Name <span className="text-red-500">*</span>
+              <span className="text-slate-500 font-normal lowercase tracking-normal text-[11px]">
+                (e.g., BSc Computer Science, BCA, MCA, BBA, MA English, MSc Economics)
+              </span>
+            </label>
+            <input
+              id="programme-name-input"
+              type="text"
+              disabled={isReadOnly}
+              value={answers.programmeName || ''}
+              onChange={(e) =>
+                setAnswers((prev) => ({
+                  ...prev,
+                  programmeName: e.target.value,
+                }))
+              }
+              placeholder="Enter your programme name..."
+              className="w-full text-sm font-semibold rounded-lg border border-slate-300 p-2.5 bg-white text-slate-900 placeholder:text-slate-400 placeholder:font-normal focus:ring-2 focus:ring-christ-navy focus:border-christ-navy disabled:bg-slate-100 shadow-inner"
+            />
+          </div>
+        )}
+
         {renderWidget()}
       </div>
 

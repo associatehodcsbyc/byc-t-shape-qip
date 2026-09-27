@@ -350,7 +350,7 @@
       "sessionId": "d1s1",
       "order": 3,
       "title": "Five Characteristics of an Ideal Graduate",
-      "instructions": "The University's Academic Vision states that graduates must possess deep disciplinary expertise, conceptual clarity, research capability, ethical reasoning, interdisciplinary awareness, employability and lifelong learning skills. Identify five characteristics of an ideal graduate of YOUR programme.",
+      "instructions": "CHRIST University's Academic Vision states that graduates must possess deep disciplinary expertise, conceptual clarity, research capability, ethical reasoning, interdisciplinary awareness, employability and lifelong learning skills. Identify five characteristics of an ideal graduate of YOUR programme.",
       "widgetType": "table_entry",
       "config": {
         "columns": [
@@ -1663,7 +1663,7 @@
       "sessionId": "d1s4",
       "order": 6,
       "title": "Group Discussion - Across the Four Cases",
-      "instructions": "After the case presentations, discuss these questions across all four cases in your group. Suggested time: 15 min.",
+      "instructions": "After the case presentations, discuss these questions across all four cases in your group:\n• Case 1: The Shallow Curriculum\n• Case 2: Excellent Results but Poor Understanding\n• Case 3: Research-led Teaching in Practice\n• Case 4: Building a T-Shaped Graduate at CHRIST\n\nSuggested time: 15 min.",
       "widgetType": "free_text",
       "config": {
         "questions": [

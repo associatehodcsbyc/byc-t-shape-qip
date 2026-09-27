@@ -53,8 +53,8 @@ export function exportActivityToCsv(
         {
           Activity: activity.title,
           Department: departmentName,
-          Status: 'Suppressed (fewer than 5 responses submitted)',
-          Note: 'Per SPEC §8A, confidential ratings appear only when at least 5 faculty respond.',
+          Status: 'Suppressed (fewer than 3 responses submitted)',
+          Note: 'Confidential ratings appear only when at least 3 faculty respond.',
         },
       ]);
       downloadFile(new Blob([csv], { type: 'text/csv;charset=utf-8;' }), filename);
@@ -145,8 +145,8 @@ export function exportActivityToXlsx(
       const wsData = [
         ['Activity', activity.title],
         ['Department', departmentName],
-        ['Status', 'Suppressed (fewer than 5 responses submitted)'],
-        ['Note', 'Per SPEC §8A, confidential summaries require at least 5 submitted responses.'],
+        ['Status', 'Suppressed (fewer than 3 responses submitted)'],
+        ['Note', 'Confidential summaries require at least 3 submitted responses.'],
       ];
       const ws = XLSX.utils.aoa_to_sheet(wsData);
       XLSX.utils.book_append_sheet(wb, ws, 'Summary');
