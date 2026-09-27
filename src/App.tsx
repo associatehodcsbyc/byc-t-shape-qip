@@ -9,8 +9,19 @@ import { AdminLanding } from './pages/AdminLanding';
 import { ActivityRunnerPage } from './pages/ActivityRunnerPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 
+import { Footer } from './components/Footer';
+
+const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return (
+    <div className="min-h-screen flex flex-col justify-between bg-slate-50">
+      <div className="flex-1 flex flex-col">{children}</div>
+      <Footer />
+    </div>
+  );
+};
+
 const RootRedirect: React.FC = () => {
-  const { user, rosterUser, loading, isParticipant, isHoD, isAdmin } = useAuth();
+  const { user, rosterUser, loading, isParticipant, isHoD, isCoordinator, isAdmin } = useAuth();
 
   if (loading) {
     return (
@@ -26,7 +37,7 @@ const RootRedirect: React.FC = () => {
   }
 
   if (isParticipant) return <Navigate to="/participant" replace />;
-  if (isHoD) return <Navigate to="/hod" replace />;
+  if (isHoD || isCoordinator) return <Navigate to="/hod" replace />;
   if (isAdmin) return <Navigate to="/admin" replace />;
 
   return <Navigate to="/login" replace />;
@@ -36,36 +47,37 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          <Route path="/" element={<RootRedirect />} />
-          <Route path="/login" element={<LoginPage />} />
+        <AppLayout>
+          <Routes>
+            <Route path="/" element={<RootRedirect />} />
+            <Route path="/login" element={<LoginPage />} />
 
-          <Route
-            path="/participant"
-            element={
-              <ProtectedRoute allowedRoles={['participant']}>
-                <ParticipantLanding />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/participant"
+              element={
+                <ProtectedRoute allowedRoles={['participant']}>
+                  <ParticipantLanding />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/hod"
-            element={
-              <ProtectedRoute allowedRoles={['hod', 'coordinator', 'admin']}>
-                <HoDLanding />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/hod"
+              element={
+                <ProtectedRoute allowedRoles={['hod', 'coordinator', 'admin']}>
+                  <HoDLanding />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute allowedRoles={['admin']}>
-                <AdminLanding />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'hod', 'coordinator']}>
+                  <AdminLanding />
+                </ProtectedRoute>
+              }
+            />
 
           <Route
             path="/activity/:activityId"
@@ -85,8 +97,9 @@ function App() {
             }
           />
 
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </AppLayout>
       </AuthProvider>
     </BrowserRouter>
   );

@@ -38,9 +38,11 @@ export const Header: React.FC = () => {
     <header className="bg-christ-navy text-white shadow-md border-b-4 border-christ-gold">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col md:flex-row items-center justify-between gap-3">
         <div className="flex items-center gap-3 text-center md:text-left">
-          <div className="w-10 h-10 rounded-full bg-christ-gold flex items-center justify-center font-bold text-christ-navy text-xl shadow">
-            C
-          </div>
+          <img
+            src="/christ-logo.png"
+            alt="CHRIST University Logo"
+            className="w-10 h-10 object-contain drop-shadow shrink-0"
+          />
           <div>
             <div className="flex items-center gap-2 justify-center md:justify-start">
               <h1 className="text-xl font-bold tracking-tight">HRDC QIP — BYC</h1>

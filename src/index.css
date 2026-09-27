@@ -4,3 +4,10 @@
   --color-christ-navy: #1f3864;
   --color-christ-gold: #b8963e;
 }
+
+/* Hide footer in projector mode or fullscreen */
+body:has(#projector-mode-view) footer,
+:fullscreen footer {
+  display: none !important;
+}
+

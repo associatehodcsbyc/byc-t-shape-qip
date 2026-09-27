@@ -47,11 +47,15 @@ export const LoginPage: React.FC = () => {
   const activeError = authError || customError;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-christ-navy to-slate-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="flex-1 bg-gradient-to-br from-slate-900 via-christ-navy to-slate-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         {/* Crest */}
-        <div className="mx-auto w-16 h-16 rounded-full bg-christ-gold flex items-center justify-center font-serif text-3xl font-extrabold text-christ-navy shadow-lg border-2 border-white/20">
-          C
+        <div className="mx-auto w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center p-2 rounded-full bg-white/5 border border-christ-gold/40 shadow-xl backdrop-blur-sm">
+          <img
+            src="/christ-logo.png"
+            alt="CHRIST University Logo"
+            className="w-full h-full object-contain drop-shadow-md"
+          />
         </div>
         <h2 className="mt-4 text-2xl font-bold tracking-tight text-white">
           CHRIST (Deemed to be University)
@@ -60,8 +64,8 @@ export const LoginPage: React.FC = () => {
           Bangalore Yeshwanthpur Campus (BYC)
         </p>
         <div className="mt-4 inline-block bg-white/10 backdrop-blur-sm px-4 py-1.5 rounded-full border border-white/10">
-          <p className="text-xs font-medium text-gray-200">
-            Internal Quality Assurance Cell & HRDC
+          <p className="text-xs font-semibold tracking-wider text-gray-200">
+            HRDC
           </p>
         </div>
       </div>
