@@ -12,7 +12,6 @@ import {
 import {
   setActivityState,
   setSessionActivitiesState,
-  setSessionActivitiesForAllDepartments,
   subscribeToDepartmentActivityStates,
   subscribeToDepartmentProgress,
   getDepartmentParticipants,
@@ -184,40 +183,6 @@ export const SessionBoard: React.FC = () => {
     }
   };
 
-  // Handle institution-wide bulk toggle for ALL departments at once
-  const handleBulkSetAllDepartments = async (
-    session: Session,
-    sessionActivities: Activity[],
-    enabled: boolean,
-    locked: boolean
-  ) => {
-    if (isReadOnly) {
-      notify('Read-only: Only the QIP Coordinator can enable, lock, or disable activities.', 'error');
-      return;
-    }
-
-    const key = `session-all-${session.sessionId}`;
-    setActionLoading(key);
-    try {
-      const deptIds = departments.map((d) => d.id);
-      await setSessionActivitiesForAllDepartments({
-        session,
-        activities: sessionActivities,
-        enabled,
-        locked,
-        userEmail,
-        departmentIds: deptIds.length > 0 ? deptIds : undefined,
-      });
-
-      const label = locked ? 'Locked all' : 'Enabled all';
-      notify(`${label} activities for ALL DEPARTMENTS in ${session.title}.`, 'success');
-    } catch (err: any) {
-      console.error('Failed to bulk update session for all departments:', err);
-      notify(`Failed to update session: ${err.message}`, 'error');
-    } finally {
-      setActionLoading(null);
-    }
-  };
 
   // Group activities by sessionId
   const activitiesBySession = useMemo(() => {
@@ -444,34 +409,25 @@ export const SessionBoard: React.FC = () => {
                 {canManageGates ? (
                   <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
                     <button
-                      onClick={() => handleBulkSetAllDepartments(session, sessActivities, true, false)}
-                      disabled={isSessionBusy || sessActivities.length === 0}
-                      id={`enable-institution-${session.sessionId}`}
-                      className="px-3.5 py-1.5 text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 rounded-lg shadow-sm transition disabled:opacity-50 flex items-center gap-1.5"
-                      title="Enable all activities in this session for ALL departments across the institution"
-                    >
-                      <span>🌐</span>
-                      <span>{isSessionBusy ? 'Updating...' : 'Enable for All Departments'}</span>
-                    </button>
-
-                    <button
                       onClick={() => handleBulkSetSession(session, sessActivities, true, false)}
                       disabled={isSessionBusy || sessActivities.length === 0}
                       id={`enable-all-${session.sessionId}`}
-                      className="px-3 py-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-lg shadow-sm transition disabled:opacity-50"
+                      className="px-3.5 py-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-lg shadow-sm transition disabled:opacity-50 flex items-center gap-1.5"
                       title={`Enable all activities in this session for ${selectedDept === 'all' ? 'All Departments' : currentDeptName}`}
                     >
-                      {selectedDept === 'all' ? 'Enable (Current)' : `Enable (${currentDeptName})`}
+                      <span>🔓</span>
+                      <span>{isSessionBusy ? 'Updating...' : selectedDept === 'all' ? 'Enable (Current)' : `Enable (${currentDeptName})`}</span>
                     </button>
 
                     <button
-                      onClick={() => handleBulkSetAllDepartments(session, sessActivities, true, true)}
+                      onClick={() => handleBulkSetSession(session, sessActivities, true, true)}
                       disabled={isSessionBusy || sessActivities.length === 0}
                       id={`lock-all-${session.sessionId}`}
-                      className="px-3 py-1.5 text-xs font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-300 rounded-lg shadow-sm transition disabled:opacity-50"
-                      title="Lock all activities in this session for ALL departments (freeze edits)"
+                      className="px-3.5 py-1.5 text-xs font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-300 rounded-lg shadow-sm transition disabled:opacity-50 flex items-center gap-1.5"
+                      title={`Lock all activities in this session for ${selectedDept === 'all' ? 'All Departments' : currentDeptName} (freeze edits)`}
                     >
-                      Lock All
+                      <span>🔒</span>
+                      <span>{isSessionBusy ? 'Updating...' : selectedDept === 'all' ? 'Lock All' : `Lock All (${currentDeptName})`}</span>
                     </button>
                   </div>
                 ) : (

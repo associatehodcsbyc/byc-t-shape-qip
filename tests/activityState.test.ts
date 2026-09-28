@@ -93,4 +93,50 @@ describe('Activity State & Live Tracker Unit Tests', () => {
     expect(getAuditAction(true, true)).toBe('LOCK_ACTIVITY');
     expect(getAuditAction(false, false)).toBe('DISABLE_ACTIVITY');
   });
+
+  it('guarantees department-specific activityState strictly overrides generic "all" gates', () => {
+    // Simulating the resolution logic in subscribeToDepartmentActivityStates
+    const resolveState = (
+      department: string,
+      records: Array<{ department: string; activityId: string; enabled: boolean; locked: boolean; updatedAt?: any }>
+    ) => {
+      const deptSpecificMap = new Map<string, any>();
+      const allFallbackMap = new Map<string, any>();
+
+      records.forEach((data) => {
+        if (data.department === 'all') {
+          allFallbackMap.set(data.activityId, data);
+        } else if (data.department === department) {
+          deptSpecificMap.set(data.activityId, data);
+        }
+      });
+
+      const finalMap = new Map<string, any>();
+      allFallbackMap.forEach((val, key) => finalMap.set(key, val));
+      deptSpecificMap.forEach((val, key) => finalMap.set(key, val));
+      return finalMap;
+    };
+
+    // Scenario: "all" gate previously locked activity 1 and enabled activity 2
+    // Department "computer-science" explicitly enables activity 1 and disables activity 2
+    const mockDbRecords = [
+      { department: 'all', activityId: 'act_1', enabled: true, locked: true },
+      { department: 'all', activityId: 'act_2', enabled: true, locked: false },
+      { department: 'computer-science', activityId: 'act_1', enabled: true, locked: false },
+      { department: 'computer-science', activityId: 'act_2', enabled: false, locked: false },
+      { department: 'all', activityId: 'act_3', enabled: true, locked: false }, // untoggled for CS
+    ];
+
+    const csStates = resolveState('computer-science', mockDbRecords);
+
+    // act_1 must be unlocked (department override wins over all)
+    expect(csStates.get('act_1').locked).toBe(false);
+    expect(csStates.get('act_1').enabled).toBe(true);
+
+    // act_2 must be disabled (department override wins over all)
+    expect(csStates.get('act_2').enabled).toBe(false);
+
+    // act_3 falls back to "all" since not specifically set for CS
+    expect(csStates.get('act_3').enabled).toBe(true);
+  });
 });

@@ -127,16 +127,33 @@ export const ParticipantLanding: React.FC = () => {
     setIsRefreshing(true);
     try {
       const snap = await getDocs(collection(db, 'activityState'));
-      const stateMap = new Map<string, ActivityState>();
+      const deptSpecificMap = new Map<string, ActivityState>();
+      const allFallbackMap = new Map<string, ActivityState>();
+
       snap.forEach((d) => {
         const data = d.data() as ActivityState;
-        if (isMatchingDepartment(data.department, userDept)) {
-          const existing = stateMap.get(data.activityId);
-          if (!existing || (!existing.enabled && data.enabled) || (!existing.locked && data.locked)) {
-            stateMap.set(data.activityId, data);
+        if (!data || !data.activityId) return;
+
+        if (data.department === 'all') {
+          allFallbackMap.set(data.activityId, data);
+        } else if (isMatchingDepartment(data.department, userDept)) {
+          const existing = deptSpecificMap.get(data.activityId);
+          if (!existing) {
+            deptSpecificMap.set(data.activityId, data);
+          } else {
+            const existingTime = (existing as any).updatedAt?.toMillis?.() || 0;
+            const newTime = (data as any).updatedAt?.toMillis?.() || 0;
+            if (newTime >= existingTime) {
+              deptSpecificMap.set(data.activityId, data);
+            }
           }
         }
       });
+
+      const stateMap = new Map<string, ActivityState>();
+      allFallbackMap.forEach((val, actId) => stateMap.set(actId, val));
+      deptSpecificMap.forEach((val, actId) => stateMap.set(actId, val));
+
       setActivityStates(stateMap);
     } catch (err) {
       console.error('Manual refresh error:', err);

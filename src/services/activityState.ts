@@ -46,15 +46,14 @@ export async function setActivityState({
   userEmail,
 }: SetActivityStateParams): Promise<void> {
   const normEmail = userEmail.toLowerCase().trim();
-  const stateDocId = `${department}__${activityId}`;
-  const stateRef = doc(db, 'activityState', stateDocId);
 
-  // 1. Write primary activity state
+  // 1. Write primary activity state & all variants atomically
   if (department === 'all') {
     const allDepts = ['all', 'computer-science', 'commerce', 'management', 'sciences', 'economics-byc'];
+    const batch = writeBatch(db);
     for (const d of allDepts) {
       const ref = doc(db, 'activityState', `${d}__${activityId}`);
-      await setDoc(ref, {
+      batch.set(ref, {
         department: d,
         activityId,
         sessionId,
@@ -64,8 +63,13 @@ export async function setActivityState({
         updatedAt: serverTimestamp(),
       });
     }
+    await batch.commit();
   } else {
-    await setDoc(stateRef, {
+    // Write target department
+    const batch = writeBatch(db);
+    const stateDocId = `${department}__${activityId}`;
+    const stateRef = doc(db, 'activityState', stateDocId);
+    batch.set(stateRef, {
       department,
       activityId,
       sessionId,
@@ -74,14 +78,12 @@ export async function setActivityState({
       updatedBy: normEmail,
       updatedAt: serverTimestamp(),
     });
-  }
 
-  // 2. Synchronize department variants (e.g., slug and display name) so all participants can access it
-  const variants = getDepartmentVariants(department).filter((v) => v !== department);
-  for (const altDept of variants) {
-    try {
+    // Also write department variants
+    const variants = getDepartmentVariants(department).filter((v) => v !== department);
+    for (const altDept of variants) {
       const altRef = doc(db, 'activityState', `${altDept}__${activityId}`);
-      await setDoc(altRef, {
+      batch.set(altRef, {
         department: altDept,
         activityId,
         sessionId,
@@ -90,31 +92,49 @@ export async function setActivityState({
         updatedBy: normEmail,
         updatedAt: serverTimestamp(),
       });
+    }
+
+    try {
+      await batch.commit();
     } catch {
-      // Best-effort: Ignored if rules prevent writing non-own department string for HoD
+      // Fallback: If batch commit fails (e.g., security rule restrict writing non-own variant for strict HoD),
+      // persist target department state directly.
+      await setDoc(stateRef, {
+        department,
+        activityId,
+        sessionId,
+        enabled,
+        locked,
+        updatedBy: normEmail,
+        updatedAt: serverTimestamp(),
+      });
     }
   }
 
-  // 3. Write audit log entry
-  const action = !enabled
-    ? 'DISABLE_ACTIVITY'
-    : locked
-    ? 'LOCK_ACTIVITY'
-    : 'ENABLE_ACTIVITY';
+  // 2. Write audit log entry (best effort, never blocks the gate state)
+  try {
+    const action = !enabled
+      ? 'DISABLE_ACTIVITY'
+      : locked
+      ? 'LOCK_ACTIVITY'
+      : 'ENABLE_ACTIVITY';
 
-  await addDoc(collection(db, 'auditLog'), {
-    actor: normEmail,
-    action,
-    target: stateDocId,
-    details: {
-      department,
-      activityId,
-      sessionId,
-      enabled,
-      locked,
-    },
-    at: serverTimestamp(),
-  });
+    await addDoc(collection(db, 'auditLog'), {
+      actor: normEmail,
+      action,
+      target: `${department}__${activityId}`,
+      details: {
+        department,
+        activityId,
+        sessionId,
+        enabled,
+        locked,
+      },
+      at: serverTimestamp(),
+    });
+  } catch (auditErr) {
+    console.warn('Audit log write error in setActivityState:', auditErr);
+  }
 }
 
 /**
@@ -321,17 +341,41 @@ export function subscribeToDepartmentActivityStates(
   const unsub = onSnapshot(
     collection(db, 'activityState'),
     (snapshot) => {
-      const stateMap = new Map<string, ActivityState>();
+      const deptSpecificMap = new Map<string, ActivityState>();
+      const allFallbackMap = new Map<string, ActivityState>();
+
       snapshot.forEach((d) => {
         const data = d.data() as ActivityState;
-        if (data.department === 'all' || isMatchingDepartment(data.department, department)) {
-          const existing = stateMap.get(data.activityId);
-          // If any matching record has enabled=true, honor it
-          if (!existing || (!existing.enabled && data.enabled) || (!existing.locked && data.locked)) {
-            stateMap.set(data.activityId, data);
+        if (!data || !data.activityId) return;
+
+        if (data.department === 'all') {
+          allFallbackMap.set(data.activityId, data);
+        } else if (department === 'all' || isMatchingDepartment(data.department, department)) {
+          const existing = deptSpecificMap.get(data.activityId);
+          if (!existing) {
+            deptSpecificMap.set(data.activityId, data);
+          } else {
+            // Pick newest update if timestamp exists
+            const existingTime = (existing as any).updatedAt?.toMillis?.() || 0;
+            const newTime = (data as any).updatedAt?.toMillis?.() || 0;
+            if (newTime >= existingTime) {
+              deptSpecificMap.set(data.activityId, data);
+            }
           }
         }
       });
+
+      // Construct final map:
+      // Department-specific state is strictly authoritative.
+      // If no department-specific record exists for an activityId, fall back to 'all'.
+      const stateMap = new Map<string, ActivityState>();
+      allFallbackMap.forEach((val, actId) => {
+        stateMap.set(actId, val);
+      });
+      deptSpecificMap.forEach((val, actId) => {
+        stateMap.set(actId, val);
+      });
+
       onUpdate(stateMap);
     },
     (err) => {

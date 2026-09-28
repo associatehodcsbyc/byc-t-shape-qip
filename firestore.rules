@@ -68,13 +68,12 @@ service cloud.firestore {
     }
 
     function activityOpen(dept, activityId) {
-      return (exists(statePath('all', activityId))
-              && get(statePath('all', activityId)).data.enabled == true
-              && get(statePath('all', activityId)).data.locked == false)
-        || (exists(statePath(dept, activityId))
-            ? (get(statePath(dept, activityId)).data.enabled == true
-               && get(statePath(dept, activityId)).data.locked == false)
-            : true);
+      return exists(statePath(dept, activityId))
+        ? (get(statePath(dept, activityId)).data.enabled == true
+           && get(statePath(dept, activityId)).data.locked == false)
+        : (exists(statePath('all', activityId))
+           && get(statePath('all', activityId)).data.enabled == true
+           && get(statePath('all', activityId)).data.locked == false);
     }
 
     function activityExists(activityId) {
