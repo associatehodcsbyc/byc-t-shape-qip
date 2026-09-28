@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { signInWithGoogle, emulatorSignInAs } from '../services/auth';
 
 export const LoginPage: React.FC = () => {
-  const { user, rosterUser, authError, clearError, isParticipant, isHoD, isAdmin } = useAuth();
+  const { user, rosterUser, authError, clearError, isParticipant, isHoD, isCoordinator, isResourcePerson, isAdmin } = useAuth();
   const [signingIn, setSigningIn] = useState(false);
   const [customError, setCustomError] = useState<string | null>(null);
 
@@ -12,7 +12,7 @@ export const LoginPage: React.FC = () => {
 
   if (user && rosterUser) {
     if (isParticipant) return <Navigate to="/participant" replace />;
-    if (isHoD) return <Navigate to="/hod" replace />;
+    if (isHoD || isCoordinator || isResourcePerson) return <Navigate to="/hod" replace />;
     if (isAdmin) return <Navigate to="/admin" replace />;
   }
 

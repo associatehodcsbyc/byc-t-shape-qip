@@ -28,7 +28,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowe
   if (allowedRoles && !allowedRoles.includes(rosterUser.role)) {
     // Route to user's permitted role landing
     if (rosterUser.role === 'participant') return <Navigate to="/participant" replace />;
-    if (rosterUser.role === 'hod' || rosterUser.role === 'coordinator') return <Navigate to="/hod" replace />;
+    if (rosterUser.role === 'hod' || rosterUser.role === 'coordinator' || rosterUser.role === 'resource_person') return <Navigate to="/hod" replace />;
     if (rosterUser.role === 'admin') return <Navigate to="/admin" replace />;
   }
 

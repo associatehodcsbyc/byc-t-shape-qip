@@ -285,11 +285,18 @@ export const SessionBoard: React.FC = () => {
           </div>
 
           <h2 className="text-2xl font-black text-slate-900 mt-2 tracking-tight">
-            Session Board & Activity Gate Controls
+            {canManageGates
+              ? 'Session Board & Activity Gate Controls'
+              : isResourcePerson
+              ? 'Facilitator Console & Live Tracker'
+              : 'Department Progress & Live Tracker'}
           </h2>
           <p className="text-sm text-slate-600 mt-1 max-w-2xl">
-            Control which activities are Enabled, Locked, or Disabled for faculty participants. Open the Live
-            Submission Tracker or launch Projector Mode during sessions.
+            {canManageGates
+              ? 'Control which activities are Enabled, Locked, or Disabled for faculty participants. Open the Live Submission Tracker or launch Projector Mode during sessions.'
+              : isResourcePerson
+              ? 'Monitor participant submissions in real time across sessions. Launch the Live Submission Tracker to view drafted and submitted responses.'
+              : 'Monitor departmental participant submissions in real time across sessions. Launch the Live Submission Tracker to view drafted and submitted responses.'}
           </p>
           <div className="mt-3">
             <Link
