@@ -375,10 +375,11 @@ export const SingleEntryModal: React.FC<SingleEntryModalProps> = ({
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                   Assigned Workshop Role <span className="text-red-500">*</span>
                 </label>
-                <div className={`grid gap-2.5 ${canManageAllDepts ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-1 sm:grid-cols-3'}`}>
+                <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3">
                   <button
                     type="button"
                     onClick={() => setFacultyRole('participant')}
+                    id="role-btn-participant"
                     className={`p-2.5 rounded-xl border text-left transition flex flex-col gap-1 ${
                       facultyRole === 'participant'
                         ? 'border-christ-navy bg-blue-50/60 ring-1 ring-christ-navy'
@@ -397,6 +398,7 @@ export const SingleEntryModal: React.FC<SingleEntryModalProps> = ({
                   <button
                     type="button"
                     onClick={() => setFacultyRole('hod')}
+                    id="role-btn-hod"
                     className={`p-2.5 rounded-xl border text-left transition flex flex-col gap-1 ${
                       facultyRole === 'hod'
                         ? 'border-purple-600 bg-purple-50/60 ring-1 ring-purple-600'
@@ -408,13 +410,14 @@ export const SingleEntryModal: React.FC<SingleEntryModalProps> = ({
                       {facultyRole === 'hod' && <span className="text-purple-600 text-xs">●</span>}
                     </div>
                     <span className="text-[10px] text-slate-500 leading-tight">
-                      Gates & live tracker
+                      Dept tracking & analytics
                     </span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setFacultyRole('coordinator')}
+                    id="role-btn-coordinator"
                     className={`p-2.5 rounded-xl border text-left transition flex flex-col gap-1 ${
                       facultyRole === 'coordinator'
                         ? 'border-teal-600 bg-teal-50/60 ring-1 ring-teal-600'
@@ -426,7 +429,26 @@ export const SingleEntryModal: React.FC<SingleEntryModalProps> = ({
                       {facultyRole === 'coordinator' && <span className="text-teal-600 text-xs">●</span>}
                     </div>
                     <span className="text-[10px] text-slate-500 leading-tight">
-                      Gates & dept reports
+                      Central gate controller
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setFacultyRole('resource_person')}
+                    id="role-btn-resource-person"
+                    className={`p-2.5 rounded-xl border text-left transition flex flex-col gap-1 ${
+                      facultyRole === 'resource_person'
+                        ? 'border-indigo-600 bg-indigo-50/60 ring-1 ring-indigo-600'
+                        : 'border-slate-200 hover:border-slate-300 bg-white'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-900">Resource Person</span>
+                      {facultyRole === 'resource_person' && <span className="text-indigo-600 text-xs">●</span>}
+                    </div>
+                    <span className="text-[10px] text-slate-500 leading-tight">
+                      Facilitator & live tracker
                     </span>
                   </button>
 
@@ -434,6 +456,7 @@ export const SingleEntryModal: React.FC<SingleEntryModalProps> = ({
                     <button
                       type="button"
                       onClick={() => setFacultyRole('admin')}
+                      id="role-btn-admin"
                       className={`p-2.5 rounded-xl border text-left transition flex flex-col gap-1 ${
                         facultyRole === 'admin'
                           ? 'border-amber-600 bg-amber-50/60 ring-1 ring-amber-600'

@@ -48,15 +48,16 @@ service cloud.firestore {
       return get(rosterPath()).data;
     }
 
-    function isAdmin()      { return isActive() && me().role == 'admin'; }
-    function isAppAdmin()   { return isAdmin() && (me().adminType == 'app_admin' || me().adminType == 'app-admin'); }
-    function isHoD()        { return isActive() && (me().role == 'hod' || me().role == 'coordinator' || me().role == 'qip_coordinator'); }
+    function isAdmin()          { return isActive() && me().role == 'admin'; }
+    function isAppAdmin()       { return isAdmin() && (me().adminType == 'app_admin' || me().adminType == 'app-admin'); }
+    function isCoordinator()    { return isActive() && (me().role == 'coordinator' || me().role == 'qip_coordinator'); }
+    function isResourcePerson() { return isActive() && (me().role == 'resource_person' || me().role == 'facilitator'); }
+    function isHoD()            { return isActive() && (me().role == 'hod' || isCoordinator()); }
     function isHoDOf(dept)  {
       return isHoD() && (
         me().department == dept
         || me().department.lower() == dept.lower()
-        || me().role == 'coordinator'
-        || me().role == 'qip_coordinator'
+        || isCoordinator()
       );
     }
     function myDept()       { return me().department; }
@@ -214,6 +215,8 @@ service cloud.firestore {
       allow read: if isActive()
         && (resource.data.email == email()
             || isAdmin()
+            || isCoordinator()
+            || isResourcePerson()
             || isHoDOf(resource.data.department));
 
       allow create, update: if isActive()
@@ -236,7 +239,7 @@ service cloud.firestore {
     // ---------- Anonymous department summaries (confidential activities) ----------
     // Doc ID = <departmentId>__<activityId>. Computed and published ONLY by the App Admin console.
     match /summaries/{sumId} {
-      allow read: if isAdmin() || isHoDOf(resource.data.department);
+      allow read: if isAdmin() || isCoordinator() || isResourcePerson() || isHoDOf(resource.data.department);
       allow create, update: if isAppAdmin()
         && sumId == request.resource.data.department + '__' + request.resource.data.activityId
         && request.resource.data.n is int

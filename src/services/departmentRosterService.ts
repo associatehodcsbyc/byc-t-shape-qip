@@ -67,8 +67,8 @@ export function validateFacultyInput(input: NewFacultyInput): ValidationResult {
 
   if (!input?.role) {
     errors.role = 'Role is required.';
-  } else if (!['participant', 'hod', 'coordinator', 'admin'].includes(input.role)) {
-    errors.role = 'Role must be Participant, HoD, QIP Coordinator, or Admin.';
+  } else if (!['participant', 'hod', 'coordinator', 'resource_person', 'admin'].includes(input.role)) {
+    errors.role = 'Role must be Participant, HoD, QIP Coordinator, Resource Person, or Admin.';
   }
 
   if (input?.role === 'admin') {

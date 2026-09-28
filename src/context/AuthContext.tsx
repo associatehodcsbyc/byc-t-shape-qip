@@ -14,10 +14,12 @@ interface AuthContextType {
   isHoD: boolean;
   isCoordinator: boolean;
   isHoDStrict: boolean;
+  isResourcePerson: boolean;
   isHoDOrCoordinator: boolean;
   isAdmin: boolean;
   isAppAdmin: boolean;
   isDeanOrLeadership: boolean;
+  canManageGates: boolean;
   reloadRoster: () => Promise<void>;
 }
 
@@ -92,6 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const isParticipant = rosterUser?.role === 'participant';
   const isCoordinator = rosterUser?.role === 'coordinator';
+  const isResourcePerson = rosterUser?.role === 'resource_person';
   const isHoDStrict = rosterUser?.role === 'hod';
   // QIP Coordinator has all the privileges of the HoD of the department:
   const isHoD = rosterUser?.role === 'hod' || isCoordinator;
@@ -100,6 +103,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const normAdminType = rosterUser?.adminType?.toLowerCase().replace(/-/g, '_');
   const isAppAdmin = isAdmin && normAdminType === 'app_admin';
   const isDeanOrLeadership = isAdmin && normAdminType !== 'app_admin';
+  // Central gate control: Only QIP Coordinator and App Admin can enable/lock/disable activities
+  const canManageGates = (isCoordinator || isAppAdmin) && !isDeanOrLeadership;
 
   return (
     <AuthContext.Provider
@@ -113,10 +118,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isHoD,
         isCoordinator,
         isHoDStrict,
+        isResourcePerson,
         isHoDOrCoordinator,
         isAdmin,
         isAppAdmin,
         isDeanOrLeadership,
+        canManageGates,
         reloadRoster,
       }}
     >

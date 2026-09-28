@@ -294,7 +294,7 @@ export const ParticipantLanding: React.FC = () => {
                           : 'bg-slate-100 text-slate-500'
                       }`}
                     >
-                      {enabledCount > 0 ? `${enabledCount} Open` : 'Awaiting HoD'}
+                      {enabledCount > 0 ? `${enabledCount} Open` : 'Awaiting Session'}
                     </span>
                   </div>
 
@@ -326,7 +326,7 @@ export const ParticipantLanding: React.FC = () => {
                               <span>{act.title}</span>
                             </span>
                             <span className="text-[11px] italic shrink-0 text-slate-400">
-                              Awaiting HoD
+                              Awaiting Coordinator
                             </span>
                           </div>
                         );

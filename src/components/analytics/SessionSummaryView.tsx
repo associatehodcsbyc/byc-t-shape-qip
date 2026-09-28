@@ -8,14 +8,15 @@ import defaultActivities from '../../../seed/activities.json';
 import { exportQipReportPackXlsx } from '../../utils/exports';
 
 export const SessionSummaryView: React.FC = () => {
-  const { rosterUser, isHoD } = useAuth();
+  const { rosterUser, isHoDStrict, isCoordinator, isResourcePerson, isAppAdmin } = useAuth();
+  const isLockedToDept = isHoDStrict && !isCoordinator && !isResourcePerson && !isAppAdmin;
 
   const [sessions, setSessions] = useState<Session[]>(defaultSessions.sessions as Session[]);
   const [activities, setActivities] = useState<Activity[]>(defaultActivities.activities as Activity[]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [selectedSessionId, setSelectedSessionId] = useState<string>('d1s1');
   const [selectedDept, setSelectedDept] = useState<string>(
-    isHoD ? rosterUser?.department || 'computer-science' : 'all'
+    isLockedToDept ? rosterUser?.department || 'computer-science' : 'all'
   );
 
   const [progressList, setProgressList] = useState<SubmissionProgress[]>([]);
@@ -184,7 +185,7 @@ export const SessionSummaryView: React.FC = () => {
           <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
             Department Scope
           </label>
-          {isHoD ? (
+          {isLockedToDept ? (
             <div className="px-3 py-2 bg-purple-50 border border-purple-200 rounded-lg text-xs font-bold text-purple-900">
               {targetDeptName}
             </div>

@@ -110,5 +110,14 @@ describe('Department and Faculty Single-Entry Validation', () => {
       expect(res.valid).toBe(true);
       expect(Object.keys(res.errors).length).toBe(0);
     });
+
+    it('accepts valid Resource Person without admin type', () => {
+      const res = validateFacultyInput({
+        ...validBase,
+        role: 'resource_person',
+      });
+      expect(res.valid).toBe(true);
+      expect(Object.keys(res.errors).length).toBe(0);
+    });
   });
 });

@@ -75,6 +75,9 @@ export const ActivityRunnerPage: React.FC = () => {
     };
   }, [activityId, departmentId]);
 
+  const isFacilitatorOrAdmin = rosterUser?.role && rosterUser.role !== 'participant';
+  const returnPath = isFacilitatorOrAdmin ? '/hod' : '/participant';
+
   return (
     <div className="flex-1 bg-slate-50 flex flex-col">
       <Header />
@@ -95,10 +98,10 @@ export const ActivityRunnerPage: React.FC = () => {
             <h3 className="text-lg font-bold text-slate-900">Activity Error</h3>
             <p className="text-sm text-red-600">{error}</p>
             <button
-              onClick={() => navigate('/participant')}
+              onClick={() => navigate(returnPath)}
               className="px-4 py-2 bg-christ-navy text-white text-xs font-semibold rounded-lg hover:bg-slate-800 transition"
             >
-              Return to Participant Home
+              Return to Dashboard
             </button>
           </div>
         )}
@@ -107,7 +110,7 @@ export const ActivityRunnerPage: React.FC = () => {
           <ActivityEngine
             activity={activity}
             activityState={activityState}
-            onBack={() => navigate('/participant')}
+            onBack={() => navigate(returnPath)}
           />
         )}
       </main>

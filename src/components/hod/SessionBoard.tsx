@@ -20,8 +20,8 @@ import {
 import { LiveTrackerModal } from './LiveTrackerModal';
 
 export const SessionBoard: React.FC = () => {
-  const { user, rosterUser, isHoD, isCoordinator, isHoDStrict, isAdmin, isAppAdmin, isDeanOrLeadership } = useAuth();
-  const isLockedToDept = isHoDStrict && !isCoordinator && !isAdmin && !isAppAdmin;
+  const { user, rosterUser, isHoD, isCoordinator, isHoDStrict, isResourcePerson, isAdmin, isAppAdmin, canManageGates } = useAuth();
+  const isLockedToDept = isHoDStrict && !isCoordinator && !isAdmin && !isAppAdmin && !isResourcePerson;
 
   // Departments and active selection
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -42,7 +42,7 @@ export const SessionBoard: React.FC = () => {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
-  const isReadOnly = isDeanOrLeadership;
+  const isReadOnly = !canManageGates;
   const userEmail = user?.email || rosterUser?.email || '';
 
   // 1. Fetch departments
@@ -124,7 +124,7 @@ export const SessionBoard: React.FC = () => {
     locked: boolean
   ) => {
     if (isReadOnly) {
-      notify('Read-only mode: Deans and Leadership cannot modify activity state.', 'error');
+      notify('Read-only: Only the QIP Coordinator can enable, lock, or disable activities.', 'error');
       return;
     }
 
@@ -158,7 +158,7 @@ export const SessionBoard: React.FC = () => {
     locked: boolean
   ) => {
     if (isReadOnly) {
-      notify('Read-only mode: Deans and Leadership cannot modify activity state.', 'error');
+      notify('Read-only: Only the QIP Coordinator can enable, lock, or disable activities.', 'error');
       return;
     }
 
@@ -192,7 +192,7 @@ export const SessionBoard: React.FC = () => {
     locked: boolean
   ) => {
     if (isReadOnly) {
-      notify('Read-only mode: Deans and Leadership cannot modify activity state.', 'error');
+      notify('Read-only: Only the QIP Coordinator can enable, lock, or disable activities.', 'error');
       return;
     }
 
@@ -257,19 +257,23 @@ export const SessionBoard: React.FC = () => {
               className={`px-2.5 py-0.5 rounded text-xs font-bold uppercase tracking-wider ${
                 isCoordinator
                   ? 'bg-teal-100 text-teal-900 border border-teal-200'
-                  : isHoD
-                  ? 'bg-purple-100 text-purple-900 border border-purple-200'
                   : isAppAdmin
                   ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                  : isResourcePerson
+                  ? 'bg-indigo-100 text-indigo-900 border border-indigo-200'
+                  : isHoD
+                  ? 'bg-purple-100 text-purple-900 border border-purple-200'
                   : 'bg-emerald-100 text-emerald-900 border border-emerald-300'
               }`}
             >
               {isCoordinator
-                ? 'QIP Coordinator Console'
-                : isHoD
-                ? 'HoD Control Console'
+                ? 'QIP Coordinator Console (Gate Controller)'
                 : isAppAdmin
-                ? 'App Admin Console'
+                ? 'App Admin Console (Gate Controller)'
+                : isResourcePerson
+                ? 'Resource Person Console (Facilitator & Live Tracker)'
+                : isHoD
+                ? 'HoD Console (Department Tracking & Analytics)'
                 : 'Leadership View (Read-Only)'}
             </span>
 
@@ -430,7 +434,7 @@ export const SessionBoard: React.FC = () => {
                 </div>
 
                 {/* Session-level Bulk Controls */}
-                {!isReadOnly ? (
+                {canManageGates ? (
                   <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
                     <button
                       onClick={() => handleBulkSetAllDepartments(session, sessActivities, true, false)}
@@ -464,9 +468,15 @@ export const SessionBoard: React.FC = () => {
                     </button>
                   </div>
                 ) : (
-                  <span className="text-xs font-semibold text-slate-400 italic">
-                    Read-only view
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                      {isResourcePerson
+                        ? 'Facilitator View (Use Live Tracker)'
+                        : isHoD
+                        ? 'Department View (Use Live Tracker)'
+                        : 'Read-only view'}
+                    </span>
+                  </div>
                 )}
               </div>
 

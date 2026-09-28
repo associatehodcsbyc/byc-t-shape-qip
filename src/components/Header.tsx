@@ -24,6 +24,9 @@ export const Header: React.FC = () => {
     if (rosterUser.role === 'coordinator') {
       return <span className="bg-teal-100 text-teal-800 text-xs font-semibold px-2.5 py-0.5 rounded border border-teal-200">QIP Coordinator</span>;
     }
+    if (rosterUser.role === 'resource_person') {
+      return <span className="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2.5 py-0.5 rounded border border-indigo-200">Resource Person</span>;
+    }
     if (isAppAdmin) {
       return <span className="bg-amber-100 text-amber-900 text-xs font-semibold px-2.5 py-0.5 rounded border border-amber-300">App Admin</span>;
     }

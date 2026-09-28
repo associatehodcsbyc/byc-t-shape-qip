@@ -97,9 +97,15 @@ export const RosterUpload: React.FC<RosterUploadProps> = ({
       roleLower === 'qip_coordinator' ||
       roleLower === 'qip-coordinator'
     ) role = 'coordinator';
+    else if (
+      roleLower === 'resource_person' ||
+      roleLower === 'resource person' ||
+      roleLower === 'resource-person' ||
+      roleLower === 'facilitator'
+    ) role = 'resource_person';
     else if (roleLower === 'admin') role = 'admin';
     else {
-      errors.push('Role must be Participant, HoD, QIP Coordinator, or Admin');
+      errors.push('Role must be Participant, HoD, QIP Coordinator, Resource Person, or Admin');
     }
 
     // 5. Admin Type validation

@@ -29,7 +29,7 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 };
 
 const RootRedirect: React.FC = () => {
-  const { user, rosterUser, loading, isParticipant, isHoD, isCoordinator, isAdmin } = useAuth();
+  const { user, rosterUser, loading, isParticipant, isHoD, isCoordinator, isResourcePerson, isAdmin } = useAuth();
 
   if (loading) {
     return (
@@ -45,7 +45,7 @@ const RootRedirect: React.FC = () => {
   }
 
   if (isParticipant) return <Navigate to="/participant" replace />;
-  if (isHoD || isCoordinator) return <Navigate to="/hod" replace />;
+  if (isHoD || isCoordinator || isResourcePerson) return <Navigate to="/hod" replace />;
   if (isAdmin) return <Navigate to="/admin" replace />;
 
   return <Navigate to="/login" replace />;
@@ -73,7 +73,7 @@ function App() {
               <Route
                 path="/hod"
                 element={
-                  <ProtectedRoute allowedRoles={['hod', 'coordinator', 'admin']}>
+                  <ProtectedRoute allowedRoles={['hod', 'coordinator', 'admin', 'resource_person']}>
                     <HoDLanding />
                   </ProtectedRoute>
                 }
@@ -91,7 +91,7 @@ function App() {
               <Route
                 path="/activity/:activityId"
                 element={
-                  <ProtectedRoute allowedRoles={['participant', 'hod', 'coordinator', 'admin']}>
+                  <ProtectedRoute allowedRoles={['participant', 'hod', 'coordinator', 'admin', 'resource_person']}>
                     <ActivityRunnerPage />
                   </ProtectedRoute>
                 }
@@ -100,7 +100,7 @@ function App() {
               <Route
                 path="/analytics"
                 element={
-                  <ProtectedRoute allowedRoles={['hod', 'coordinator', 'admin']}>
+                  <ProtectedRoute allowedRoles={['hod', 'coordinator', 'admin', 'resource_person']}>
                     <AnalyticsPage />
                   </ProtectedRoute>
                 }

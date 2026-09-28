@@ -49,7 +49,8 @@ export const ActivityAnalytics: React.FC<ActivityAnalyticsProps> = ({
   activitiesList = [],
   departmentsList = [],
 }) => {
-  const { rosterUser, isHoD, isAppAdmin } = useAuth();
+  const { rosterUser, isHoDStrict, isCoordinator, isResourcePerson, isAppAdmin } = useAuth();
+  const isLockedToDept = isHoDStrict && !isCoordinator && !isResourcePerson && !isAppAdmin;
 
   const [activities, setActivities] = useState<Activity[]>(() =>
     activitiesList.length > 0 ? sortActivities(activitiesList) : []
@@ -60,7 +61,7 @@ export const ActivityAnalytics: React.FC<ActivityAnalyticsProps> = ({
   );
 
   const [selectedDept, setSelectedDept] = useState<string>(
-    isHoD ? rosterUser?.department || 'computer-science' : 'all'
+    isLockedToDept ? rosterUser?.department || 'computer-science' : 'all'
   );
   const [selectedGroup, setSelectedGroup] = useState<string>('all');
   const [searchFilter, setSearchFilter] = useState('');
@@ -118,10 +119,10 @@ export const ActivityAnalytics: React.FC<ActivityAnalyticsProps> = ({
 
   // Ensure HoD is strictly locked to own department
   useEffect(() => {
-    if (isHoD && rosterUser?.department) {
+    if (isLockedToDept && rosterUser?.department) {
       setSelectedDept(rosterUser.department);
     }
-  }, [isHoD, rosterUser?.department]);
+  }, [isLockedToDept, rosterUser?.department]);
 
   const sortedActivities = useMemo(() => {
     return sortActivities(activities);
@@ -1088,7 +1089,7 @@ export const ActivityAnalytics: React.FC<ActivityAnalyticsProps> = ({
           <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
             Department Scope
           </label>
-          {isHoD ? (
+          {isLockedToDept ? (
             <div className="px-3 py-2 bg-purple-50 border border-purple-200 rounded-lg text-xs font-bold text-purple-900">
               {currentDeptObj?.name || rosterUser?.department}
             </div>
