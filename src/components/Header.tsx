@@ -84,13 +84,57 @@ export const Header: React.FC = () => {
                   </a>
                 </>
               )}
-              {(rosterUser.role === 'hod' || rosterUser.role === 'coordinator') && (
+              {rosterUser.role === 'coordinator' && (
                 <>
                   <a
                     href="/hod"
                     className="px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-white transition"
                   >
-                    {rosterUser.role === 'coordinator' ? 'Coordinator Console' : 'HoD Console'}
+                    Coordinator Console
+                  </a>
+                  <a
+                    href="/participant"
+                    className="px-2.5 py-1 rounded bg-emerald-700/80 hover:bg-emerald-600 text-white transition border border-emerald-500/40"
+                  >
+                    My Participation
+                  </a>
+                  <a
+                    href="/analytics"
+                    className="px-2.5 py-1 rounded bg-christ-gold/20 hover:bg-christ-gold/30 text-christ-gold transition border border-christ-gold/30"
+                  >
+                    Analytics & Reports
+                  </a>
+                </>
+              )}
+              {rosterUser.role === 'resource_person' && (
+                <>
+                  <a
+                    href="/hod"
+                    className="px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-white transition"
+                  >
+                    Facilitator Console
+                  </a>
+                  <a
+                    href="/participant"
+                    className="px-2.5 py-1 rounded bg-emerald-700/80 hover:bg-emerald-600 text-white transition border border-emerald-500/40"
+                  >
+                    My Participation
+                  </a>
+                  <a
+                    href="/analytics"
+                    className="px-2.5 py-1 rounded bg-christ-gold/20 hover:bg-christ-gold/30 text-christ-gold transition border border-christ-gold/30"
+                  >
+                    Analytics & Reports
+                  </a>
+                </>
+              )}
+              {rosterUser.role === 'hod' && (
+                <>
+                  <a
+                    href="/hod"
+                    className="px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-white transition"
+                  >
+                    HoD Console
                   </a>
                   <a
                     href="/analytics"

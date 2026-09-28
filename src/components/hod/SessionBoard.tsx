@@ -21,6 +21,7 @@ import { LiveTrackerModal } from './LiveTrackerModal';
 export const SessionBoard: React.FC = () => {
   const { user, rosterUser, isHoD, isCoordinator, isHoDStrict, isResourcePerson, isAdmin, isAppAdmin, canManageGates } = useAuth();
   const isLockedToDept = isHoDStrict && !isCoordinator && !isAdmin && !isAppAdmin && !isResourcePerson;
+  const canParticipate = isCoordinator || isResourcePerson;
 
   // Departments and active selection
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -604,6 +605,43 @@ export const SessionBoard: React.FC = () => {
                             <div className="px-3 py-1.5 bg-slate-100 text-slate-500 rounded-lg text-xs font-semibold border border-slate-200">
                               Status: {isEnabled ? (isLocked ? 'Locked' : 'Enabled') : 'Disabled'}
                             </div>
+                          )}
+
+                          {/* Participate Button (Permitted for QIP Coordinator and Resource Persons only) */}
+                          {canParticipate && (
+                            <>
+                              {!isEnabled ? (
+                                <button
+                                  disabled
+                                  id={`btn-participate-${act.activityId}`}
+                                  className="px-3 py-1.5 bg-slate-100 text-slate-400 text-xs font-bold rounded-xl border border-slate-200 cursor-not-allowed flex items-center gap-1.5"
+                                  title="Activity is disabled by coordinator (cannot participate yet)"
+                                >
+                                  <span>🔒</span>
+                                  <span>Participate</span>
+                                </button>
+                              ) : isLocked ? (
+                                <Link
+                                  to={`/activity/${act.activityId}`}
+                                  id={`btn-participate-${act.activityId}`}
+                                  className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5"
+                                  title="View activity worksheet (Locked - Read Only)"
+                                >
+                                  <span>🔒</span>
+                                  <span>View (Locked)</span>
+                                </Link>
+                              ) : (
+                                <Link
+                                  to={`/activity/${act.activityId}`}
+                                  id={`btn-participate-${act.activityId}`}
+                                  className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5"
+                                  title="Participate in this activity"
+                                >
+                                  <span>📝</span>
+                                  <span>Participate</span>
+                                </Link>
+                              )}
+                            </>
                           )}
 
                           {/* Live Tracker Modal Launcher */}
