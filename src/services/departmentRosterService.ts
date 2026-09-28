@@ -1,4 +1,4 @@
-import { doc, getDoc, collection, serverTimestamp, writeBatch } from 'firebase/firestore';
+import { doc, getDoc, collection, serverTimestamp, writeBatch, query, where, getDocs } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 import { toDepartmentId } from '../utils/department';
 import { Role, AdminType, Department, RosterUser } from '../types';
@@ -108,6 +108,52 @@ export async function checkFacultyExists(email: string): Promise<RosterUser | nu
 }
 
 /**
+ * Synchronous / in-memory check to validate that a department only has at most 1 QIP Coordinator.
+ */
+export function validateSingleCoordinatorRule(
+  departmentId: string,
+  userEmail: string,
+  existingRoster: RosterUser[]
+): { valid: boolean; error?: string; existingCoordinator?: RosterUser } {
+  const cleanDept = departmentId.trim();
+  const cleanEmail = userEmail.trim().toLowerCase();
+  const existing = existingRoster.find(
+    (u) =>
+      u.department === cleanDept &&
+      (u.role === 'coordinator' || u.role === ('qip_coordinator' as any)) &&
+      u.active !== false &&
+      u.email.toLowerCase() !== cleanEmail
+  );
+  if (existing) {
+    return {
+      valid: false,
+      error: `Department "${cleanDept}" already has an assigned QIP Coordinator (${existing.name || existing.email}). Only one QIP Coordinator is allowed per department.`,
+      existingCoordinator: existing,
+    };
+  }
+  return { valid: true };
+}
+
+/**
+ * Query Firestore to find an existing active QIP Coordinator for a department.
+ */
+export async function getDepartmentCoordinator(departmentId: string): Promise<RosterUser | null> {
+  const cleanDeptId = departmentId.trim();
+  if (!cleanDeptId) return null;
+  const q = query(
+    collection(db, 'roster'),
+    where('department', '==', cleanDeptId),
+    where('role', 'in', ['coordinator', 'qip_coordinator'])
+  );
+  const snap = await getDocs(q);
+  if (snap.empty) return null;
+  const activeCoordinator = snap.docs
+    .map((d) => d.data() as RosterUser)
+    .find((u) => u.active !== false);
+  return activeCoordinator || null;
+}
+
+/**
  * Create a new department with audit log.
  */
 export async function insertSingleDepartment(
@@ -187,6 +233,19 @@ export async function insertSingleFaculty(
     err.code = 'FACULTY_EXISTS';
     err.existing = existing;
     throw err;
+  }
+
+  // Enforce single QIP Coordinator constraint per department
+  if (input.role === 'coordinator' && active !== false) {
+    const existingCoordinator = await getDepartmentCoordinator(cleanDeptId);
+    if (existingCoordinator && existingCoordinator.email.toLowerCase() !== emailLower) {
+      const err: any = new Error(
+        `Department "${cleanDeptId}" already has an assigned QIP Coordinator (${existingCoordinator.name || existingCoordinator.email}). Only one QIP Coordinator role can be assigned per department.`
+      );
+      err.code = 'COORDINATOR_EXISTS';
+      err.existingCoordinator = existingCoordinator;
+      throw err;
+    }
   }
 
   const batch = writeBatch(db);

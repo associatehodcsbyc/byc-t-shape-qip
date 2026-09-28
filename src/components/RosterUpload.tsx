@@ -4,17 +4,19 @@ import { collection, doc, writeBatch, serverTimestamp } from 'firebase/firestore
 import { db } from '../config/firebase';
 import { useAuth } from '../context/AuthContext';
 import { toDepartmentId } from '../utils/department';
-import { RosterRowValidation, Role, AdminType } from '../types';
+import { RosterRowValidation, Role, AdminType, RosterUser } from '../types';
 
 interface RosterUploadProps {
   existingEmails: Set<string>;
   existingDeptIds: Set<string>;
+  existingCoordinators?: Map<string, RosterUser>;
   onUploadSuccess: () => void;
 }
 
 export const RosterUpload: React.FC<RosterUploadProps> = ({
   existingEmails,
   existingDeptIds,
+  existingCoordinators,
   onUploadSuccess,
 }) => {
   const { user } = useAuth();
@@ -31,7 +33,8 @@ export const RosterUpload: React.FC<RosterUploadProps> = ({
   const validateRow = (
     raw: Record<string, any>,
     index: number,
-    seenInFile: Set<string>
+    seenInFile: Set<string>,
+    seenCoordinatorsInFile: Map<string, string> = new Map()
   ): RosterRowValidation => {
     // Normalize keys
     const getVal = (possibleKeys: string[]) => {
@@ -123,6 +126,29 @@ export const RosterUpload: React.FC<RosterUploadProps> = ({
       adminType = null;
     }
 
+    // 6. Single QIP Coordinator check per department
+    if (role === 'coordinator' && departmentId) {
+      if (seenCoordinatorsInFile.has(departmentId)) {
+        const firstEmail = seenCoordinatorsInFile.get(departmentId);
+        if (firstEmail !== email) {
+          errors.push(
+            `Multiple QIP Coordinators detected for department "${department}" in this file. Only one QIP Coordinator is allowed per department.`
+          );
+        }
+      } else {
+        seenCoordinatorsInFile.set(departmentId, email);
+      }
+
+      if (existingCoordinators && existingCoordinators.has(departmentId)) {
+        const existingCoord = existingCoordinators.get(departmentId);
+        if (existingCoord && existingCoord.email.toLowerCase() !== email) {
+          errors.push(
+            `Department "${department}" already has an assigned QIP Coordinator (${existingCoord.name || existingCoord.email}). Only one QIP Coordinator is allowed per department.`
+          );
+        }
+      }
+    }
+
     const isExistingInDb = existingEmails.has(email);
     let status: 'valid' | 'error' | 'existing' = 'valid';
     if (errors.length > 0) {
@@ -162,6 +188,7 @@ export const RosterUpload: React.FC<RosterUploadProps> = ({
 
     const isCsv = file.name.endsWith('.csv');
     const seenInFile = new Set<string>();
+    const seenCoordinatorsInFile = new Map<string, string>();
 
     if (isCsv) {
       Papa.parse(file, {
@@ -169,7 +196,7 @@ export const RosterUpload: React.FC<RosterUploadProps> = ({
         skipEmptyLines: true,
         complete: (results) => {
           const validated = results.data.map((row: any, i: number) =>
-            validateRow(row, i, seenInFile)
+            validateRow(row, i, seenInFile, seenCoordinatorsInFile)
           );
           setRows(validated);
         },
@@ -189,7 +216,7 @@ export const RosterUpload: React.FC<RosterUploadProps> = ({
           const ws = wb.Sheets[wsname];
           const data = XLSX.utils.sheet_to_json(ws);
           const validated = data.map((row: any, i: number) =>
-            validateRow(row, i, seenInFile)
+            validateRow(row, i, seenInFile, seenCoordinatorsInFile)
           );
           setRows(validated);
         } catch (err: any) {

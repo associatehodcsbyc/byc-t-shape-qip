@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   validateDepartmentInput,
   validateFacultyInput,
+  validateSingleCoordinatorRule,
   NewFacultyInput,
 } from '../src/services/departmentRosterService';
 
@@ -118,6 +119,77 @@ describe('Department and Faculty Single-Entry Validation', () => {
       });
       expect(res.valid).toBe(true);
       expect(Object.keys(res.errors).length).toBe(0);
+    });
+  });
+
+  describe('validateSingleCoordinatorRule', () => {
+    const existingRoster: any[] = [
+      {
+        email: 'alice.coordinator@christuniversity.in',
+        name: 'Dr. Alice Coordinator',
+        department: 'computer-science',
+        role: 'coordinator',
+        active: true,
+      },
+      {
+        email: 'inactive.coord@christuniversity.in',
+        name: 'Dr. Inactive',
+        department: 'commerce',
+        role: 'coordinator',
+        active: false,
+      },
+      {
+        email: 'hod1@christuniversity.in',
+        name: 'Dr. HoD One',
+        department: 'computer-science',
+        role: 'hod',
+        active: true,
+      },
+      {
+        email: 'hod2@christuniversity.in',
+        name: 'Dr. HoD Two',
+        department: 'computer-science',
+        role: 'hod',
+        active: true,
+      },
+    ];
+
+    it('permits assigning coordinator when department has none', () => {
+      const res = validateSingleCoordinatorRule(
+        'management',
+        'bob@christuniversity.in',
+        existingRoster
+      );
+      expect(res.valid).toBe(true);
+    });
+
+    it('blocks assigning a second coordinator to a department that already has one', () => {
+      const res = validateSingleCoordinatorRule(
+        'computer-science',
+        'charlie@christuniversity.in',
+        existingRoster
+      );
+      expect(res.valid).toBe(false);
+      expect(res.error).toContain('already has an assigned QIP Coordinator (Dr. Alice Coordinator)');
+      expect(res.existingCoordinator?.email).toBe('alice.coordinator@christuniversity.in');
+    });
+
+    it('permits existing coordinator to update their own details', () => {
+      const res = validateSingleCoordinatorRule(
+        'computer-science',
+        'alice.coordinator@christuniversity.in',
+        existingRoster
+      );
+      expect(res.valid).toBe(true);
+    });
+
+    it('permits assigning coordinator if previous coordinator in dept is inactive', () => {
+      const res = validateSingleCoordinatorRule(
+        'commerce',
+        'new.coord@christuniversity.in',
+        existingRoster
+      );
+      expect(res.valid).toBe(true);
     });
   });
 });

@@ -9,6 +9,7 @@ interface EditUserModalProps {
   departments: Department[];
   isAppAdmin: boolean;
   userDept?: string;
+  existingCoordinators?: Map<string, RosterUser>;
   onClose: () => void;
   onSuccess: (updatedUser: RosterUser, message: string) => void;
 }
@@ -19,6 +20,7 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
   departments,
   isAppAdmin,
   userDept,
+  existingCoordinators,
   onClose,
   onSuccess,
 }) => {
@@ -61,6 +63,19 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
     const effectiveDept = isAppAdmin ? departmentId : (userDept || departmentId);
     if (!effectiveDept) {
       setError('Department is required.');
+      return;
+    }
+
+    const existingCoord = existingCoordinators?.get(effectiveDept);
+    if (
+      role === 'coordinator' &&
+      active &&
+      existingCoord &&
+      existingCoord.email.toLowerCase() !== targetUser.email.toLowerCase()
+    ) {
+      setError(
+        `Department "${effectiveDept}" already has an assigned QIP Coordinator (${existingCoord.name || existingCoord.email}). Only one QIP Coordinator is allowed per department.`
+      );
       return;
     }
 
@@ -205,6 +220,14 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
                 <option value="hod">Head of Department (HoD)</option>
                 {isAppAdmin && <option value="admin">Admin / Leadership</option>}
               </select>
+              {role === 'coordinator' && active && existingCoordinators?.get(isAppAdmin ? departmentId : (userDept || departmentId)) && existingCoordinators.get(isAppAdmin ? departmentId : (userDept || departmentId))!.email.toLowerCase() !== targetUser.email.toLowerCase() && (
+                <div className="mt-2 p-2.5 rounded-lg bg-amber-50 border border-amber-300 text-amber-900 text-xs flex items-start gap-1.5 animate-in fade-in duration-150">
+                  <span className="text-amber-600 font-bold text-xs mt-0.5">⚠️</span>
+                  <span className="text-[11px] text-amber-800 leading-tight">
+                    <strong>{existingCoordinators.get(isAppAdmin ? departmentId : (userDept || departmentId))!.name || existingCoordinators.get(isAppAdmin ? departmentId : (userDept || departmentId))!.email}</strong> is already assigned as the QIP Coordinator for this department.
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Active Status */}

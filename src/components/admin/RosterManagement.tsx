@@ -120,6 +120,15 @@ export const RosterManagement: React.FC<RosterManagementProps> = ({ forcedDepart
 
   const existingEmails = useMemo(() => new Set(roster.map((u) => (u.email || '').toLowerCase().trim())), [roster]);
   const existingDeptIds = useMemo(() => new Set(departments.map((d) => d.id)), [departments]);
+  const existingCoordinatorsByDept = useMemo(() => {
+    const map = new Map<string, RosterUser>();
+    roster.forEach((u) => {
+      if ((u.role === 'coordinator' || u.role === ('qip_coordinator' as any)) && u.active !== false && u.department) {
+        map.set(u.department, u);
+      }
+    });
+    return map;
+  }, [roster]);
 
   // Scoped roster based on permission
   const scopedRoster = useMemo(() => {
@@ -412,6 +421,7 @@ export const RosterManagement: React.FC<RosterManagementProps> = ({ forcedDepart
           <RosterUpload
             existingEmails={existingEmails}
             existingDeptIds={existingDeptIds}
+            existingCoordinators={existingCoordinatorsByDept}
             onUploadSuccess={fetchRosterAndDepartments}
           />
         </div>
@@ -571,6 +581,7 @@ export const RosterManagement: React.FC<RosterManagementProps> = ({ forcedDepart
         departments={departments}
         isAppAdmin={Boolean(isAppAdmin)}
         userDept={userDept}
+        existingCoordinators={existingCoordinatorsByDept}
         onClose={() => {
           setIsEditModalOpen(false);
           setSelectedUserToEdit(null);
@@ -585,6 +596,7 @@ export const RosterManagement: React.FC<RosterManagementProps> = ({ forcedDepart
         departments={departments}
         existingEmails={existingEmails}
         existingDeptIds={existingDeptIds}
+        existingCoordinators={existingCoordinatorsByDept}
         userDept={userDept}
         canManageAllDepts={canManageAllDepts}
         onClose={() => setIsSingleEntryModalOpen(false)}

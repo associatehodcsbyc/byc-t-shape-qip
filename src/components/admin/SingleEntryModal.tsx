@@ -8,7 +8,7 @@ import {
   validateFacultyInput,
   NewFacultyInput,
 } from '../../services/departmentRosterService';
-import { Department, Role, AdminType } from '../../types';
+import { Department, Role, AdminType, RosterUser } from '../../types';
 
 interface SingleEntryModalProps {
   isOpen: boolean;
@@ -16,6 +16,7 @@ interface SingleEntryModalProps {
   departments: Department[];
   existingEmails: Set<string>;
   existingDeptIds: Set<string>;
+  existingCoordinators?: Map<string, RosterUser>;
   onClose: () => void;
   onSuccess: (type: 'department' | 'faculty', message: string) => void;
   userDept?: string;
@@ -28,6 +29,7 @@ export const SingleEntryModal: React.FC<SingleEntryModalProps> = ({
   departments,
   existingEmails,
   existingDeptIds,
+  existingCoordinators,
   onClose,
   onSuccess,
   userDept,
@@ -131,6 +133,20 @@ export const SingleEntryModal: React.FC<SingleEntryModalProps> = ({
     const validation = validateFacultyInput(input);
     if (!validation.valid) {
       setFacultyError(Object.values(validation.errors)[0]);
+      return;
+    }
+
+    const existingCoord = facultyDeptId && existingCoordinators ? existingCoordinators.get(facultyDeptId) : undefined;
+    const hasCoordinatorConflict =
+      facultyRole === 'coordinator' &&
+      facultyActive !== false &&
+      !!existingCoord &&
+      existingCoord.email.toLowerCase() !== cleanedEmail;
+
+    if (hasCoordinatorConflict) {
+      setFacultyError(
+        `Department already has an assigned QIP Coordinator (${existingCoord.name || existingCoord.email}). Only one QIP Coordinator is allowed per department.`
+      );
       return;
     }
 
@@ -473,6 +489,18 @@ export const SingleEntryModal: React.FC<SingleEntryModalProps> = ({
                     </button>
                   )}
                 </div>
+
+                {facultyRole === 'coordinator' && facultyActive && facultyDeptId && existingCoordinators?.get(facultyDeptId) && existingCoordinators.get(facultyDeptId)!.email.toLowerCase() !== cleanedEmail && (
+                  <div className="mt-2.5 p-3 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs flex items-start gap-2 animate-in fade-in duration-150">
+                    <span className="text-amber-600 font-bold text-sm leading-none mt-0.5">⚠️</span>
+                    <div>
+                      <div className="font-bold">QIP Coordinator Slot Occupied</div>
+                      <div className="text-[11px] text-amber-800 mt-0.5">
+                        <strong>{existingCoordinators.get(facultyDeptId)!.name || existingCoordinators.get(facultyDeptId)!.email}</strong> is already assigned as the QIP Coordinator for this department. Only one QIP Coordinator is allowed per department.
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Admin Type (Visible only when Role == Admin) */}
