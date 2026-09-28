@@ -12,7 +12,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { Activity, ActivityState, SubmissionProgress, Session, RosterUser } from '../types';
-import { isMatchingDepartment, getDepartmentVariants } from '../utils/department';
+import { isMatchingDepartment, getDepartmentVariants, isEligibleParticipant } from '../utils/department';
 
 export interface SetActivityStateParams {
   department: string;
@@ -400,6 +400,24 @@ export function subscribeToDepartmentProgress(
     return () => {};
   }
 
+  // If department is 'all', listen to entire progress collection
+  if (department === 'all') {
+    const unsub = onSnapshot(
+      collection(db, 'progress'),
+      (snapshot) => {
+        const list: SubmissionProgress[] = [];
+        snapshot.forEach((d) => {
+          list.push(d.data() as SubmissionProgress);
+        });
+        onUpdate(list);
+      },
+      (err) => {
+        if (onError) onError(err);
+      }
+    );
+    return unsub;
+  }
+
   const variants = getDepartmentVariants(department);
   const variantProgress = new Map<string, SubmissionProgress[]>();
   const unsubs: (() => void)[] = [];
@@ -446,14 +464,30 @@ export function subscribeToDepartmentProgress(
 }
 
 /**
- * Fetch participants across all department aliases from the roster.
+ * Fetch eligible participants across all department aliases from the roster.
+ * Includes faculty participants, coordinators, and resource persons (excludes HoD and Admin).
  */
 export async function getDepartmentParticipants(department: string): Promise<RosterUser[]> {
   if (!department) return [];
 
-  const variants = getDepartmentVariants(department);
   const userMap = new Map<string, RosterUser>();
 
+  if (department === 'all') {
+    try {
+      const snap = await getDocs(collection(db, 'roster'));
+      snap.forEach((d) => {
+        const data = d.data() as RosterUser;
+        if (isEligibleParticipant(data)) {
+          userMap.set(data.email.toLowerCase().trim(), data);
+        }
+      });
+    } catch (err) {
+      console.error('Failed to fetch institution-wide participants:', err);
+    }
+    return Array.from(userMap.values()).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  }
+
+  const variants = getDepartmentVariants(department);
   for (const variant of variants) {
     try {
       const q = query(
@@ -463,7 +497,7 @@ export async function getDepartmentParticipants(department: string): Promise<Ros
       const snap = await getDocs(q);
       snap.forEach((d) => {
         const data = d.data() as RosterUser;
-        if (data.role === 'participant' && data.active !== false) {
+        if (isEligibleParticipant(data)) {
           userMap.set(data.email.toLowerCase().trim(), data);
         }
       });

@@ -44,8 +44,10 @@ export const LiveTrackerModal: React.FC<LiveTrackerModalProps> = ({
 
   // Combine roster participants with their activity progress
   const participantStatuses = useMemo(() => {
-    return participants.map((p) => {
+    const emailSet = new Set<string>();
+    const list = participants.map((p) => {
       const emailLower = p.email.toLowerCase().trim();
+      emailSet.add(emailLower);
       const prog = activityProgress.get(emailLower);
       const status: 'submitted' | 'draft' | 'not-started' = prog
         ? prog.status
@@ -61,13 +63,29 @@ export const LiveTrackerModal: React.FC<LiveTrackerModalProps> = ({
         updatedAt,
       };
     });
+
+    // Safeguard: If someone submitted or drafted, but was not in the initial participants list,
+    // include them so no submission is ever dropped or invisible in the live tracker
+    activityProgress.forEach((prog, progEmail) => {
+      if (!emailSet.has(progEmail) && (prog.status === 'submitted' || prog.status === 'draft')) {
+        list.push({
+          email: prog.email || progEmail,
+          name: prog.name || progEmail.split('@')[0],
+          status: prog.status,
+          groupLabel: prog.groupLabel || '',
+          updatedAt: prog.updatedAt,
+        });
+      }
+    });
+
+    return list;
   }, [participants, activityProgress]);
 
   // Computed metrics
-  const totalCount = participants.length;
+  const totalCount = Math.max(participants.length, participantStatuses.length);
   const submittedCount = participantStatuses.filter((p) => p.status === 'submitted').length;
   const draftCount = participantStatuses.filter((p) => p.status === 'draft').length;
-  const notStartedCount = totalCount - submittedCount - draftCount;
+  const notStartedCount = Math.max(0, totalCount - submittedCount - draftCount);
 
   const submittedPct = totalCount > 0 ? Math.round((submittedCount / totalCount) * 100) : 0;
   const draftPct = totalCount > 0 ? Math.round((draftCount / totalCount) * 100) : 0;

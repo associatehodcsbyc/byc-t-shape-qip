@@ -72,4 +72,15 @@ export function isMatchingDepartment(deptA?: string, deptB?: string): boolean {
   return variantsB.some((v) => variantsA.has(v));
 }
 
+/**
+ * Determines whether a user is an eligible workshop activity participant.
+ * Eligible: participants, coordinators, resource persons.
+ * Excluded: HoDs and Admins (leadership, app admin, HRDC).
+ */
+export function isEligibleParticipant(user?: { role?: string; active?: boolean }): boolean {
+  if (!user || user.active === false) return false;
+  if (user.role === 'admin' || user.role === 'hod') return false;
+  return ['participant', 'coordinator', 'resource_person', 'facilitator', 'qip_coordinator'].includes(user.role || '');
+}
+
 

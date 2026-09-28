@@ -9,6 +9,7 @@ import {
   RosterUser,
 } from '../types';
 import { computeRatingScaleScore } from './scoring';
+import { isEligibleParticipant } from './department';
 
 /**
  * Computes arithmetic mean and population standard deviation.
@@ -538,7 +539,7 @@ export function computeAttendanceAndCertificates(
   activities: Activity[],
   roster: RosterUser[]
 ): QipAttendanceAnalysisResult {
-  const activeParticipants = roster.filter((u) => u.role === 'participant' && u.active !== false);
+  const activeParticipants = roster.filter((u) => isEligibleParticipant(u));
   const totalSessions = sessions.length || 12;
 
   // 1. Map of participantEmail -> Set of attended sessionIds (where at least one submitted activity exists)

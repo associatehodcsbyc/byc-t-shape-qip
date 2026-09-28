@@ -6,6 +6,7 @@ import { Session, Activity, SubmissionProgress, RosterUser, Department } from '.
 import defaultSessions from '../../../seed/sessions.json';
 import defaultActivities from '../../../seed/activities.json';
 import { exportQipReportPackXlsx } from '../../utils/exports';
+import { isEligibleParticipant } from '../../utils/department';
 
 export const SessionSummaryView: React.FC = () => {
   const { rosterUser, isHoDStrict, isCoordinator, isResourcePerson, isAppAdmin } = useAuth();
@@ -81,7 +82,7 @@ export const SessionSummaryView: React.FC = () => {
       const rList: RosterUser[] = [];
       rSnap.forEach((d) => {
         const u = d.data() as RosterUser;
-        if (u.role === 'participant' && u.active !== false) {
+        if (isEligibleParticipant(u)) {
           rList.push(u);
         }
       });

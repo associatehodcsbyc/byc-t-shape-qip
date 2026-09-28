@@ -22,6 +22,7 @@ import {
   DOK_LEVELS,
 } from '../../utils/analytics';
 import { exportActivityToCsv, exportActivityToXlsx } from '../../utils/exports';
+import { isEligibleParticipant } from '../../utils/department';
 import defaultActivities from '../../../seed/activities.json';
 
 interface ActivityAnalyticsProps {
@@ -152,7 +153,7 @@ export const ActivityAnalytics: React.FC<ActivityAnalyticsProps> = ({
       const rList: RosterUser[] = [];
       rSnap.forEach((d) => {
         const u = d.data() as RosterUser;
-        if (u.role === 'participant' && u.active !== false) {
+        if (isEligibleParticipant(u)) {
           rList.push(u);
         }
       });
