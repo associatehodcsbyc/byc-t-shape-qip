@@ -705,16 +705,13 @@ export const ActivityAnalytics: React.FC<ActivityAnalyticsProps> = ({
                       <p className="text-xs text-slate-800 leading-relaxed italic whitespace-pre-wrap">
                         "{item.text}"
                       </p>
-                      <div className="flex items-center justify-between pt-1 border-t border-slate-200/60 text-[10px] text-slate-500 font-medium">
-                        <span className="font-semibold text-slate-700">
-                          {isConfidential && !isAppAdmin ? 'Anonymous Faculty' : item.name}
-                        </span>
-                        {item.group && (
+                      {item.group && (
+                        <div className="flex items-center justify-end pt-1 border-t border-slate-200/60 text-[10px] text-slate-500 font-medium">
                           <span className="px-1.5 py-0.2 rounded bg-blue-50 text-blue-700 border border-blue-200 font-semibold">
                             {item.group}
                           </span>
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -928,9 +925,13 @@ export const ActivityAnalytics: React.FC<ActivityAnalyticsProps> = ({
                     filledEntries.slice(0, 5).map((e, idx) => (
                       <div key={idx} className="p-2 bg-slate-50 rounded-lg border border-slate-200 text-xs">
                         <div className="text-slate-800 line-clamp-3">{e.val}</div>
-                        <div className="text-[10px] text-slate-400 font-semibold mt-1">
-                          — {isConfidential && !isAppAdmin ? 'Anonymous Faculty' : e.name}
-                        </div>
+                        {e.group && (
+                          <div className="text-[10px] text-slate-400 font-semibold mt-1">
+                            <span className="px-1.5 py-0.2 rounded bg-blue-50 text-blue-700 border border-blue-200">
+                              {e.group}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     ))
                   )}
