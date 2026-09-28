@@ -44,6 +44,9 @@ export const Footer: React.FC = () => {
         <p className="text-[12px] sm:text-[13px] text-gray-300 print:hidden font-normal leading-tight">
           Ideated and Developed by: Dr Balakrishnan C & Dr Vinay M | CS-BYC
         </p>
+        <p className="text-[11px] sm:text-[12px] text-gray-300/90 print:hidden font-normal leading-tight">
+          Built with Google Antigravity IDE v2.4.5 · Powered by Gemini 3.8 Flash & Claude 3.7 Sonnet
+        </p>
       </div>
     </footer>
   );
