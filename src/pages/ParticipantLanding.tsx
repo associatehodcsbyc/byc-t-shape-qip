@@ -15,6 +15,8 @@ import {
   getCachedActivities,
   loadContentWithRevalidation,
 } from '../services/content';
+import { getDepartmentVariants } from '../utils/department';
+
 
 export const ParticipantLanding: React.FC = () => {
   const { user, rosterUser } = useAuth();
@@ -23,7 +25,7 @@ export const ParticipantLanding: React.FC = () => {
   const userDept = rosterUser?.department || '';
   const emailLower = user?.email?.toLowerCase().trim() || '';
 
-  const [activeDay, setActiveDay] = useState<1 | 2 | 3>(1);
+  const [activeDay, setActiveDay] = useState<1 | 2 | 3 | 'all'>(1);
   const [sessions, setSessions] = useState<Session[]>(() => getCachedSessions());
   const [activities, setActivities] = useState<Activity[]>(() => getCachedActivities());
   const [activityStates, setActivityStates] = useState<Map<string, ActivityState>>(new Map());
@@ -37,64 +39,142 @@ export const ParticipantLanding: React.FC = () => {
     });
   }, []);
 
-  // 2. Listen LIVE to activityState for current department
+  // 2. Listen LIVE to activityState for current department and its variants
   useEffect(() => {
     if (!userDept) return;
 
-    // Rules require: where('department', '==', myDept())
-    const q = query(
-      collection(db, 'activityState'),
-      where('department', '==', userDept)
-    );
+    const variants = getDepartmentVariants(userDept);
+    const variantMaps = new Map<string, Map<string, ActivityState>>();
+    const unsubs: (() => void)[] = [];
 
-    const unsub = onSnapshot(
-      q,
-      (snapshot) => {
-        const stateMap = new Map<string, ActivityState>();
-        snapshot.forEach((docSnap) => {
-          const data = docSnap.data() as ActivityState;
-          stateMap.set(data.activityId, data);
-        });
-        setActivityStates(stateMap);
-      },
-      (err) => {
-        console.error('Error listening to activityState:', err);
+    const emitMerged = () => {
+      const combined = new Map<string, ActivityState>();
+      for (const subMap of variantMaps.values()) {
+        for (const [actId, st] of subMap.entries()) {
+          const existing = combined.get(actId);
+          // If any variant marks an activity enabled, keep it enabled
+          if (!existing || (!existing.enabled && st.enabled) || (!existing.locked && st.locked)) {
+            combined.set(actId, st);
+          }
+        }
       }
-    );
+      setActivityStates(combined);
+    };
 
-    return () => unsub();
+    for (const v of variants) {
+      const q = query(
+        collection(db, 'activityState'),
+        where('department', '==', v)
+      );
+
+      const unsub = onSnapshot(
+        q,
+        (snapshot) => {
+          const stateMap = new Map<string, ActivityState>();
+          snapshot.forEach((docSnap) => {
+            const data = docSnap.data() as ActivityState;
+            stateMap.set(data.activityId, data);
+          });
+          variantMaps.set(v, stateMap);
+          emitMerged();
+        },
+        (_err) => {
+          // Ignore permission errors on non-exact alias queries per Firestore rules
+        }
+      );
+      unsubs.push(unsub);
+    }
+
+    return () => {
+      unsubs.forEach((u) => u());
+    };
   }, [userDept]);
 
-  // 3. Listen LIVE to progress for current user
+  // 3. Listen LIVE to progress for current user across department variants
   useEffect(() => {
     if (!userDept || !emailLower) return;
 
-    const q = query(
-      collection(db, 'progress'),
-      where('department', '==', userDept),
-      where('email', '==', emailLower)
-    );
+    const variants = getDepartmentVariants(userDept);
+    const variantMaps = new Map<string, Map<string, SubmissionProgress>>();
+    const unsubs: (() => void)[] = [];
 
-    const unsub = onSnapshot(
-      q,
-      (snapshot) => {
-        const progMap = new Map<string, SubmissionProgress>();
-        snapshot.forEach((docSnap) => {
-          const data = docSnap.data() as SubmissionProgress;
-          progMap.set(data.activityId, data);
-        });
-        setUserProgress(progMap);
-      },
-      (err) => {
-        console.error('Error listening to user progress:', err);
+    const emitMerged = () => {
+      const combined = new Map<string, SubmissionProgress>();
+      for (const subMap of variantMaps.values()) {
+        for (const [actId, prog] of subMap.entries()) {
+          const existing = combined.get(actId);
+          if (!existing || (prog.status === 'submitted' && existing.status !== 'submitted')) {
+            combined.set(actId, prog);
+          }
+        }
       }
-    );
+      setUserProgress(combined);
+    };
 
-    return () => unsub();
+    for (const v of variants) {
+      const q = query(
+        collection(db, 'progress'),
+        where('department', '==', v),
+        where('email', '==', emailLower)
+      );
+
+      const unsub = onSnapshot(
+        q,
+        (snapshot) => {
+          const progMap = new Map<string, SubmissionProgress>();
+          snapshot.forEach((docSnap) => {
+            const data = docSnap.data() as SubmissionProgress;
+            progMap.set(data.activityId, data);
+          });
+          variantMaps.set(v, progMap);
+          emitMerged();
+        },
+        (_err) => {}
+      );
+      unsubs.push(unsub);
+    }
+
+    return () => {
+      unsubs.forEach((u) => u());
+    };
   }, [userDept, emailLower]);
 
+  // Find currently open/live activities for this participant
+  const liveActivities = React.useMemo(() => {
+    const list: {
+      activity: Activity;
+      session: Session;
+      state: ActivityState;
+    }[] = [];
+
+    for (const act of activities) {
+      const st = activityStates.get(act.activityId);
+      if (st?.enabled === true && !st.locked) {
+        const sess = sessions.find((s) => s.sessionId === act.sessionId);
+        if (sess) {
+          list.push({ activity: act, session: sess, state: st });
+        }
+      }
+    }
+
+    return list.sort((a, b) => a.activity.order - b.activity.order);
+  }, [activities, activityStates, sessions]);
+
+  // Live activity counts per day
+  const liveCountByDay = React.useMemo(() => {
+    const counts: Record<number, number> = { 1: 0, 2: 0, 3: 0 };
+    for (const item of liveActivities) {
+      if (item.session.day >= 1 && item.session.day <= 3) {
+        counts[item.session.day] = (counts[item.session.day] || 0) + 1;
+      }
+    }
+    return counts;
+  }, [liveActivities]);
+
   // Filter sessions by active day
-  const daySessions = sessions.filter((s) => s.day === activeDay);
+  const displayedSessions = activeDay === 'all'
+    ? sessions
+    : sessions.filter((s) => s.day === activeDay);
 
   return (
     <div className="flex-1 bg-slate-50 flex flex-col">
@@ -105,9 +185,9 @@ export const ParticipantLanding: React.FC = () => {
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-                    Participant Portal
-                  </span>
+              <span className="px-2.5 py-0.5 rounded text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                Participant Portal
+              </span>
               <span className="text-xs font-mono text-slate-500">
                 Dept: <strong className="text-slate-800">{rosterUser?.department}</strong>
               </span>
@@ -130,33 +210,84 @@ export const ParticipantLanding: React.FC = () => {
           </div>
         </div>
 
+        {/* Live Activity In Progress Alert Banner (Instant Jump) */}
+        {liveActivities.length > 0 && (
+          <div className="bg-gradient-to-r from-emerald-700 via-teal-700 to-slate-900 text-white rounded-2xl p-5 shadow-md border border-emerald-500/30 animate-in fade-in duration-300">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-2.5 w-2.5 relative">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-300"></span>
+                  </span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-200">
+                    Active Workshop Activity • HoD Enabled
+                  </span>
+                </div>
+                <h3 className="text-lg font-black text-white leading-tight">
+                  {liveActivities[0].activity.title}
+                </h3>
+                <p className="text-xs text-emerald-100">
+                  {liveActivities[0].session.title} (Slot {liveActivities[0].session.slot} • {liveActivities[0].session.time} IST)
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {liveActivities.length > 1 && (
+                  <span className="text-xs text-emerald-200 font-medium">
+                    +{liveActivities.length - 1} other open
+                  </span>
+                )}
+                <button
+                  type="button"
+                  id="btn-jump-live-activity"
+                  onClick={() => navigate(`/activity/${liveActivities[0].activity.activityId}`)}
+                  className="px-5 py-2.5 bg-white text-emerald-900 hover:bg-emerald-50 rounded-xl font-bold text-xs sm:text-sm transition shadow flex items-center gap-2"
+                >
+                  <span>Start Worksheet Now</span>
+                  <span>→</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Day Tabs */}
         <div className="border-b border-slate-200">
-          <nav className="flex space-x-6 sm:space-x-8">
+          <nav className="flex space-x-4 sm:space-x-8 overflow-x-auto pb-1">
             {[
-              { day: 1, label: 'Day 1 (28 Sept)' },
-              { day: 2, label: 'Day 2 (29 Sept)' },
-              { day: 3, label: 'Day 3 (30 Sept)' },
-            ].map(({ day, label }) => (
-              <button
-                key={day}
-                type="button"
-                onClick={() => setActiveDay(day as any)}
-                className={`py-3 px-1 text-sm font-bold border-b-2 transition ${
-                  activeDay === day
-                    ? 'border-christ-navy text-christ-navy'
-                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
+              { day: 1 as const, label: 'Day 1 (28 Sept)' },
+              { day: 2 as const, label: 'Day 2 (29 Sept)' },
+              { day: 3 as const, label: 'Day 3 (30 Sept)' },
+              { day: 'all' as const, label: 'All Days' },
+            ].map(({ day, label }) => {
+              const count = typeof day === 'number' ? liveCountByDay[day] : liveActivities.length;
+              return (
+                <button
+                  key={day}
+                  type="button"
+                  onClick={() => setActiveDay(day)}
+                  className={`py-3 px-2 text-xs sm:text-sm font-bold border-b-2 transition flex items-center gap-1.5 whitespace-nowrap ${
+                    activeDay === day
+                      ? 'border-christ-navy text-christ-navy'
+                      : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                  }`}
+                >
+                  <span>{label}</span>
+                  {count > 0 && (
+                    <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                      {count} Live
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </nav>
         </div>
 
         {/* Sessions & Activities Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {daySessions.map((session) => {
+          {displayedSessions.map((session) => {
             const sessionActivities = activities.filter(
               (a) => a.sessionId === session.sessionId
             );
@@ -175,7 +306,7 @@ export const ParticipantLanding: React.FC = () => {
                 <div>
                   <div className="flex items-center justify-between text-xs font-semibold text-christ-gold mb-2">
                     <span className="font-mono">
-                      SLOT {session.slot} • {session.time} IST
+                      DAY {session.day} • SLOT {session.slot} • {session.time} IST
                     </span>
                     <span
                       className={`px-2 py-0.5 rounded text-[11px] font-bold ${
@@ -215,7 +346,7 @@ export const ParticipantLanding: React.FC = () => {
                               <span className="font-mono font-bold text-slate-500">Activity {act.order}:</span>
                               <span>{act.title}</span>
                             </span>
-                            <span className="text-[11px] italic shrink-0">
+                            <span className="text-[11px] italic shrink-0 text-slate-400">
                               Awaiting HoD
                             </span>
                           </div>
@@ -262,16 +393,17 @@ export const ParticipantLanding: React.FC = () => {
                                 🔒 Locked
                               </span>
                             ) : status === 'submitted' ? (
-                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                              <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
                                 ✓ Submitted
                               </span>
                             ) : status === 'draft' ? (
-                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                              <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
                                 ✏ Draft
                               </span>
                             ) : (
-                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-christ-navy text-white hover:bg-slate-800">
-                                Start →
+                              <span className="px-3 py-1 rounded-lg text-[11px] font-bold bg-christ-navy text-white hover:bg-slate-800 shadow-sm flex items-center gap-1">
+                                <span>Start</span>
+                                <span>→</span>
                               </span>
                             )}
                           </div>
@@ -288,3 +420,5 @@ export const ParticipantLanding: React.FC = () => {
     </div>
   );
 };
+
+

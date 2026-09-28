@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { toDepartmentId } from '../src/utils/department';
+import { toDepartmentId, getDepartmentVariants } from '../src/utils/department';
 
 describe('toDepartmentId utility', () => {
   it('converts "Computer Science" to "computer-science"', () => {
@@ -37,3 +37,30 @@ describe('toDepartmentId utility', () => {
     expect(toDepartmentId('')).toBe('');
   });
 });
+
+describe('getDepartmentVariants utility', () => {
+  it('returns both slug and display variants for "Computer Science"', () => {
+    const variants = getDepartmentVariants('Computer Science');
+    expect(variants).toContain('Computer Science');
+    expect(variants).toContain('computer-science');
+  });
+
+  it('returns title case and slug for "computer-science"', () => {
+    const variants = getDepartmentVariants('computer-science');
+    expect(variants).toContain('computer-science');
+    expect(variants).toContain('Computer Science');
+  });
+
+  it('handles variants with BYC campus suffix', () => {
+    const variants = getDepartmentVariants('Computer Science - BYC');
+    expect(variants).toContain('Computer Science - BYC');
+    expect(variants).toContain('Computer Science');
+    expect(variants).toContain('computer-science');
+  });
+
+  it('handles empty or whitespace strings', () => {
+    expect(getDepartmentVariants('')).toEqual([]);
+    expect(getDepartmentVariants('   ')).toEqual([]);
+  });
+});
+

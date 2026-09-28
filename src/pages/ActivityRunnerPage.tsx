@@ -8,6 +8,8 @@ import { Header } from '../components/Header';
 import { ActivityEngine } from '../components/ActivityEngine';
 
 import { getCachedActivityById, fetchActivityById } from '../services/content';
+import { getDepartmentVariants } from '../utils/department';
+
 
 export const ActivityRunnerPage: React.FC = () => {
   const { activityId } = useParams<{ activityId: string }>();
@@ -47,27 +49,57 @@ export const ActivityRunnerPage: React.FC = () => {
           setLoading(false);
         }
 
-        // Listen live to activityState for this department
+        // Listen live to activityState for this department and its variants
         if (departmentId) {
-          const stateId = `${departmentId}__${activityId}`;
-          const stateRef = doc(db, 'activityState', stateId);
+          const variants = getDepartmentVariants(departmentId);
+          const stateSnapMap = new Map<string, ActivityState | null>();
+          const unsubs: (() => void)[] = [];
 
-          unsubState = onSnapshot(
-            stateRef,
-            (snap) => {
-              if (!isMounted) return;
-              if (snap.exists()) {
-                setActivityState(snap.data() as ActivityState);
-              } else {
-                setActivityState(null);
+          const resolveState = () => {
+            if (!isMounted) return;
+            // Prefer an explicitly enabled state record
+            let chosen: ActivityState | null = null;
+            for (const st of stateSnapMap.values()) {
+              if (st && st.enabled) {
+                chosen = st;
+                break;
               }
-              setLoading(false);
-            },
-            (err) => {
-              console.error('Error listening to activityState:', err);
-              if (isMounted) setLoading(false);
             }
-          );
+            // Fallback to any existing state record if none is enabled
+            if (!chosen) {
+              for (const st of stateSnapMap.values()) {
+                if (st) {
+                  chosen = st;
+                  break;
+                }
+              }
+            }
+            setActivityState(chosen);
+            setLoading(false);
+          };
+
+          for (const v of variants) {
+            const stateId = `${v}__${activityId}`;
+            const stateRef = doc(db, 'activityState', stateId);
+
+            const u = onSnapshot(
+              stateRef,
+              (snap) => {
+                if (!isMounted) return;
+                stateSnapMap.set(v, snap.exists() ? (snap.data() as ActivityState) : null);
+                resolveState();
+              },
+              (_err) => {
+                stateSnapMap.set(v, null);
+                resolveState();
+              }
+            );
+            unsubs.push(u);
+          }
+
+          unsubState = () => {
+            unsubs.forEach((fn) => fn());
+          };
         } else {
           if (isMounted) setLoading(false);
         }
