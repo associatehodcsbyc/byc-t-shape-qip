@@ -5,6 +5,7 @@ import {
   query,
   where,
   onSnapshot,
+  getDocs,
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAuth } from '../context/AuthContext';
@@ -15,8 +16,8 @@ import {
   getCachedActivities,
   loadContentWithRevalidation,
 } from '../services/content';
-import { getDepartmentVariants } from '../utils/department';
-
+import { subscribeToDepartmentActivityStates } from '../services/activityState';
+import { isMatchingDepartment } from '../utils/department';
 
 export const ParticipantLanding: React.FC = () => {
   const { user, rosterUser } = useAuth();
@@ -30,6 +31,7 @@ export const ParticipantLanding: React.FC = () => {
   const [activities, setActivities] = useState<Activity[]>(() => getCachedActivities());
   const [activityStates, setActivityStates] = useState<Map<string, ActivityState>>(new Map());
   const [userProgress, setUserProgress] = useState<Map<string, SubmissionProgress>>(new Map());
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
   // 1. Instant cache with background revalidation
   useEffect(() => {
@@ -39,105 +41,49 @@ export const ParticipantLanding: React.FC = () => {
     });
   }, []);
 
-  // 2. Listen LIVE to activityState for current department and its variants
+  // 2. Listen LIVE to activityState for current department (fuzzy/flexible matching across all aliases)
   useEffect(() => {
     if (!userDept) return;
 
-    const variants = getDepartmentVariants(userDept);
-    const variantMaps = new Map<string, Map<string, ActivityState>>();
-    const unsubs: (() => void)[] = [];
-
-    const emitMerged = () => {
-      const combined = new Map<string, ActivityState>();
-      for (const subMap of variantMaps.values()) {
-        for (const [actId, st] of subMap.entries()) {
-          const existing = combined.get(actId);
-          // If any variant marks an activity enabled, keep it enabled
-          if (!existing || (!existing.enabled && st.enabled) || (!existing.locked && st.locked)) {
-            combined.set(actId, st);
-          }
-        }
+    const unsub = subscribeToDepartmentActivityStates(
+      userDept,
+      (stateMap) => {
+        setActivityStates(stateMap);
+      },
+      (err) => {
+        console.warn('ParticipantLanding activityState error:', err);
       }
-      setActivityStates(combined);
-    };
+    );
 
-    for (const v of variants) {
-      const q = query(
-        collection(db, 'activityState'),
-        where('department', '==', v)
-      );
-
-      const unsub = onSnapshot(
-        q,
-        (snapshot) => {
-          const stateMap = new Map<string, ActivityState>();
-          snapshot.forEach((docSnap) => {
-            const data = docSnap.data() as ActivityState;
-            stateMap.set(data.activityId, data);
-          });
-          variantMaps.set(v, stateMap);
-          emitMerged();
-        },
-        (_err) => {
-          // Ignore permission errors on non-exact alias queries per Firestore rules
-        }
-      );
-      unsubs.push(unsub);
-    }
-
-    return () => {
-      unsubs.forEach((u) => u());
-    };
+    return () => unsub();
   }, [userDept]);
 
-  // 3. Listen LIVE to progress for current user across department variants
+  // 3. Listen LIVE to progress for current user
   useEffect(() => {
-    if (!userDept || !emailLower) return;
+    if (!emailLower) return;
 
-    const variants = getDepartmentVariants(userDept);
-    const variantMaps = new Map<string, Map<string, SubmissionProgress>>();
-    const unsubs: (() => void)[] = [];
+    const q = query(
+      collection(db, 'progress'),
+      where('email', '==', emailLower)
+    );
 
-    const emitMerged = () => {
-      const combined = new Map<string, SubmissionProgress>();
-      for (const subMap of variantMaps.values()) {
-        for (const [actId, prog] of subMap.entries()) {
-          const existing = combined.get(actId);
-          if (!existing || (prog.status === 'submitted' && existing.status !== 'submitted')) {
-            combined.set(actId, prog);
-          }
-        }
+    const unsub = onSnapshot(
+      q,
+      (snapshot) => {
+        const progMap = new Map<string, SubmissionProgress>();
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data() as SubmissionProgress;
+          progMap.set(data.activityId, data);
+        });
+        setUserProgress(progMap);
+      },
+      (err) => {
+        console.warn('ParticipantLanding progress listener warning:', err);
       }
-      setUserProgress(combined);
-    };
+    );
 
-    for (const v of variants) {
-      const q = query(
-        collection(db, 'progress'),
-        where('department', '==', v),
-        where('email', '==', emailLower)
-      );
-
-      const unsub = onSnapshot(
-        q,
-        (snapshot) => {
-          const progMap = new Map<string, SubmissionProgress>();
-          snapshot.forEach((docSnap) => {
-            const data = docSnap.data() as SubmissionProgress;
-            progMap.set(data.activityId, data);
-          });
-          variantMaps.set(v, progMap);
-          emitMerged();
-        },
-        (_err) => {}
-      );
-      unsubs.push(unsub);
-    }
-
-    return () => {
-      unsubs.forEach((u) => u());
-    };
-  }, [userDept, emailLower]);
+    return () => unsub();
+  }, [emailLower]);
 
   // Find currently open/live activities for this participant
   const liveActivities = React.useMemo(() => {
@@ -176,6 +122,29 @@ export const ParticipantLanding: React.FC = () => {
     ? sessions
     : sessions.filter((s) => s.day === activeDay);
 
+  const handleManualRefresh = async () => {
+    if (!userDept) return;
+    setIsRefreshing(true);
+    try {
+      const snap = await getDocs(collection(db, 'activityState'));
+      const stateMap = new Map<string, ActivityState>();
+      snap.forEach((d) => {
+        const data = d.data() as ActivityState;
+        if (isMatchingDepartment(data.department, userDept)) {
+          const existing = stateMap.get(data.activityId);
+          if (!existing || (!existing.enabled && data.enabled) || (!existing.locked && data.locked)) {
+            stateMap.set(data.activityId, data);
+          }
+        }
+      });
+      setActivityStates(stateMap);
+    } catch (err) {
+      console.error('Manual refresh error:', err);
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 400);
+    }
+  };
+
   return (
     <div className="flex-1 bg-slate-50 flex flex-col">
       <Header />
@@ -200,7 +169,17 @@ export const ParticipantLanding: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleManualRefresh}
+              disabled={isRefreshing}
+              id="btn-refresh-activities"
+              className="px-3.5 py-2 text-xs font-semibold text-christ-navy bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 transition shadow-sm flex items-center gap-1.5 disabled:opacity-50"
+              title="Check for newly enabled activities"
+            >
+              <span className={isRefreshing ? 'animate-spin inline-block' : ''}>🔄</span>
+              <span>{isRefreshing ? 'Checking...' : 'Refresh Status'}</span>
+            </button>
             <button
               onClick={() => alert('Working Document view is available in Day 2-3.')}
               className="px-3.5 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg border border-slate-300 transition shadow-sm"

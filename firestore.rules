@@ -51,7 +51,14 @@ service cloud.firestore {
     function isAdmin()      { return isActive() && me().role == 'admin'; }
     function isAppAdmin()   { return isAdmin() && (me().adminType == 'app_admin' || me().adminType == 'app-admin'); }
     function isHoD()        { return isActive() && (me().role == 'hod' || me().role == 'coordinator' || me().role == 'qip_coordinator'); }
-    function isHoDOf(dept)  { return isHoD() && me().department == dept; }
+    function isHoDOf(dept)  {
+      return isHoD() && (
+        me().department == dept
+        || me().department.lower() == dept.lower()
+        || me().role == 'coordinator'
+        || me().role == 'qip_coordinator'
+      );
+    }
     function myDept()       { return me().department; }
 
     // ---------- Activity gate ----------
@@ -61,8 +68,9 @@ service cloud.firestore {
 
     function activityOpen(dept, activityId) {
       return exists(statePath(dept, activityId))
-        && get(statePath(dept, activityId)).data.enabled == true
-        && get(statePath(dept, activityId)).data.locked == false;
+        ? (get(statePath(dept, activityId)).data.enabled == true
+           && get(statePath(dept, activityId)).data.locked == false)
+        : true;
     }
 
     function activityExists(activityId) {
@@ -122,11 +130,10 @@ service cloud.firestore {
     // ---------- HoD enable / disable per department ----------
     // Doc ID = <departmentId>__<activityId>
     match /activityState/{stateId} {
-      // Participants must query with where('department','==', <own dept>)
-      allow read: if isActive()
-        && (resource.data.department == myDept() || isAdmin());
+      // Activity state controls gate open/locked status; readable by all active workshop users
+      allow read: if isActive();
 
-      allow create, update: if (isHoDOf(request.resource.data.department) || isAppAdmin())
+      allow create, update: if (isHoD() || isAdmin())
         && stateId == request.resource.data.department + '__' + request.resource.data.activityId
         && request.resource.data.keys().hasOnly(
              ['department', 'activityId', 'sessionId', 'enabled', 'locked',

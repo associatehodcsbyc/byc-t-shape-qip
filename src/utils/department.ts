@@ -52,3 +52,24 @@ export function getDepartmentVariants(raw: string): string[] {
   return Array.from(variants).filter(Boolean);
 }
 
+/**
+ * Checks whether two department strings match under any formatting
+ * (e.g. slug, title-case, with or without campus suffixes, spaces, hyphens).
+ */
+export function isMatchingDepartment(deptA?: string, deptB?: string): boolean {
+  if (!deptA || !deptB) return false;
+  const a = deptA.trim().toLowerCase();
+  const b = deptB.trim().toLowerCase();
+  if (a === b) return true;
+  if (toDepartmentId(deptA) === toDepartmentId(deptB)) return true;
+
+  const cleanA = a.replace(/[^a-z0-9]/g, '');
+  const cleanB = b.replace(/[^a-z0-9]/g, '');
+  if (cleanA && cleanB && cleanA === cleanB) return true;
+
+  const variantsA = new Set(getDepartmentVariants(deptA).map((v) => v.toLowerCase().trim()));
+  const variantsB = getDepartmentVariants(deptB).map((v) => v.toLowerCase().trim());
+  return variantsB.some((v) => variantsA.has(v));
+}
+
+

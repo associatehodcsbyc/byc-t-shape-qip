@@ -12,7 +12,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { Activity, ActivityState, SubmissionProgress, Session, RosterUser } from '../types';
-import { getDepartmentVariants } from '../utils/department';
+import { isMatchingDepartment, getDepartmentVariants } from '../utils/department';
 
 export interface SetActivityStateParams {
   department: string;
@@ -179,6 +179,7 @@ export async function setSessionActivitiesState({
 
 /**
  * Subscribe in real time to activity states for a department and its aliases.
+ * Reads the activityState collection and matches using flexible department comparison.
  */
 export function subscribeToDepartmentActivityStates(
   department: string,
@@ -190,54 +191,32 @@ export function subscribeToDepartmentActivityStates(
     return () => {};
   }
 
-  const variants = getDepartmentVariants(department);
-  const variantMaps = new Map<string, Map<string, ActivityState>>();
-  const unsubs: (() => void)[] = [];
-
-  const emitMerged = () => {
-    const combined = new Map<string, ActivityState>();
-    // Merge: If any variant marks an activity enabled, keep it enabled
-    for (const subMap of variantMaps.values()) {
-      for (const [actId, st] of subMap.entries()) {
-        const existing = combined.get(actId);
-        if (!existing || (!existing.enabled && st.enabled) || (!existing.locked && st.locked)) {
-          combined.set(actId, st);
+  // Subscribe to activityState collection in real time.
+  // In-memory matching ensures that whether states are stored under slug (computer-science)
+  // or title (Computer Science), the participant receives all matching activity states instantly.
+  const unsub = onSnapshot(
+    collection(db, 'activityState'),
+    (snapshot) => {
+      const stateMap = new Map<string, ActivityState>();
+      snapshot.forEach((d) => {
+        const data = d.data() as ActivityState;
+        if (isMatchingDepartment(data.department, department)) {
+          const existing = stateMap.get(data.activityId);
+          // If any matching record has enabled=true, honor it
+          if (!existing || (!existing.enabled && data.enabled) || (!existing.locked && data.locked)) {
+            stateMap.set(data.activityId, data);
+          }
         }
-      }
+      });
+      onUpdate(stateMap);
+    },
+    (err) => {
+      console.warn('Real-time activityState collection listener warning:', err);
+      if (onError) onError(err);
     }
-    onUpdate(combined);
-  };
+  );
 
-  for (const variant of variants) {
-    const q = query(
-      collection(db, 'activityState'),
-      where('department', '==', variant)
-    );
-
-    const unsub = onSnapshot(
-      q,
-      (snapshot) => {
-        const map = new Map<string, ActivityState>();
-        snapshot.forEach((d) => {
-          const data = d.data() as ActivityState;
-          map.set(data.activityId, data);
-        });
-        variantMaps.set(variant, map);
-        emitMerged();
-      },
-      (err) => {
-        // If one alias is denied by Firestore security rules, don't crash other valid listeners
-        if (variants.length === 1 && onError) {
-          onError(err);
-        }
-      }
-    );
-    unsubs.push(unsub);
-  }
-
-  return () => {
-    unsubs.forEach((u) => u());
-  };
+  return unsub;
 }
 
 /**
