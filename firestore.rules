@@ -79,7 +79,11 @@ service cloud.firestore {
       // HoD list queries MUST filter: where('department','==', <own dept>)
       allow list: if isAdmin()
         || (isHoD() && resource.data.department == myDept());
-      allow create, update: if isAppAdmin()
+      allow create, update: if (isAppAdmin()
+        || (isHoD()
+            && request.resource.data.department == myDept()
+            && (resource == null || resource.data.department == myDept())
+            && request.resource.data.role in ['participant', 'hod', 'coordinator', 'qip_coordinator']))
         && rEmail == request.resource.data.email
         && request.resource.data.keys().hasOnly(
              ['email', 'name', 'department', 'role', 'adminType', 'active',

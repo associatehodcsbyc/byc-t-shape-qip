@@ -1,12 +1,13 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Papa from 'papaparse';
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, query, where } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import { useAuth } from '../../context/AuthContext';
 import { SingleEntryModal } from './SingleEntryModal';
 import { EditUserModal } from './EditUserModal';
 import { RosterUpload } from '../RosterUpload';
 import { RosterUser, Department } from '../../types';
+import { toDepartmentId } from '../../utils/department';
 
 interface RosterManagementProps {
   // If passed, locks the view to this department (e.g. for HoD or QIP Coordinator)
@@ -14,9 +15,10 @@ interface RosterManagementProps {
 }
 
 export const RosterManagement: React.FC<RosterManagementProps> = ({ forcedDepartmentId }) => {
-  const { rosterUser, isAppAdmin, isHoD, isCoordinator } = useAuth();
+  const { rosterUser, isAppAdmin, isAdmin, isHoD, isCoordinator } = useAuth();
 
   const userDept = forcedDepartmentId || (isHoD || isCoordinator ? rosterUser?.department : undefined);
+  const canViewAllDepts = (isAppAdmin || isAdmin) && !forcedDepartmentId;
   const canManageAllDepts = isAppAdmin && !forcedDepartmentId;
 
   const [roster, setRoster] = useState<RosterUser[]>([]);
@@ -37,18 +39,33 @@ export const RosterManagement: React.FC<RosterManagementProps> = ({ forcedDepart
   const [singleEntryTab, setSingleEntryTab] = useState<'department' | 'faculty'>('faculty');
 
   // Fetch roster and departments
-  const fetchRosterAndDepartments = async () => {
+  const fetchRosterAndDepartments = useCallback(async () => {
+    // If not permitted to view all depts and userDept is not yet loaded, wait
+    if (!canViewAllDepts && !userDept) {
+      return;
+    }
+
     setLoading(true);
     try {
-      const rosterSnap = await getDocs(collection(db, 'roster'));
-      const rosterList: RosterUser[] = [];
-      rosterSnap.forEach((docSnap) => {
-        rosterList.push(docSnap.data() as RosterUser);
-      });
+      let rosterList: RosterUser[] = [];
+      if (canViewAllDepts) {
+        const rosterSnap = await getDocs(collection(db, 'roster'));
+        rosterSnap.forEach((docSnap) => {
+          rosterList.push(docSnap.data() as RosterUser);
+        });
+      } else if (userDept) {
+        // HoD / Coordinator: Query MUST be filtered by department to satisfy Firestore security rules
+        const q = query(collection(db, 'roster'), where('department', '==', userDept));
+        const rosterSnap = await getDocs(q);
+        rosterSnap.forEach((docSnap) => {
+          rosterList.push(docSnap.data() as RosterUser);
+        });
+      }
+
       rosterList.sort((a, b) => {
-        const deptCompare = a.department.localeCompare(b.department);
+        const deptCompare = (a.department || '').localeCompare(b.department || '');
         if (deptCompare !== 0) return deptCompare;
-        return a.name.localeCompare(b.name);
+        return (a.name || '').localeCompare(b.name || '');
       });
       setRoster(rosterList);
 
@@ -57,18 +74,35 @@ export const RosterManagement: React.FC<RosterManagementProps> = ({ forcedDepart
       deptSnap.forEach((docSnap) => {
         deptList.push({ id: docSnap.id, ...(docSnap.data() as any) });
       });
-      deptList.sort((a, b) => a.name.localeCompare(b.name));
+
+      if (deptList.length === 0) {
+        deptList.push(
+          { id: 'computer-science', name: 'Computer Science', campus: 'BYC' },
+          { id: 'commerce', name: 'Commerce', campus: 'BYC' },
+          { id: 'management', name: 'Management', campus: 'BYC' },
+          { id: 'sciences', name: 'Sciences', campus: 'BYC' }
+        );
+      }
+      if (userDept && !deptList.some((d) => d.id === userDept)) {
+        deptList.push({
+          id: userDept,
+          name: userDept.split('-').map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join(' '),
+          campus: 'BYC',
+        });
+      }
+
+      deptList.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
       setDepartments(deptList);
     } catch (err) {
       console.error('Error fetching roster data:', err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [canViewAllDepts, userDept]);
 
   useEffect(() => {
     fetchRosterAndDepartments();
-  }, []);
+  }, [fetchRosterAndDepartments]);
 
   // Department ID to name lookup map
   const deptMap = useMemo(() => {
@@ -84,23 +118,30 @@ export const RosterManagement: React.FC<RosterManagementProps> = ({ forcedDepart
     }
   }, [userDept]);
 
-  const existingEmails = useMemo(() => new Set(roster.map((u) => u.email.toLowerCase().trim())), [roster]);
+  const existingEmails = useMemo(() => new Set(roster.map((u) => (u.email || '').toLowerCase().trim())), [roster]);
   const existingDeptIds = useMemo(() => new Set(departments.map((d) => d.id)), [departments]);
 
   // Scoped roster based on permission
   const scopedRoster = useMemo(() => {
-    if (userDept) {
-      return roster.filter((u) => u.department === userDept);
+    if (userDept && canViewAllDepts) {
+      const targetSlug = toDepartmentId(userDept);
+      const targetLower = userDept.trim().toLowerCase();
+      return roster.filter(
+        (u) =>
+          u.department === userDept ||
+          (u.department && toDepartmentId(u.department) === targetSlug) ||
+          (u.department && u.department.trim().toLowerCase() === targetLower)
+      );
     }
     return roster;
-  }, [roster, userDept]);
+  }, [roster, userDept, canViewAllDepts]);
 
   // Live matching users for "Type Name to Edit"
   const matchingUsersToEdit = useMemo(() => {
     const q = typeToEditQuery.trim().toLowerCase();
     if (!q || q.length < 2) return [];
     return scopedRoster
-      .filter((u) => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q))
+      .filter((u) => (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q))
       .slice(0, 8);
   }, [scopedRoster, typeToEditQuery]);
 
@@ -109,20 +150,20 @@ export const RosterManagement: React.FC<RosterManagementProps> = ({ forcedDepart
     return scopedRoster
       .filter((u) => {
         const matchesSearch =
-          u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          u.email.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesDept = selectedDept === 'all' || u.department === selectedDept;
+          (u.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (u.email || '').toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesDept = !canViewAllDepts || selectedDept === 'all' || u.department === selectedDept;
         const matchesRole = selectedRole === 'all' || u.role === selectedRole;
         return matchesSearch && matchesDept && matchesRole;
       })
       .sort((a, b) => {
-        const deptA = deptMap.get(a.department)?.name || a.department;
-        const deptB = deptMap.get(b.department)?.name || b.department;
+        const deptA = deptMap.get(a.department)?.name || a.department || '';
+        const deptB = deptMap.get(b.department)?.name || b.department || '';
         const deptCompare = deptA.localeCompare(deptB);
         if (deptCompare !== 0) return deptCompare;
-        return a.name.localeCompare(b.name);
+        return (a.name || '').localeCompare(b.name || '');
       });
-  }, [scopedRoster, searchTerm, selectedDept, selectedRole, deptMap]);
+  }, [scopedRoster, searchTerm, selectedDept, selectedRole, deptMap, canViewAllDepts]);
 
   // Toggle user activation
   const handleToggleActive = async (targetUser: RosterUser) => {
@@ -544,6 +585,8 @@ export const RosterManagement: React.FC<RosterManagementProps> = ({ forcedDepart
         departments={departments}
         existingEmails={existingEmails}
         existingDeptIds={existingDeptIds}
+        userDept={userDept}
+        canManageAllDepts={canManageAllDepts}
         onClose={() => setIsSingleEntryModalOpen(false)}
         onSuccess={handleSingleEntrySuccess}
       />
