@@ -87,21 +87,24 @@ service cloud.firestore {
       allow get: if isChristAccount()
         && (rEmail == email()
             || isAdmin()
+            || isCoordinator()
             || (isHoD() && resource.data.department == myDept()));
       // HoD list queries MUST filter: where('department','==', <own dept>)
       allow list: if isAdmin()
+        || isCoordinator()
         || (isHoD() && resource.data.department == myDept());
       allow create, update: if (isAppAdmin()
+        || isCoordinator()
         || (isHoD()
             && request.resource.data.department == myDept()
             && (resource == null || resource.data.department == myDept())
-            && request.resource.data.role in ['participant', 'hod', 'coordinator', 'qip_coordinator']))
+            && request.resource.data.role in ['participant', 'hod', 'coordinator', 'qip_coordinator', 'resource_person']))
         && rEmail == request.resource.data.email
         && request.resource.data.keys().hasOnly(
              ['email', 'name', 'department', 'role', 'adminType', 'active',
               'uploadedBy', 'uploadedAt'])
         && request.resource.data.email.matches('^[a-z0-9._%+-]+@christuniversity[.]in$')
-        && request.resource.data.role in ['participant', 'hod', 'coordinator', 'qip_coordinator', 'admin']
+        && request.resource.data.role in ['participant', 'hod', 'coordinator', 'qip_coordinator', 'resource_person', 'admin']
         && request.resource.data.active is bool
         && (request.resource.data.role != 'admin'
             || request.resource.data.adminType in ['app_admin', 'app-admin', 'dean', 'associate_dean', 'hrdc']);
