@@ -383,7 +383,9 @@ export const RosterManagement: React.FC<RosterManagementProps> = ({ forcedDepart
                     </div>
                     <div className="text-[11px] text-slate-500 mt-0.5">
                       Dept: <strong className="text-slate-700">{u.department}</strong> • Role:{' '}
-                      <span className="capitalize font-semibold text-christ-navy">{u.role}</span>
+                      <span className="font-semibold text-christ-navy">
+                        {u.role === 'resource_person' ? 'Resource Person' : u.role === 'coordinator' ? 'QIP Coordinator' : u.role === 'hod' ? 'HoD' : u.role}
+                      </span>
                       {!u.active && (
                         <span className="ml-1 text-[10px] text-amber-700 bg-amber-100 px-1.5 py-0.2 rounded font-bold">
                           Inactive
@@ -477,6 +479,7 @@ export const RosterManagement: React.FC<RosterManagementProps> = ({ forcedDepart
             <option value="all">All Roles</option>
             <option value="participant">Participant</option>
             <option value="coordinator">QIP Coordinator</option>
+            <option value="resource_person">Resource Person</option>
             <option value="hod">HoD</option>
             <option value="admin">Admin</option>
           </select>
@@ -535,10 +538,12 @@ export const RosterManagement: React.FC<RosterManagementProps> = ({ forcedDepart
                             ? 'bg-amber-100 text-amber-900 border border-amber-200'
                             : u.role === 'coordinator'
                             ? 'bg-blue-100 text-blue-900 border border-blue-200'
+                            : u.role === 'resource_person'
+                            ? 'bg-indigo-100 text-indigo-900 border border-indigo-200'
                             : 'bg-slate-100 text-slate-700 border border-slate-200'
                         }`}
                       >
-                        {u.role === 'coordinator' ? 'QIP Coordinator' : u.role}
+                        {u.role === 'coordinator' ? 'QIP Coordinator' : u.role === 'resource_person' ? 'Resource Person' : u.role === 'hod' ? 'HoD' : u.role}
                       </span>
                     </td>
                     <td className="py-3 px-4">

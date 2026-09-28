@@ -217,6 +217,7 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
               >
                 <option value="participant">Participant</option>
                 <option value="coordinator">QIP Coordinator</option>
+                <option value="resource_person">Resource Person</option>
                 <option value="hod">Head of Department (HoD)</option>
                 {isAppAdmin && <option value="admin">Admin / Leadership</option>}
               </select>
