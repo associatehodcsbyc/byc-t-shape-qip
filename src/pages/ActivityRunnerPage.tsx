@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { doc, onSnapshot } from 'firebase/firestore';
-import { db } from '../config/firebase';
 import { useAuth } from '../context/AuthContext';
 import { Activity, ActivityState } from '../types';
 import { Header } from '../components/Header';
 import { ActivityEngine } from '../components/ActivityEngine';
 
 import { getCachedActivityById, fetchActivityById } from '../services/content';
-import { getDepartmentVariants } from '../utils/department';
+import { subscribeToDepartmentActivityStates } from '../services/activityState';
 
 
 export const ActivityRunnerPage: React.FC = () => {
@@ -49,57 +47,14 @@ export const ActivityRunnerPage: React.FC = () => {
           setLoading(false);
         }
 
-        // Listen live to activityState for this department and its variants
+        // Listen live to activityState using resilient department matching and 'all' gate
         if (departmentId) {
-          const variants = getDepartmentVariants(departmentId);
-          const stateSnapMap = new Map<string, ActivityState | null>();
-          const unsubs: (() => void)[] = [];
-
-          const resolveState = () => {
+          unsubState = subscribeToDepartmentActivityStates(departmentId, (map) => {
             if (!isMounted) return;
-            // Prefer an explicitly enabled state record
-            let chosen: ActivityState | null = null;
-            for (const st of stateSnapMap.values()) {
-              if (st && st.enabled) {
-                chosen = st;
-                break;
-              }
-            }
-            // Fallback to any existing state record if none is enabled
-            if (!chosen) {
-              for (const st of stateSnapMap.values()) {
-                if (st) {
-                  chosen = st;
-                  break;
-                }
-              }
-            }
-            setActivityState(chosen);
+            const st = map.get(activityId!);
+            setActivityState(st || null);
             setLoading(false);
-          };
-
-          for (const v of variants) {
-            const stateId = `${v}__${activityId}`;
-            const stateRef = doc(db, 'activityState', stateId);
-
-            const u = onSnapshot(
-              stateRef,
-              (snap) => {
-                if (!isMounted) return;
-                stateSnapMap.set(v, snap.exists() ? (snap.data() as ActivityState) : null);
-                resolveState();
-              },
-              (_err) => {
-                stateSnapMap.set(v, null);
-                resolveState();
-              }
-            );
-            unsubs.push(u);
-          }
-
-          unsubState = () => {
-            unsubs.forEach((fn) => fn());
-          };
+          });
         } else {
           if (isMounted) setLoading(false);
         }

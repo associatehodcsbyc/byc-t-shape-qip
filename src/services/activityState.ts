@@ -50,15 +50,31 @@ export async function setActivityState({
   const stateRef = doc(db, 'activityState', stateDocId);
 
   // 1. Write primary activity state
-  await setDoc(stateRef, {
-    department,
-    activityId,
-    sessionId,
-    enabled,
-    locked,
-    updatedBy: normEmail,
-    updatedAt: serverTimestamp(),
-  });
+  if (department === 'all') {
+    const allDepts = ['all', 'computer-science', 'commerce', 'management', 'sciences', 'economics-byc'];
+    for (const d of allDepts) {
+      const ref = doc(db, 'activityState', `${d}__${activityId}`);
+      await setDoc(ref, {
+        department: d,
+        activityId,
+        sessionId,
+        enabled,
+        locked,
+        updatedBy: normEmail,
+        updatedAt: serverTimestamp(),
+      });
+    }
+  } else {
+    await setDoc(stateRef, {
+      department,
+      activityId,
+      sessionId,
+      enabled,
+      locked,
+      updatedBy: normEmail,
+      updatedAt: serverTimestamp(),
+    });
+  }
 
   // 2. Synchronize department variants (e.g., slug and display name) so all participants can access it
   const variants = getDepartmentVariants(department).filter((v) => v !== department);
@@ -114,6 +130,19 @@ export async function setSessionActivitiesState({
   userEmail,
 }: SetSessionActivitiesParams): Promise<void> {
   const normEmail = userEmail.toLowerCase().trim();
+
+  // If department is 'all', invoke universal institution-wide updater
+  if (department === 'all') {
+    await setSessionActivitiesForAllDepartments({
+      session,
+      activities,
+      enabled,
+      locked,
+      userEmail: normEmail,
+    });
+    return;
+  }
+
   const batch = writeBatch(db);
 
   for (const act of activities) {
@@ -129,28 +158,7 @@ export async function setSessionActivitiesState({
     });
   }
 
-  const action = locked
-    ? 'LOCK_ALL_SESSION'
-    : enabled
-    ? 'ENABLE_ALL_SESSION'
-    : 'DISABLE_ALL_SESSION';
-
-  const auditRef = doc(collection(db, 'auditLog'));
-  batch.set(auditRef, {
-    actor: normEmail,
-    action,
-    target: `${department}__${session.sessionId}`,
-    details: {
-      department,
-      sessionId: session.sessionId,
-      sessionTitle: session.title,
-      activityCount: activities.length,
-      enabled,
-      locked,
-    },
-    at: serverTimestamp(),
-  });
-
+  // Commit the primary activity gates first
   await batch.commit();
 
   // Synchronize department variants for all activities in the session
@@ -175,11 +183,127 @@ export async function setSessionActivitiesState({
       // Best-effort sync
     }
   }
+
+  // Audit log written asynchronously (never blocks the gate state)
+  try {
+    const action = locked
+      ? 'LOCK_ALL_SESSION'
+      : enabled
+      ? 'ENABLE_ALL_SESSION'
+      : 'DISABLE_ALL_SESSION';
+
+    await addDoc(collection(db, 'auditLog'), {
+      actor: normEmail,
+      action,
+      target: `${department}__${session.sessionId}`,
+      details: {
+        department,
+        sessionId: session.sessionId,
+        sessionTitle: session.title,
+        activityCount: activities.length,
+        enabled,
+        locked,
+      },
+      at: serverTimestamp(),
+    });
+  } catch (auditErr) {
+    console.warn('Audit log write error:', auditErr);
+  }
+}
+
+export interface SetSessionForAllParams {
+  session: Session;
+  activities: Activity[];
+  enabled: boolean;
+  locked: boolean;
+  userEmail: string;
+  departmentIds?: string[];
+}
+
+/**
+ * Activates or locks a session for ALL departments across the institution at once.
+ * Writes a master 'all' gate plus individual records for every registered department.
+ */
+export async function setSessionActivitiesForAllDepartments({
+  session,
+  activities,
+  enabled,
+  locked,
+  userEmail,
+  departmentIds = ['computer-science', 'commerce', 'management', 'sciences', 'economics-byc'],
+}: SetSessionForAllParams): Promise<void> {
+  const normEmail = userEmail.toLowerCase().trim();
+  const allDepts = Array.from(new Set(['all', ...departmentIds]));
+
+  const batch = writeBatch(db);
+  for (const dept of allDepts) {
+    for (const act of activities) {
+      const stateRef = doc(db, 'activityState', `${dept}__${act.activityId}`);
+      batch.set(stateRef, {
+        department: dept,
+        activityId: act.activityId,
+        sessionId: act.sessionId,
+        enabled,
+        locked,
+        updatedBy: normEmail,
+        updatedAt: serverTimestamp(),
+      });
+    }
+  }
+
+  await batch.commit();
+
+  // Also best-effort write variant aliases
+  for (const dept of departmentIds) {
+    const variants = getDepartmentVariants(dept).filter((v) => v !== dept);
+    if (variants.length === 0) continue;
+    try {
+      const altBatch = writeBatch(db);
+      for (const altDept of variants) {
+        for (const act of activities) {
+          const altRef = doc(db, 'activityState', `${altDept}__${act.activityId}`);
+          altBatch.set(altRef, {
+            department: altDept,
+            activityId: act.activityId,
+            sessionId: act.sessionId,
+            enabled,
+            locked,
+            updatedBy: normEmail,
+            updatedAt: serverTimestamp(),
+          });
+        }
+      }
+      await altBatch.commit();
+    } catch {
+      // Best-effort sync
+    }
+  }
+
+  // Audit log
+  try {
+    await addDoc(collection(db, 'auditLog'), {
+      actor: normEmail,
+      action: enabled ? 'ENABLE_ALL_INSTITUTION' : 'DISABLE_ALL_INSTITUTION',
+      target: `all__${session.sessionId}`,
+      details: {
+        sessionId: session.sessionId,
+        sessionTitle: session.title,
+        departments: allDepts,
+        activityCount: activities.length,
+        enabled,
+        locked,
+      },
+      at: serverTimestamp(),
+    });
+  } catch (err) {
+    console.warn('Audit log write error:', err);
+  }
 }
 
 /**
  * Subscribe in real time to activity states for a department and its aliases.
- * Reads the activityState collection and matches using flexible department comparison.
+ * Reads the activityState collection and matches using flexible department comparison
+ * and checks the universal 'all' department master gate.
  */
 export function subscribeToDepartmentActivityStates(
   department: string,
@@ -192,15 +316,15 @@ export function subscribeToDepartmentActivityStates(
   }
 
   // Subscribe to activityState collection in real time.
-  // In-memory matching ensures that whether states are stored under slug (computer-science)
-  // or title (Computer Science), the participant receives all matching activity states instantly.
+  // In-memory matching ensures that whether states are stored under slug (computer-science),
+  // title (Computer Science), or 'all' (institution-wide), the participant receives all matching activity states instantly.
   const unsub = onSnapshot(
     collection(db, 'activityState'),
     (snapshot) => {
       const stateMap = new Map<string, ActivityState>();
       snapshot.forEach((d) => {
         const data = d.data() as ActivityState;
-        if (isMatchingDepartment(data.department, department)) {
+        if (data.department === 'all' || isMatchingDepartment(data.department, department)) {
           const existing = stateMap.get(data.activityId);
           // If any matching record has enabled=true, honor it
           if (!existing || (!existing.enabled && data.enabled) || (!existing.locked && data.locked)) {

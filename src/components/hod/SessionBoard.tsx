@@ -12,6 +12,7 @@ import {
 import {
   setActivityState,
   setSessionActivitiesState,
+  setSessionActivitiesForAllDepartments,
   subscribeToDepartmentActivityStates,
   subscribeToDepartmentProgress,
   getDepartmentParticipants,
@@ -19,11 +20,12 @@ import {
 import { LiveTrackerModal } from './LiveTrackerModal';
 
 export const SessionBoard: React.FC = () => {
-  const { user, rosterUser, isHoD, isCoordinator, isAppAdmin, isDeanOrLeadership } = useAuth();
+  const { user, rosterUser, isHoD, isCoordinator, isHoDStrict, isAdmin, isAppAdmin, isDeanOrLeadership } = useAuth();
+  const isLockedToDept = isHoDStrict && !isCoordinator && !isAdmin && !isAppAdmin;
 
   // Departments and active selection
   const [departments, setDepartments] = useState<Department[]>([]);
-  const [selectedDept, setSelectedDept] = useState<string>(rosterUser?.department || 'computer-science');
+  const [selectedDept, setSelectedDept] = useState<string>(rosterUser?.department || 'all');
 
   // Content (initialized instantly from memory cache)
   const [sessions, setSessions] = useState<Session[]>(() => getCachedSessions());
@@ -76,12 +78,12 @@ export const SessionBoard: React.FC = () => {
     });
   }, []);
 
-  // 3. Ensure HoD is strictly locked to their own department
+  // 3. Ensure HoD is strictly locked to their own department only if strictly departmental HoD
   useEffect(() => {
-    if (isHoD && rosterUser?.department) {
+    if (isLockedToDept && rosterUser?.department) {
       setSelectedDept(rosterUser.department);
     }
-  }, [isHoD, rosterUser?.department]);
+  }, [isLockedToDept, rosterUser?.department]);
 
   // 4. Subscribe to activityState for selected department
   useEffect(() => {
@@ -182,6 +184,41 @@ export const SessionBoard: React.FC = () => {
     }
   };
 
+  // Handle institution-wide bulk toggle for ALL departments at once
+  const handleBulkSetAllDepartments = async (
+    session: Session,
+    sessionActivities: Activity[],
+    enabled: boolean,
+    locked: boolean
+  ) => {
+    if (isReadOnly) {
+      notify('Read-only mode: Deans and Leadership cannot modify activity state.', 'error');
+      return;
+    }
+
+    const key = `session-all-${session.sessionId}`;
+    setActionLoading(key);
+    try {
+      const deptIds = departments.map((d) => d.id);
+      await setSessionActivitiesForAllDepartments({
+        session,
+        activities: sessionActivities,
+        enabled,
+        locked,
+        userEmail,
+        departmentIds: deptIds.length > 0 ? deptIds : undefined,
+      });
+
+      const label = locked ? 'Locked all' : 'Enabled all';
+      notify(`${label} activities for ALL DEPARTMENTS in ${session.title}.`, 'success');
+    } catch (err: any) {
+      console.error('Failed to bulk update session for all departments:', err);
+      notify(`Failed to update session: ${err.message}`, 'error');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   // Group activities by sessionId
   const activitiesBySession = useMemo(() => {
     const map = new Map<string, Activity[]>();
@@ -203,7 +240,9 @@ export const SessionBoard: React.FC = () => {
 
   // Selected department metadata
   const currentDeptObj = departments.find((d) => d.id === selectedDept);
-  const currentDeptName = currentDeptObj ? currentDeptObj.name : selectedDept;
+  const currentDeptName = selectedDept === 'all'
+    ? 'All Departments (Institution-wide)'
+    : currentDeptObj ? currentDeptObj.name : selectedDept;
 
   // Department active participants count
   const totalFacultyCount = deptParticipants.length;
@@ -264,7 +303,7 @@ export const SessionBoard: React.FC = () => {
           <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
             Target Department
           </label>
-          {isHoD ? (
+          {isLockedToDept ? (
             <div className="px-4 py-2 bg-purple-50 border border-purple-200 rounded-xl text-sm font-bold text-purple-900 flex items-center gap-2">
               <svg className="w-4 h-4 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
@@ -278,6 +317,7 @@ export const SessionBoard: React.FC = () => {
               id="hod-department-selector"
               className="px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-sm font-bold text-slate-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
+              <option value="all">🌟 All Departments (Institution-wide)</option>
               {departments.map((dept) => (
                 <option key={dept.id} value={dept.id}>
                   {dept.name} ({dept.id})
@@ -391,23 +431,34 @@ export const SessionBoard: React.FC = () => {
 
                 {/* Session-level Bulk Controls */}
                 {!isReadOnly ? (
-                  <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+                  <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
+                    <button
+                      onClick={() => handleBulkSetAllDepartments(session, sessActivities, true, false)}
+                      disabled={isSessionBusy || sessActivities.length === 0}
+                      id={`enable-institution-${session.sessionId}`}
+                      className="px-3.5 py-1.5 text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 rounded-lg shadow-sm transition disabled:opacity-50 flex items-center gap-1.5"
+                      title="Enable all activities in this session for ALL departments across the institution"
+                    >
+                      <span>🌐</span>
+                      <span>{isSessionBusy ? 'Updating...' : 'Enable for All Departments'}</span>
+                    </button>
+
                     <button
                       onClick={() => handleBulkSetSession(session, sessActivities, true, false)}
                       disabled={isSessionBusy || sessActivities.length === 0}
                       id={`enable-all-${session.sessionId}`}
                       className="px-3 py-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-lg shadow-sm transition disabled:opacity-50"
-                      title="Enable all activities in this session"
+                      title={`Enable all activities in this session for ${selectedDept === 'all' ? 'All Departments' : currentDeptName}`}
                     >
-                      {isSessionBusy ? 'Updating...' : 'Enable All'}
+                      {selectedDept === 'all' ? 'Enable (Current)' : `Enable (${currentDeptName})`}
                     </button>
 
                     <button
-                      onClick={() => handleBulkSetSession(session, sessActivities, true, true)}
+                      onClick={() => handleBulkSetAllDepartments(session, sessActivities, true, true)}
                       disabled={isSessionBusy || sessActivities.length === 0}
                       id={`lock-all-${session.sessionId}`}
                       className="px-3 py-1.5 text-xs font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-300 rounded-lg shadow-sm transition disabled:opacity-50"
-                      title="Lock all activities in this session (freeze edits)"
+                      title="Lock all activities in this session for ALL departments (freeze edits)"
                     >
                       Lock All
                     </button>
