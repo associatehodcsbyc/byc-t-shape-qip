@@ -4,8 +4,11 @@ import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import { useAuth } from '../../context/AuthContext';
 import { Session, Activity, ActivityState, SubmissionProgress, Department, RosterUser } from '../../types';
-import defaultSessions from '../../../seed/sessions.json';
-import defaultActivities from '../../../seed/activities.json';
+import {
+  getCachedSessions,
+  getCachedActivities,
+  loadContentWithRevalidation,
+} from '../../services/content';
 import {
   setActivityState,
   setSessionActivitiesState,
@@ -22,9 +25,9 @@ export const SessionBoard: React.FC = () => {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [selectedDept, setSelectedDept] = useState<string>(rosterUser?.department || 'computer-science');
 
-  // Content
-  const [sessions, setSessions] = useState<Session[]>(defaultSessions.sessions as Session[]);
-  const [activities, setActivities] = useState<Activity[]>(defaultActivities.activities as Activity[]);
+  // Content (initialized instantly from memory cache)
+  const [sessions, setSessions] = useState<Session[]>(() => getCachedSessions());
+  const [activities, setActivities] = useState<Activity[]>(() => getCachedActivities());
 
   // Real-time state
   const [activityStates, setActivityStates] = useState<Map<string, ActivityState>>(new Map());
@@ -65,30 +68,12 @@ export const SessionBoard: React.FC = () => {
     loadDepts();
   }, []);
 
-  // 2. Fetch sessions and activities from Firestore (fallback to bundled seed)
+  // 2. Background revalidation of sessions and activities
   useEffect(() => {
-    async function loadContent() {
-      try {
-        const sessSnap = await getDocs(collection(db, 'sessions'));
-        if (!sessSnap.empty) {
-          const list: Session[] = [];
-          sessSnap.forEach((d) => list.push(d.data() as Session));
-          list.sort((a, b) => a.order - b.order);
-          setSessions(list);
-        }
-
-        const actSnap = await getDocs(collection(db, 'activities'));
-        if (!actSnap.empty) {
-          const list: Activity[] = [];
-          actSnap.forEach((d) => list.push(d.data() as Activity));
-          list.sort((a, b) => a.order - b.order);
-          setActivities(list);
-        }
-      } catch (err) {
-        console.error('Error fetching sessions/activities:', err);
-      }
-    }
-    loadContent();
+    loadContentWithRevalidation((updatedSess, updatedActs) => {
+      setSessions(updatedSess);
+      setActivities(updatedActs);
+    });
   }, []);
 
   // 3. Ensure HoD is strictly locked to their own department

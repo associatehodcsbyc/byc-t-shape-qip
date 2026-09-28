@@ -5,14 +5,16 @@ import {
   query,
   where,
   onSnapshot,
-  getDocs,
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAuth } from '../context/AuthContext';
 import { Header } from '../components/Header';
 import { Session, Activity, ActivityState, SubmissionProgress } from '../types';
-import defaultSessions from '../../seed/sessions.json';
-import defaultActivities from '../../seed/activities.json';
+import {
+  getCachedSessions,
+  getCachedActivities,
+  loadContentWithRevalidation,
+} from '../services/content';
 
 export const ParticipantLanding: React.FC = () => {
   const { user, rosterUser } = useAuth();
@@ -22,39 +24,17 @@ export const ParticipantLanding: React.FC = () => {
   const emailLower = user?.email?.toLowerCase().trim() || '';
 
   const [activeDay, setActiveDay] = useState<1 | 2 | 3>(1);
-  const [sessions, setSessions] = useState<Session[]>(defaultSessions.sessions as Session[]);
-  const [activities, setActivities] = useState<Activity[]>(defaultActivities.activities as Activity[]);
+  const [sessions, setSessions] = useState<Session[]>(() => getCachedSessions());
+  const [activities, setActivities] = useState<Activity[]>(() => getCachedActivities());
   const [activityStates, setActivityStates] = useState<Map<string, ActivityState>>(new Map());
   const [userProgress, setUserProgress] = useState<Map<string, SubmissionProgress>>(new Map());
-  const [loading, setLoading] = useState<boolean>(true);
 
-  // 1. Fetch sessions & activities from Firestore (fallback to bundled seed)
+  // 1. Instant cache with background revalidation
   useEffect(() => {
-    async function loadContent() {
-      try {
-        const sessSnap = await getDocs(collection(db, 'sessions'));
-        if (!sessSnap.empty) {
-          const list: Session[] = [];
-          sessSnap.forEach((d) => list.push(d.data() as Session));
-          list.sort((a, b) => a.order - b.order);
-          setSessions(list);
-        }
-
-        const actSnap = await getDocs(collection(db, 'activities'));
-        if (!actSnap.empty) {
-          const list: Activity[] = [];
-          actSnap.forEach((d) => list.push(d.data() as Activity));
-          list.sort((a, b) => a.order - b.order);
-          setActivities(list);
-        }
-      } catch (err) {
-        console.error('Failed to load sessions/activities:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadContent();
+    loadContentWithRevalidation((updatedSess, updatedActs) => {
+      setSessions(updatedSess);
+      setActivities(updatedActs);
+    });
   }, []);
 
   // 2. Listen LIVE to activityState for current department
@@ -121,17 +101,10 @@ export const ParticipantLanding: React.FC = () => {
       <Header />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        {loading ? (
-          <div className="flex flex-col items-center justify-center p-12 space-y-3">
-            <div className="w-10 h-10 border-4 border-christ-navy border-t-christ-gold rounded-full animate-spin" />
-            <p className="text-xs text-slate-500 font-medium">Loading session workspace...</p>
-          </div>
-        ) : (
-          <>
-            {/* Welcome Banner */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-2">
+        {/* Welcome Banner */}
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2">
                   <span className="px-2.5 py-0.5 rounded text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
                     Participant Portal
                   </span>
@@ -311,8 +284,6 @@ export const ParticipantLanding: React.FC = () => {
             );
           })}
         </div>
-          </>
-        )}
       </main>
     </div>
   );

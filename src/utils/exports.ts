@@ -1,4 +1,3 @@
-import * as XLSX from 'xlsx';
 import Papa from 'papaparse';
 import {
   Activity,
@@ -126,15 +125,17 @@ export function exportActivityToCsv(
 
 /**
  * Export single activity data to XLSX (Excel).
+ * Dynamically imports xlsx to reduce bundle size.
  */
-export function exportActivityToXlsx(
+export async function exportActivityToXlsx(
   activity: Activity,
   responses: ActivityResponse[],
   summary: ActivitySummary | null,
   isConfidential: boolean,
   isAppAdmin: boolean,
   departmentName: string
-): void {
+): Promise<void> {
+  const XLSX = await import('xlsx');
   const timestamp = new Date().toISOString().slice(0, 10);
   const filename = `${activity.activityId}_${departmentName}_${timestamp}.xlsx`;
   const wb = XLSX.utils.book_new();
@@ -260,13 +261,14 @@ export function exportActivityToXlsx(
  * - Sheet 2: Participants present in all 12 sessions (the e-certificate list).
  * - Sheet 3: Participation per activity.
  */
-export function exportQipReportPackXlsx(
+export async function exportQipReportPackXlsx(
   progressList: SubmissionProgress[],
   sessions: Session[],
   activities: Activity[],
   roster: RosterUser[],
   scopeLabel: string
-): void {
+): Promise<void> {
+  const XLSX = await import('xlsx');
   const timestamp = new Date().toISOString().slice(0, 10);
   const filename = `QIP_Report_Pack_${scopeLabel}_${timestamp}.xlsx`;
 

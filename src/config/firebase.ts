@@ -1,6 +1,12 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, connectAuthEmulator } from 'firebase/auth';
-import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
+import {
+  initializeFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
+  connectFirestoreEmulator,
+  getFirestore,
+} from 'firebase/firestore';
 
 const isEmulator = import.meta.env.VITE_USE_EMULATORS === 'true';
 
@@ -15,7 +21,24 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+
+// Enable persistent multi-tab cache in browser for instant offline/re-visit reads
+let firestoreDb;
+try {
+  if (typeof window !== 'undefined' && typeof window.indexedDB !== 'undefined') {
+    firestoreDb = initializeFirestore(app, {
+      localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager(),
+      }),
+    });
+  } else {
+    firestoreDb = getFirestore(app);
+  }
+} catch {
+  firestoreDb = getFirestore(app);
+}
+
+export const db = firestoreDb;
 
 // Use connectAuthEmulator/connectFirestoreEmulator only when VITE_USE_EMULATORS=true
 if (isEmulator) {
@@ -24,3 +47,4 @@ if (isEmulator) {
 }
 
 // Note: App Check will be initialized in Phase 6
+

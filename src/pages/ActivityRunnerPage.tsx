@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { doc, getDoc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAuth } from '../context/AuthContext';
 import { Activity, ActivityState } from '../types';
 import { Header } from '../components/Header';
 import { ActivityEngine } from '../components/ActivityEngine';
+
+import { getCachedActivityById, fetchActivityById } from '../services/content';
 
 export const ActivityRunnerPage: React.FC = () => {
   const { activityId } = useParams<{ activityId: string }>();
@@ -13,32 +15,37 @@ export const ActivityRunnerPage: React.FC = () => {
   const { rosterUser } = useAuth();
   const departmentId = rosterUser?.department || '';
 
-  const [activity, setActivity] = useState<Activity | null>(null);
+  const initialCached = activityId ? getCachedActivityById(activityId) || null : null;
+  const [activity, setActivity] = useState<Activity | null>(initialCached);
   const [activityState, setActivityState] = useState<ActivityState | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(!initialCached);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!activityId) return;
 
     let unsubState: (() => void) | null = null;
+    let isMounted = true;
 
-    async function fetchActivity() {
-      setLoading(true);
+    async function loadActivityData() {
+      // If not yet in cache, show loading
+      if (!initialCached) {
+        setLoading(true);
+      }
       setError(null);
 
       try {
-        const actRef = doc(db, 'activities', activityId!);
-        const actSnap = await getDoc(actRef);
-
-        if (!actSnap.exists()) {
-          setError(`Activity "${activityId}" not found in database.`);
-          setLoading(false);
+        const actData = await fetchActivityById(activityId!);
+        if (!actData) {
+          if (isMounted) setError(`Activity "${activityId}" not found in database.`);
+          if (isMounted) setLoading(false);
           return;
         }
 
-        const actData = actSnap.data() as Activity;
-        setActivity(actData);
+        if (isMounted) {
+          setActivity(actData);
+          setLoading(false);
+        }
 
         // Listen live to activityState for this department
         if (departmentId) {
@@ -48,6 +55,7 @@ export const ActivityRunnerPage: React.FC = () => {
           unsubState = onSnapshot(
             stateRef,
             (snap) => {
+              if (!isMounted) return;
               if (snap.exists()) {
                 setActivityState(snap.data() as ActivityState);
               } else {
@@ -57,22 +65,25 @@ export const ActivityRunnerPage: React.FC = () => {
             },
             (err) => {
               console.error('Error listening to activityState:', err);
-              setLoading(false);
+              if (isMounted) setLoading(false);
             }
           );
         } else {
-          setLoading(false);
+          if (isMounted) setLoading(false);
         }
       } catch (err: any) {
         console.error('Failed to load activity:', err);
-        setError(err.message || 'Error loading activity.');
-        setLoading(false);
+        if (isMounted) {
+          setError(err.message || 'Error loading activity.');
+          setLoading(false);
+        }
       }
     }
 
-    fetchActivity();
+    loadActivityData();
 
     return () => {
+      isMounted = false;
       if (unsubState) unsubState();
     };
   }, [activityId, departmentId]);
