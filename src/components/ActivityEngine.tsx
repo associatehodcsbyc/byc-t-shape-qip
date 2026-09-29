@@ -236,7 +236,7 @@ export const ActivityEngine: React.FC<ActivityEngineProps> = ({
     return () => clearInterval(interval);
   }, [timerRunning, secondsRemaining]);
 
-  // 3. Debounced Autosave (2 seconds)
+  // 3. Debounced Autosave (8 seconds)
   useEffect(() => {
     if (isInitialLoad.current || isReadOnly) return;
 
@@ -248,7 +248,7 @@ export const ActivityEngine: React.FC<ActivityEngineProps> = ({
 
     debounceTimerRef.current = setTimeout(() => {
       saveDraft();
-    }, 2000);
+    }, 8000);
 
     return () => {
       if (debounceTimerRef.current) {
@@ -891,19 +891,26 @@ export const ActivityEngine: React.FC<ActivityEngineProps> = ({
       {/* Bottom Sticky Action Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 p-4 shadow-lg z-20">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
-          <div className="text-xs text-slate-500">
-            Status:{' '}
-            <span
-              className={`font-semibold uppercase tracking-wider ${
-                submissionStatus === 'submitted'
-                  ? 'text-emerald-600'
-                  : submissionStatus === 'draft'
-                  ? 'text-amber-600'
-                  : 'text-slate-400'
-              }`}
-            >
-              {submissionStatus}
+          <div className="text-xs text-slate-500 flex items-center gap-1.5 flex-wrap">
+            <span>
+              Status:{' '}
+              <span
+                className={`font-semibold uppercase tracking-wider ${
+                  submissionStatus === 'submitted'
+                    ? 'text-emerald-600'
+                    : submissionStatus === 'draft'
+                    ? 'text-amber-600'
+                    : 'text-slate-400'
+                }`}
+              >
+                {submissionStatus}
+              </span>
             </span>
+            {!isReadOnly && (
+              <span className="text-[11px] text-slate-400 font-normal">
+                (autosaved every 8 seconds)
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-3">
