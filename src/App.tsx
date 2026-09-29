@@ -1,5 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Footer } from './components/Footer';
@@ -111,6 +112,7 @@ function App() {
           </Suspense>
         </AppLayout>
       </AuthProvider>
+      <Analytics />
     </BrowserRouter>
   );
 }
