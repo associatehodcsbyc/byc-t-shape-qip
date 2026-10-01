@@ -42,12 +42,18 @@
       "label": "C. Higher-Order Thinking & Scholarship of Teaching and Learning",
       "widgetType": "poll",
       "config": {
-        "prompt": "Which part of the programme most changed how you think about assessment design?",
-        "options": [
-          { "id": "o1", "text": "Bloom's / Webb's DOK / Cognitive Rigour Matrix mapping" },
-          { "id": "o2", "text": "Authentic, higher-order assessment task design" },
-          { "id": "o3", "text": "SoTL and documenting curricular change" },
-          { "id": "o4", "text": "The departmental curriculum action-planning session" }
+        "questions": [
+          {
+            "id": "q1",
+            "prompt": "Which part of the programme most changed how you think about assessment design?",
+            "multi": false,
+            "options": [
+              { "id": "o1", "text": "Bloom's / Webb's DOK / Cognitive Rigour Matrix mapping" },
+              { "id": "o2", "text": "Authentic, higher-order assessment task design" },
+              { "id": "o3", "text": "SoTL and documenting curricular change" },
+              { "id": "o4", "text": "The departmental curriculum action-planning session" }
+            ]
+          }
         ]
       }
     },
@@ -83,17 +89,27 @@
       "id": "pD2",
       "widgetType": "free_text",
       "config": {
-        "prompt": "What is the one change that would most improve a future run of this QIP?",
-        "maxChars": 500,
-        "anonymous": true
+        "questions": [
+          {
+            "id": "q1",
+            "prompt": "What is the one change that would most improve a future run of this QIP?",
+            "maxChars": 500,
+            "anonymous": true
+          }
+        ]
       }
     },
     {
       "id": "pD3",
       "widgetType": "free_text",
       "config": {
-        "prompt": "Any other comments or appreciation you'd like to record?",
-        "maxChars": 500
+        "questions": [
+          {
+            "id": "q1",
+            "prompt": "Any other comments or appreciation you'd like to record?",
+            "maxChars": 500
+          }
+        ]
       }
     }
   ]

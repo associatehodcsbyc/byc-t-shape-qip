@@ -174,8 +174,11 @@ export function computeFeedbackSummary(
 
     // pC1
     if (ans.pC1) {
-      const selected = typeof ans.pC1 === 'string' ? ans.pC1 : ans.pC1.selected || ans.pC1.optionId;
-      if (selected) {
+      const selected =
+        typeof ans.pC1 === 'string'
+          ? ans.pC1
+          : ans.pC1.q1 || ans.pC1.selected || ans.pC1.optionId || Object.values(ans.pC1)[0];
+      if (selected && typeof selected === 'string') {
         pC1.total++;
         pC1.counts[selected] = (pC1.counts[selected] || 0) + 1;
       }
@@ -213,7 +216,10 @@ export function computeFeedbackSummary(
 
     // pD2 (anonymous free text)
     if (ans.pD2) {
-      const text = typeof ans.pD2 === 'string' ? ans.pD2 : ans.pD2.text || ans.pD2.response;
+      const text =
+        typeof ans.pD2 === 'string'
+          ? ans.pD2
+          : ans.pD2.q1 || ans.pD2.text || ans.pD2.response || Object.values(ans.pD2)[0];
       if (text && typeof text === 'string' && text.trim().length > 0) {
         rawPD2Quotes.push(text.trim());
       }

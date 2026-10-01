@@ -127,7 +127,8 @@ export const FeedbackAnalysisView: React.FC = () => {
 
   // Format Section C1 Poll Chart Data
   const partC1Schema = feedbackFormContent.parts.find((p) => p.id === 'pC1');
-  const partC1Options: Array<{ id: string; text: string }> = partC1Schema?.config?.options || [];
+  const partC1Options: Array<{ id: string; text: string }> =
+    partC1Schema?.config?.questions?.[0]?.options || partC1Schema?.config?.options || [];
   const partC1Counts = summary.pC1?.counts || {};
   const partC1ChartData = partC1Options.map((opt: { id: string; text: string }) => ({
     name: opt.text,
