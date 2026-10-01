@@ -10,6 +10,13 @@ import { ReportGenerationView } from '../components/analytics/ReportGenerationVi
 export const AnalyticsPage: React.FC = () => {
   const { isAppAdmin } = useAuth();
   const [activeTab, setActiveTab] = useState<'activity' | 'session' | 'feedback' | 'report' | 'publisher'>('activity');
+  const [selectedActivityId, setSelectedActivityId] = useState<string | undefined>();
+
+  const handleNavigateToActivity = (actId: string) => {
+    setSelectedActivityId(actId);
+    setActiveTab('activity');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <div className="flex-1 bg-slate-50 flex flex-col min-h-screen">
@@ -82,10 +89,12 @@ export const AnalyticsPage: React.FC = () => {
         </div>
 
         {/* Tab Content */}
-        {activeTab === 'activity' && <ActivityAnalytics />}
+        {activeTab === 'activity' && <ActivityAnalytics initialActivityId={selectedActivityId} />}
         {activeTab === 'session' && <SessionSummaryView />}
         {activeTab === 'feedback' && <FeedbackAnalysisView />}
-        {activeTab === 'report' && <ReportGenerationView />}
+        {activeTab === 'report' && (
+          <ReportGenerationView onViewActivityAnalytics={handleNavigateToActivity} />
+        )}
         {activeTab === 'publisher' && isAppAdmin && <SummaryPublisher />}
       </main>
     </div>

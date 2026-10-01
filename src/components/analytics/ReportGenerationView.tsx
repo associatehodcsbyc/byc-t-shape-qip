@@ -50,7 +50,13 @@ const ACTION_PLAN_DIMENSIONS = [
   '8. Benchmarking',
 ];
 
-export const ReportGenerationView: React.FC = () => {
+interface ReportGenerationViewProps {
+  onViewActivityAnalytics?: (activityId: string) => void;
+}
+
+export const ReportGenerationView: React.FC<ReportGenerationViewProps> = ({
+  onViewActivityAnalytics,
+}) => {
   const { canEditReport, user, rosterUser, isAppAdmin, isDeanOrLeadership } = useAuth();
 
   // Department State
@@ -540,30 +546,48 @@ export const ReportGenerationView: React.FC = () => {
         if (selected) counts[selected] = (counts[selected] || 0) + 1;
       });
       return {
-        type: 'poll',
+        type: 'poll' as const,
         count,
         votes: counts,
       };
     }
 
-    // 3. Qualitative / Grid (Thematic)
-    let qualitativeKeywords = '';
-    if (act.activityId.includes('four_pillars')) {
-      qualitativeKeywords = 'Foundational rigour, authentic assessment & interdisciplinary balance';
-    } else if (act.activityId.includes('ideal_graduate')) {
-      qualitativeKeywords = 'Analytical depth, ethical leadership, adaptive problem-solving';
-    } else if (act.activityId.includes('course_redesign') || act.activityId.includes('crm')) {
-      qualitativeKeywords = "Bloom's HOT alignment, authentic problem prompts, tiered rubrics";
-    } else if (act.activityId.includes('action_plan') || act.activityId.includes('strategic')) {
-      qualitativeKeywords = 'Curricular depth audit, BoS revision, 90-day execution roadmap';
+    // 3. Qualitative / Thematic Synthesis
+    let qualitativeText = '';
+    const actId = act.activityId.toLowerCase();
+
+    if (actId.includes('four_pillars')) {
+      qualitativeText = 'Audited department baseline across disciplinary depth (70%), horizontal breadth (30%), authentic assessment, and scholarly inquiry.';
+    } else if (actId.includes('ideal_graduate')) {
+      qualitativeText = 'Synthesized key graduate competencies: advanced analytical rigour, ethical problem-solving, and adaptability.';
+    } else if (actId.includes('case_study_1') || actId.includes('case_study_one')) {
+      qualitativeText = 'Analyzed cognitive dilution when breadth replaces depth; proposed solidifying prerequisite core modules before multidisciplinary electives.';
+    } else if (actId.includes('case_study_2') || actId.includes('case_study_two')) {
+      qualitativeText = 'Addressed divergence between exam marks and practical mastery; formulated authentic performance assessments.';
+    } else if (actId.includes('case_study_3') || actId.includes('case_study_three')) {
+      qualitativeText = 'Explored undergraduate research integration into foundational laboratory and course assignments.';
+    } else if (actId.includes('case_study_4') || actId.includes('case_study_four')) {
+      qualitativeText = 'Mapped interdisciplinary curriculum connections and industry benchmarks to develop distinctive T-shaped graduates.';
+    } else if (actId.includes('case_study') || actId.includes('discussion')) {
+      qualitativeText = 'Synthesized case insights into actionable departmental consensus on academic rigour and curriculum scaffolding.';
+    } else if (actId.includes('bloom') || actId.includes('dok') || actId.includes('crm')) {
+      qualitativeText = "Scaffolded course learning objectives from lower-order recall into higher-order evaluation and authentic creation.";
+    } else if (actId.includes('redesign') || actId.includes('authentic_task')) {
+      qualitativeText = 'Constructed authentic scenario-based assessment prompts and tiered rubrics reflecting real-world complexity.';
+    } else if (actId.includes('progression') || actId.includes('threshold')) {
+      qualitativeText = 'Audited prerequisite continuity and threshold concepts across Semesters 1–8 to ensure vertical coherence.';
+    } else if (actId.includes('sotl') || actId.includes('inquiry')) {
+      qualitativeText = 'Formulated pedagogical inquiry questions to systematically measure and document student learning outcomes.';
+    } else if (actId.includes('action_plan') || actId.includes('strategic') || actId.includes('priority')) {
+      qualitativeText = 'Finalized curriculum restructuring priorities, BoS review milestones, and 90-day implementation commitments.';
     } else {
-      qualitativeKeywords = 'Collaborative faculty reflections & curriculum mapping';
+      qualitativeText = 'Faculty completed structured collaborative inquiry, aligning course goals with departmental academic transformation.';
     }
 
     return {
-      type: 'qualitative',
+      type: 'qualitative' as const,
       count,
-      thematicSummary: qualitativeKeywords,
+      thematicSummary: qualitativeText,
     };
   };
 
@@ -1065,33 +1089,45 @@ export const ReportGenerationView: React.FC = () => {
                           <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                             Department Worksheets & Analytics
                           </div>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             {sessActs.map((act) => {
                               const stats = getActivityDepartmentStats(act);
                               return (
                                 <div
                                   key={act.activityId}
-                                  className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/80 text-[11px] flex flex-col justify-between space-y-1.5"
+                                  className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-[11px] flex flex-col justify-between space-y-2"
                                 >
-                                  <div className="flex items-start justify-between gap-1">
-                                    <div className="truncate font-bold text-slate-800">
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div className="font-bold text-slate-900 leading-tight">
                                       {act.title}
                                     </div>
-                                    <span className="font-mono font-bold text-christ-navy bg-white px-1.5 py-0.5 rounded border border-slate-200 text-[10px] shrink-0">
-                                      {stats.count} sub
-                                    </span>
+                                    <div className="flex items-center gap-1.5 shrink-0">
+                                      <span className="font-mono font-bold text-christ-navy bg-white px-2 py-0.5 rounded border border-slate-200 text-[10px]">
+                                        {stats.count} sub
+                                      </span>
+                                      {onViewActivityAnalytics && (
+                                        <button
+                                          type="button"
+                                          onClick={() => onViewActivityAnalytics(act.activityId)}
+                                          className="no-print px-2 py-0.5 rounded bg-slate-200/70 hover:bg-christ-navy hover:text-white text-slate-700 font-semibold text-[10px] transition flex items-center gap-0.5 shadow-sm"
+                                          title="Open detailed per-activity analytics for this activity"
+                                        >
+                                          <span>Analytics ↗</span>
+                                        </button>
+                                      )}
+                                    </div>
                                   </div>
 
                                   {/* Quantitative visual indicator */}
                                   {stats.type === 'quantitative' && typeof stats.mean === 'number' && stats.mean > 0 && (
-                                    <div className="space-y-1">
-                                      <div className="flex justify-between text-[10px] text-slate-600 font-medium">
-                                        <span>Dept Rating:</span>
+                                    <div className="space-y-1 bg-white p-2 rounded-lg border border-slate-100">
+                                      <div className="flex justify-between text-[10px] text-slate-700 font-medium">
+                                        <span>Department Mean Agreement:</span>
                                         <span className="font-bold text-christ-navy">{stats.mean} / 5.0</span>
                                       </div>
-                                      <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                                      <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200/60">
                                         <div
-                                          className="bg-christ-navy h-full rounded-full"
+                                          className="bg-gradient-to-r from-christ-navy to-blue-700 h-full rounded-full transition-all"
                                           style={{ width: `${(stats.mean / 5.0) * 100}%` }}
                                         />
                                       </div>
@@ -1100,8 +1136,9 @@ export const ReportGenerationView: React.FC = () => {
 
                                   {/* Qualitative thematic extract */}
                                   {stats.type === 'qualitative' && (
-                                    <div className="text-[10px] text-slate-600 italic truncate bg-white/70 px-1.5 py-0.5 rounded border border-slate-100">
-                                      Focus: {stats.thematicSummary}
+                                    <div className="text-[11px] text-slate-700 leading-relaxed bg-white p-2 rounded-lg border border-slate-100">
+                                      <span className="font-semibold text-slate-900">Key Focus: </span>
+                                      {stats.thematicSummary}
                                     </div>
                                   )}
                                 </div>
