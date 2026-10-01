@@ -30,6 +30,7 @@ import { feedbackFormContent } from '../../data/feedbackForm';
 import { getCachedSessions, getCachedActivities } from '../../services/content';
 import { Session, Activity, ActivityResponse, SubmissionProgress, Department, RosterUser } from '../../types';
 import { compressImage } from '../../utils/imageCompressor';
+import { ActivityAnalytics } from './ActivityAnalytics';
 
 const DEFAULT_OBJECTIVES = [
   '• Deepen vertical disciplinary depth (70%) and horizontal interdisciplinary breadth (30%) across undergraduate curricula.',
@@ -50,12 +51,105 @@ const ACTION_PLAN_DIMENSIONS = [
   '8. Benchmarking',
 ];
 
+const ACTIVITY_INFERENCE_MAP: Record<string, string> = {
+  d1s1_a1_four_pillars:
+    'Audited department baseline across the Four Pillars; prioritized bridging vertical disciplinary depth (70%) with authentic interdisciplinary applications (30%).',
+  d1s1_a2_tl_questionnaire:
+    'Evaluation highlighted strong faculty consensus on student-centred pedagogy and identified growth priorities in cognitive rigour and authentic rubric design.',
+  d1s1_a3_ideal_graduate:
+    'Synthesized core graduate attributes: deep disciplinary domain mastery, critical inquiry skills, agility, and ethical decision-making.',
+  d1s2_a1_depth_ranking:
+    'Ranked curriculum components to preserve core foundational depth and prevent cognitive dilution from superficial elective survey topics.',
+  d1s2_a2_draw_our_t:
+    'Mapped vertical core mastery (stem of the T) versus horizontal cross-disciplinary connections (crossbar of the T) across departmental degree pathways.',
+  d1s3_a1_rigour_checklist:
+    'Benchmarked course syllabi against the 8 Dimensions of Academic Rigour, identifying opportunities to elevate student cognitive challenge.',
+  d1s3_a2_rigour_reflection:
+    'Faculty articulated actionable reflections on shifting classroom emphasis from rote recall toward conceptual synthesis.',
+  d1s3_a3_curriculum_for_depth:
+    'Streamlined course modular structures to allow dedicated time for deep conceptual inquiry and complex problem analysis.',
+  d1s3_a4_teaching_for_mastery:
+    'Formulated active learning interventions to ensure students achieve threshold mastery before progressing to advanced modules.',
+  d1s3_a5_reading_for_depth:
+    'Integrated high-rigour primary literature, research papers, and scholarly texts into undergraduate reading lists.',
+  d1s3_a6_research_inquiry:
+    'Embedded undergraduate research methodologies, data interpretation, and hypothesis testing into core coursework assignments.',
+  d1s4_a1_quality_dimensions:
+    'Evaluated departmental instructional quality dimensions against national and international benchmark criteria.',
+  d1s4_a2_case1_breadth_replaces_depth:
+    'Analyzed case study on cognitive dilution; instituted prerequisite safeguards to preserve disciplinary depth before elective breadth.',
+  d1s4_a3_case2_results_vs_understanding:
+    'Addressed divergence between exam grades and genuine practical mastery through authentic diagnostic checkpoints.',
+  d1s4_a4_case3_research_led:
+    'Formulated strategies to translate faculty research discoveries and ongoing scholarship into undergraduate learning modules.',
+  d1s4_a5_case4_t_shaped_graduate:
+    'Benchmarked industry and academic requirements to construct distinctive departmental graduate profile targets.',
+  d1s4_a6_group_discussion:
+    'Achieved inter-faculty alignment on rigorous assessment standards and collaborative teaching practices.',
+  d2s1_a1_register_working_doc:
+    'Registered course syllabus working documents for systematic cognitive scaffolding and learning outcome redesign.',
+  d2s1_a2_threshold_concepts:
+    'Identified discipline-specific threshold concepts and troublesome knowledge areas requiring explicit instructional scaffolding.',
+  d2s1_a3_three_must_know:
+    'Defined the 3 non-negotiable core conceptual foundations each graduate must master before program completion.',
+  d2s2_a2_doing_to_deep_learning:
+    'Replaced passive lecture delivery with inquiry-driven problem sets and experiential learning scenarios.',
+  d2s2_a3_rewrite_working_doc:
+    "Restructured course learning outcomes using precise higher-order cognitive verbs (Bloom's Levels 4–6: Analyze, Evaluate, Create).",
+  d2s2_a4_hot_case_studies:
+    'Analyzed real-world disciplinary case studies to cultivate higher-order evaluation and creative synthesis.',
+  d2s3_a1_crm_syllabus_map:
+    "Mapped syllabus units onto the Cognitive Rigour Matrix (CRM), balancing Bloom's Taxonomy with Webb's DOK.",
+  d2s3_a2_crm_before_after:
+    'Upgraded assessment items from DOK 1–2 (recall/routine skill) to DOK 3–4 (strategic and extended thinking).',
+  d2s4_a1_issue_based_redesign:
+    'Redesigned course syllabi around contemporary disciplinary challenges, integrating authentic inquiry prompts.',
+  d3s1_a1_vertical_map:
+    'Constructed 8-semester vertical progression maps ensuring seamless prerequisite continuity across degrees.',
+  d3s1_a2_vertical_diagnostics:
+    'Diagnosed curriculum bottlenecks and topic redundancies across progressive semesters.',
+  d3s1_a3_concept_progression:
+    'Established concept progression ladders to elevate cognitive complexity progressively from 1st to 4th year.',
+  d3s2_a1_assessment_audit:
+    'Audited current examination papers, confirming actionable transition towards criterion-referenced higher-order tasks.',
+  d3s2_a2_assessment_methods:
+    'Diversified assessment modalities to incorporate project portfolios, authentic simulations, and viva voce.',
+  d3s2_a3_authentic_task_rubric:
+    'Constructed authentic assessment tasks with explicit, transparent scoring rubrics for faculty and students.',
+  d3s3_a1_locate_redesign:
+    'Positioned departmental curriculum innovations within the broader scholarship of teaching and learning (SoTL).',
+  d3s3_a2_sort_scholarship:
+    'Categorized pedagogical inquiry approaches to systematically evaluate teaching effectiveness.',
+  d3s3_a3_meera_ladder:
+    "Applied Meera's Reflection Ladder to examine faculty teaching philosophy and continuous improvement.",
+  d3s3_a4_felten_audit:
+    "Benchmarked departmental teaching practices against Felten's 5 Principles of Good SoTL Practice.",
+  d3s3_a5_department_position:
+    "Articulated the department's collective vision for academic rigour, research-led teaching, and student success.",
+  d3s3_a6_sotl_inquiry_plan:
+    'Formulated classroom inquiry questions to research and publish on student learning outcomes.',
+  d3s4_a1_strategic_plan_15:
+    "Aligned departmental initiatives with the university's 15 strategic academic transformation priorities.",
+  d3s4_a2_priority_matrix:
+    'Ranked curriculum transformation initiatives based on strategic impact and implementation feasibility.',
+  d3s4_a3_department_action_plan:
+    'Finalized comprehensive 8-dimension departmental curriculum action plan with specific BoS review milestones.',
+  d3s4_a4_signature_initiative:
+    'Designed a departmental signature pedagogy initiative to distinguish our graduates nationally and globally.',
+  d3s4_a5_ninety_day_plan:
+    'Committed to a concrete 90-day execution roadmap for syllabus revisions and Board of Studies submissions.',
+  d3s4_a6_scorecard_15:
+    'Audited departmental progress scorecard against key transformation benchmarks.',
+  d3s4_a7_dare_closing:
+    'Adopted closing commitments to sustain academic rigour, collaborative peer review, and continuous pedagogical inquiry.',
+};
+
 interface ReportGenerationViewProps {
   onViewActivityAnalytics?: (activityId: string) => void;
 }
 
 export const ReportGenerationView: React.FC<ReportGenerationViewProps> = ({
-  onViewActivityAnalytics,
+  onViewActivityAnalytics: _onViewActivityAnalytics,
 }) => {
   const { canEditReport, user, rosterUser, isAppAdmin, isDeanOrLeadership } = useAuth();
 
@@ -78,10 +172,22 @@ export const ReportGenerationView: React.FC<ReportGenerationViewProps> = ({
   const [uploadingPhoto, setUploadingPhoto] = useState<boolean>(false);
   const [uploadingAttendance, setUploadingAttendance] = useState<boolean>(false);
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'dirty' | 'error'>('saved');
+  const [analyticsModalActId, setAnalyticsModalActId] = useState<string | null>(null);
 
   const photoFileInputRef = useRef<HTMLInputElement>(null);
   const attendanceFileInputRef = useRef<HTMLInputElement>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Close modal on Escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && analyticsModalActId) {
+        setAnalyticsModalActId(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [analyticsModalActId]);
 
   // Determine if user's role is department-specific (HoD or QIP Coordinator)
   const isHoD = rosterUser?.role === 'hod';
@@ -291,6 +397,13 @@ export const ReportGenerationView: React.FC<ReportGenerationViewProps> = ({
     const currentSignatures = fields.signatures || {};
     saveFieldsUpdate({
       signatures: { ...currentSignatures, [key]: value },
+    });
+  };
+
+  const updateActivityInference = (activityId: string, value: string) => {
+    const currentInferences = fields.activityInferences || {};
+    saveFieldsUpdate({
+      activityInferences: { ...currentInferences, [activityId]: value },
     });
   };
 
@@ -552,42 +665,53 @@ export const ReportGenerationView: React.FC<ReportGenerationViewProps> = ({
       };
     }
 
-    // 3. Qualitative / Thematic Synthesis
-    let qualitativeText = '';
-    const actId = act.activityId.toLowerCase();
-
-    if (actId.includes('four_pillars')) {
-      qualitativeText = 'Audited department baseline across disciplinary depth (70%), horizontal breadth (30%), authentic assessment, and scholarly inquiry.';
-    } else if (actId.includes('ideal_graduate')) {
-      qualitativeText = 'Synthesized key graduate competencies: advanced analytical rigour, ethical problem-solving, and adaptability.';
-    } else if (actId.includes('case_study_1') || actId.includes('case_study_one')) {
-      qualitativeText = 'Analyzed cognitive dilution when breadth replaces depth; proposed solidifying prerequisite core modules before multidisciplinary electives.';
-    } else if (actId.includes('case_study_2') || actId.includes('case_study_two')) {
-      qualitativeText = 'Addressed divergence between exam marks and practical mastery; formulated authentic performance assessments.';
-    } else if (actId.includes('case_study_3') || actId.includes('case_study_three')) {
-      qualitativeText = 'Explored undergraduate research integration into foundational laboratory and course assignments.';
-    } else if (actId.includes('case_study_4') || actId.includes('case_study_four')) {
-      qualitativeText = 'Mapped interdisciplinary curriculum connections and industry benchmarks to develop distinctive T-shaped graduates.';
-    } else if (actId.includes('case_study') || actId.includes('discussion')) {
-      qualitativeText = 'Synthesized case insights into actionable departmental consensus on academic rigour and curriculum scaffolding.';
-    } else if (actId.includes('bloom') || actId.includes('dok') || actId.includes('crm')) {
-      qualitativeText = "Scaffolded course learning objectives from lower-order recall into higher-order evaluation and authentic creation.";
-    } else if (actId.includes('redesign') || actId.includes('authentic_task')) {
-      qualitativeText = 'Constructed authentic scenario-based assessment prompts and tiered rubrics reflecting real-world complexity.';
-    } else if (actId.includes('progression') || actId.includes('threshold')) {
-      qualitativeText = 'Audited prerequisite continuity and threshold concepts across Semesters 1–8 to ensure vertical coherence.';
-    } else if (actId.includes('sotl') || actId.includes('inquiry')) {
-      qualitativeText = 'Formulated pedagogical inquiry questions to systematically measure and document student learning outcomes.';
-    } else if (actId.includes('action_plan') || actId.includes('strategic') || actId.includes('priority')) {
-      qualitativeText = 'Finalized curriculum restructuring priorities, BoS review milestones, and 90-day implementation commitments.';
-    } else {
-      qualitativeText = 'Faculty completed structured collaborative inquiry, aligning course goals with departmental academic transformation.';
+    // 3. Qualitative: Check saved user custom inference first
+    const savedCustom = fields.activityInferences?.[act.activityId];
+    if (savedCustom && savedCustom.trim()) {
+      return {
+        type: 'qualitative' as const,
+        count,
+        thematicSummary: savedCustom.trim(),
+        isCustomized: true,
+      };
     }
+
+    // Extract genuine insights from submitted responses if present
+    const submittedSnippets: string[] = [];
+    responses.forEach((r) => {
+      if (!r.answers) return;
+      const rawAnswers: any = r.answers;
+      if (typeof rawAnswers === 'string' && rawAnswers.trim().length > 15) {
+        submittedSnippets.push(rawAnswers.trim());
+      } else if (typeof rawAnswers === 'object' && rawAnswers !== null) {
+        Object.values(rawAnswers).forEach((val: any) => {
+          if (typeof val === 'string' && val.trim().length > 15 && !val.startsWith('http') && !val.startsWith('{')) {
+            submittedSnippets.push(val.trim());
+          } else if (Array.isArray(val)) {
+            val.forEach((item: any) => {
+              if (typeof item === 'string' && item.trim().length > 15) {
+                submittedSnippets.push(item.trim());
+              }
+            });
+          }
+        });
+      }
+    });
+
+    const defaultInference =
+      ACTIVITY_INFERENCE_MAP[act.activityId] ||
+      `Faculty reviewed "${act.title}", articulating concrete pedagogical and curricular alignments for the department.`;
+
+    const summaryWithRealData =
+      submittedSnippets.length > 0
+        ? `${defaultInference} Key Faculty Submission: "${submittedSnippets[0].length > 130 ? submittedSnippets[0].substring(0, 127) + '...' : submittedSnippets[0]}"`
+        : defaultInference;
 
     return {
       type: 'qualitative' as const,
       count,
-      thematicSummary: qualitativeText,
+      thematicSummary: summaryWithRealData,
+      isCustomized: false,
     };
   };
 
@@ -1085,47 +1209,50 @@ export const ReportGenerationView: React.FC<ReportGenerationViewProps> = ({
 
                       {/* Department-Specific Worksheets & Quantitative / Qualitative Analytics */}
                       {sessActs.length > 0 && (
-                        <div className="pt-2 border-t border-slate-100 space-y-2">
+                        <div className="pt-2 border-t border-slate-100 space-y-3">
                           <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                             Department Worksheets & Analytics
                           </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div className="flex flex-col space-y-3">
                             {sessActs.map((act) => {
                               const stats = getActivityDepartmentStats(act);
                               return (
                                 <div
                                   key={act.activityId}
-                                  className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-[11px] flex flex-col justify-between space-y-2"
+                                  className="p-3.5 bg-slate-50/80 rounded-xl border border-slate-200 text-[11px] flex flex-col space-y-2.5"
                                 >
                                   <div className="flex items-start justify-between gap-2">
-                                    <div className="font-bold text-slate-900 leading-tight">
-                                      {act.title}
+                                    <div>
+                                      <span className="text-[10px] font-mono text-slate-500 mr-1.5">
+                                        [{act.activityId}]
+                                      </span>
+                                      <span className="font-bold text-slate-900 leading-tight text-xs">
+                                        {act.title}
+                                      </span>
                                     </div>
                                     <div className="flex items-center gap-1.5 shrink-0">
                                       <span className="font-mono font-bold text-christ-navy bg-white px-2 py-0.5 rounded border border-slate-200 text-[10px]">
                                         {stats.count} sub
                                       </span>
-                                      {onViewActivityAnalytics && (
-                                        <button
-                                          type="button"
-                                          onClick={() => onViewActivityAnalytics(act.activityId)}
-                                          className="no-print px-2 py-0.5 rounded bg-slate-200/70 hover:bg-christ-navy hover:text-white text-slate-700 font-semibold text-[10px] transition flex items-center gap-0.5 shadow-sm"
-                                          title="Open detailed per-activity analytics for this activity"
-                                        >
-                                          <span>Analytics ↗</span>
-                                        </button>
-                                      )}
+                                      <button
+                                        type="button"
+                                        onClick={() => setAnalyticsModalActId(act.activityId)}
+                                        className="no-print px-2.5 py-0.5 rounded-lg bg-slate-200/80 hover:bg-christ-navy hover:text-white text-slate-800 font-bold text-[10px] transition flex items-center gap-1 shadow-sm"
+                                        title="Open detailed analytics sub-window for this activity"
+                                      >
+                                        <span>📊 Analytics ↗</span>
+                                      </button>
                                     </div>
                                   </div>
 
                                   {/* Quantitative visual indicator */}
                                   {stats.type === 'quantitative' && typeof stats.mean === 'number' && stats.mean > 0 && (
-                                    <div className="space-y-1 bg-white p-2 rounded-lg border border-slate-100">
-                                      <div className="flex justify-between text-[10px] text-slate-700 font-medium">
+                                    <div className="space-y-1.5 bg-white p-3 rounded-xl border border-slate-100">
+                                      <div className="flex justify-between text-xs text-slate-700 font-medium">
                                         <span>Department Mean Agreement:</span>
-                                        <span className="font-bold text-christ-navy">{stats.mean} / 5.0</span>
+                                        <span className="font-bold text-christ-navy text-xs">{stats.mean} / 5.0</span>
                                       </div>
-                                      <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200/60">
+                                      <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden border border-slate-200/60">
                                         <div
                                           className="bg-gradient-to-r from-christ-navy to-blue-700 h-full rounded-full transition-all"
                                           style={{ width: `${(stats.mean / 5.0) * 100}%` }}
@@ -1134,11 +1261,42 @@ export const ReportGenerationView: React.FC<ReportGenerationViewProps> = ({
                                     </div>
                                   )}
 
-                                  {/* Qualitative thematic extract */}
+                                  {/* Qualitative thematic extract (Editable by HoD/Coordinator) */}
                                   {stats.type === 'qualitative' && (
-                                    <div className="text-[11px] text-slate-700 leading-relaxed bg-white p-2 rounded-lg border border-slate-100">
-                                      <span className="font-semibold text-slate-900">Key Focus: </span>
-                                      {stats.thematicSummary}
+                                    <div className="space-y-1.5 pt-1">
+                                      <div className="flex items-center justify-between text-[10px] font-bold text-slate-600">
+                                        <span className="flex items-center gap-1.5">
+                                          <span>💡 Qualitative Inferences & Insights:</span>
+                                          {stats.isCustomized && (
+                                            <span className="px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 text-[9px] font-semibold">
+                                              Customized
+                                            </span>
+                                          )}
+                                        </span>
+                                        {canEditReport && (
+                                          <span className="text-slate-400 font-normal italic no-print text-[9px]">
+                                            Editable
+                                          </span>
+                                        )}
+                                      </div>
+                                      {canEditReport ? (
+                                        <div className="space-y-1">
+                                          <textarea
+                                            rows={2}
+                                            className="w-full p-2.5 text-xs bg-white border border-slate-200 rounded-lg leading-relaxed focus:border-christ-navy focus:outline-none no-print text-slate-800 shadow-inner"
+                                            value={stats.thematicSummary}
+                                            onChange={(e) => updateActivityInference(act.activityId, e.target.value)}
+                                            placeholder="Enter departmental qualitative inference for this activity..."
+                                          />
+                                          <div className="hidden print:block text-xs text-slate-800 leading-relaxed bg-white p-2 rounded border border-slate-100">
+                                            {stats.thematicSummary}
+                                          </div>
+                                        </div>
+                                      ) : (
+                                        <div className="text-xs text-slate-800 leading-relaxed bg-white p-2.5 rounded-lg border border-slate-100">
+                                          {stats.thematicSummary}
+                                        </div>
+                                      )}
                                     </div>
                                   )}
                                 </div>
@@ -1664,6 +1822,61 @@ export const ReportGenerationView: React.FC<ReportGenerationViewProps> = ({
           </div>
         </section>
       </div>
+
+      {/* Dedicated Activity Analytics Sub-Window Overlay Modal */}
+      {analyticsModalActId && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-900/60 backdrop-blur-sm no-print"
+          onClick={() => setAnalyticsModalActId(null)}
+        >
+          <div 
+            className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-6xl max-h-[92vh] flex flex-col overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header Bar */}
+            <div className="px-6 py-4 bg-christ-navy text-white flex items-center justify-between shrink-0 shadow-md">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">📊</span>
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-white leading-tight">
+                    Activity Analytics & Detailed Submissions
+                  </h3>
+                  <p className="text-[11px] text-christ-gold font-medium">
+                    Activity: <span className="font-mono text-white">{analyticsModalActId}</span>
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => window.open(`/analytics?activityId=${analyticsModalActId}`, '_blank')}
+                  className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-semibold transition border border-white/20 flex items-center gap-1"
+                  title="Open detailed analytics in a new browser tab"
+                >
+                  <span>↗ Open in New Tab</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAnalyticsModalActId(null)}
+                  className="px-3.5 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition shadow"
+                  title="Close modal (Esc)"
+                >
+                  ✕ Close
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body with embedded ActivityAnalytics */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-50/60">
+              <ActivityAnalytics
+                initialActivityId={analyticsModalActId}
+                activitiesList={activities}
+                departmentsList={departments}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Print Stylesheet */}
       <style>{`

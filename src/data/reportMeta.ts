@@ -51,6 +51,7 @@ export interface ReportSignatures {
 export interface ReportFields {
   header?: ReportHeader;
   sessions?: Record<string, SessionFields>;
+  activityInferences?: Record<string, string>;
   actionPlanExtra?: ActionPlanRow[];
   photosNote?: string;
   hodObservations?: string;
