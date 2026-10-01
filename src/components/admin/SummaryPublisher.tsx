@@ -134,7 +134,7 @@ export const SummaryPublisher: React.FC = () => {
       } catch (err) {
         console.error('Feedback auto-publish failed:', err);
       }
-    }, 30000); // 30 seconds
+    }, 120000); // 120 seconds (2 minutes)
 
     return () => {
       if (feedbackDebounceTimerRef.current) {
@@ -337,7 +337,7 @@ export const SummaryPublisher: React.FC = () => {
             )}
           </button>
           <span className="text-[10px] text-indigo-300">
-            Auto-syncs every 30s on new responses
+            Auto-syncs every 120s on new responses
           </span>
         </div>
       </div>
