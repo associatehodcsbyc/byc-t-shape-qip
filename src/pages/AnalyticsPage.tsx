@@ -17,7 +17,7 @@ export const AnalyticsPage: React.FC = () => {
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         {/* Top View Selector Tabs */}
-        <div className="bg-white rounded-2xl p-2 shadow-sm border border-slate-200 flex flex-wrap gap-2">
+        <div className="no-print bg-white rounded-2xl p-2 shadow-sm border border-slate-200 flex flex-wrap gap-2">
           <button
             onClick={() => setActiveTab('activity')}
             id="tab-activity-analytics"

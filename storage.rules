@@ -61,6 +61,16 @@ service firebase.storage {
       allow delete: if canEditReport();
     }
 
+    // ---------- Report attendance sheet annexures ----------
+    // Path: qipReportAttendance/{autoId}-{originalFilename}
+    match /qipReportAttendance/{fileName} {
+      allow read: if isActive();
+      allow write: if canEditReport()
+        && request.resource.size < 8 * 1024 * 1024
+        && (request.resource.contentType.matches('image/.*') || request.resource.contentType == 'application/pdf');
+      allow delete: if canEditReport();
+    }
+
     // ---------- Everything else is denied ----------
     match /{allPaths=**} {
       allow read, write: if false;

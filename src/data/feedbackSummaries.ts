@@ -193,21 +193,39 @@ export function computeFeedbackSummary(
       }
     }
 
-    // pD1
+    // pD1 (checklist)
     if (ans.pD1) {
       if (Array.isArray(ans.pD1)) {
         for (const optId of ans.pD1) {
-          pD1.counts[optId] = (pD1.counts[optId] || 0) + 1;
+          if (typeof optId === 'string') {
+            pD1.counts[optId] = (pD1.counts[optId] || 0) + 1;
+          }
         }
         pD1.total++;
       } else if (typeof ans.pD1 === 'object') {
         let anyChecked = false;
-        for (const [k, v] of Object.entries(ans.pD1)) {
-          if (k === 'otherText' && typeof v === 'string' && v.trim()) {
-            pD1.otherComments?.push(v.trim());
-          } else if (v) {
-            pD1.counts[k] = (pD1.counts[k] || 0) + 1;
-            anyChecked = true;
+        // Case A: ChecklistWidget format { selected: ['o1', 'o2'], other: '...' }
+        if (Array.isArray(ans.pD1.selected)) {
+          for (const optId of ans.pD1.selected) {
+            if (typeof optId === 'string') {
+              pD1.counts[optId] = (pD1.counts[optId] || 0) + 1;
+              anyChecked = true;
+            }
+          }
+          if (typeof ans.pD1.other === 'string' && ans.pD1.other.trim()) {
+            pD1.otherComments?.push(ans.pD1.other.trim());
+          }
+        } else {
+          // Case B: Map format { o1: true, o2: true, other: '...' }
+          for (const [k, v] of Object.entries(ans.pD1)) {
+            if (k === 'otherText' || k === 'other') {
+              if (typeof v === 'string' && v.trim()) {
+                pD1.otherComments?.push(v.trim());
+              }
+            } else if (v === true || v === 1 || v === 'true') {
+              pD1.counts[k] = (pD1.counts[k] || 0) + 1;
+              anyChecked = true;
+            }
           }
         }
         if (anyChecked) pD1.total++;

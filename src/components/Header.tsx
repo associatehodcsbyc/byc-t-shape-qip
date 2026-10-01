@@ -38,7 +38,7 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className="bg-christ-navy text-white shadow-md border-b-4 border-christ-gold">
+    <header className="bg-christ-navy text-white shadow-md border-b-4 border-christ-gold no-print">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col md:flex-row items-center justify-between gap-3">
         <div className="flex items-center gap-3 text-center md:text-left">
           <img

@@ -334,12 +334,13 @@ service cloud.firestore {
       allow delete: if isAppAdmin();
     }
 
-    // ---------- Editable QIP report fields ----------
+    // ---------- Editable QIP report fields (per-department or main) ----------
     match /reportMeta/{docId} {
       allow read: if isActive() && (canEditReport() || isAdmin() || isResourcePerson());
 
       allow create, update: if canEditReport()
-        && docId == 'main'
+        && (docId == 'main' || docId.matches('^main_.*') || docId.matches('^[a-zA-Z0-9_-]+$'))
+        && docId.size() <= 60
         && request.resource.data.updatedBy == email()
         && request.resource.data.updatedAt == request.time
         && request.resource.data.keys().hasOnly(['fields', 'updatedBy', 'updatedAt'])

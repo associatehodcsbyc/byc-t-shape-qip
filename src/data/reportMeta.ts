@@ -9,6 +9,14 @@ export interface PhotoEntry {
   uploadedAt: number;
 }
 
+export interface AttendanceEntry {
+  storagePath: string;
+  downloadURL: string;
+  caption: string;
+  uploadedBy: string;
+  uploadedAt: number;
+}
+
 export interface ReportHeader {
   theme?: string;
   titleOverride?: string;
@@ -25,6 +33,7 @@ export interface ReportHeader {
 export interface SessionFields {
   resourcePerson?: string;
   summaryOfProceedings?: string;
+  inferences?: string;
 }
 
 export interface ActionPlanRow {
@@ -47,6 +56,7 @@ export interface ReportFields {
   hodObservations?: string;
   signatures?: ReportSignatures;
   photos?: PhotoEntry[];
+  attendance?: AttendanceEntry[];
   [key: string]: any;
 }
 
@@ -56,15 +66,22 @@ export interface ReportMeta {
   updatedAt: any;
 }
 
-export const getReportMetaRef = () => doc(db, 'reportMeta', 'main');
+export const getReportMetaRef = (deptId?: string) => {
+  const docId = deptId && deptId.trim() ? `main_${deptId.trim()}` : 'main';
+  return doc(db, 'reportMeta', docId);
+};
 
-export const getReportMeta = async (): Promise<ReportMeta | null> => {
-  const snap = await getDoc(getReportMetaRef());
+export const getReportMeta = async (deptId?: string): Promise<ReportMeta | null> => {
+  const snap = await getDoc(getReportMetaRef(deptId));
   return snap.exists() ? (snap.data() as ReportMeta) : null;
 };
 
-export const updateReportMetaFields = async (fieldsUpdate: Partial<ReportFields>, email: string) => {
-  const ref = getReportMetaRef();
+export const updateReportMetaFields = async (
+  fieldsUpdate: Partial<ReportFields>,
+  email: string,
+  deptId?: string
+) => {
+  const ref = getReportMetaRef(deptId);
   const snap = await getDoc(ref);
   const current = snap.exists() ? (snap.data() as ReportMeta) : { fields: {} };
 
