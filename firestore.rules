@@ -324,11 +324,12 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // ---------- Published aggregate of the closing feedback (programme-wide, not per-department) ----------
+    // ---------- Published aggregate of the closing feedback (programme-wide or per-department) ----------
     match /feedbackSummaries/{sumId} {
       allow read: if isActive() && (isAdmin() || isHoD() || isResourcePerson());
       allow create, update: if isAppAdmin()
-        && sumId == 'overall'
+        && (sumId == 'overall' || sumId.matches('^[a-zA-Z0-9_-]+$'))
+        && sumId.size() <= 60
         && request.resource.data.n is int
         && request.resource.data.updatedAt == request.time;
       allow delete: if isAppAdmin();

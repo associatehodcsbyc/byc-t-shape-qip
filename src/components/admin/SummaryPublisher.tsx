@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import { useAuth } from '../../context/AuthContext';
 import { Activity, ActivityResponse, ActivitySummary, Department } from '../../types';
@@ -213,15 +213,29 @@ export const SummaryPublisher: React.FC = () => {
     }
   };
 
-  // Publish Closing Programme Feedback Summary
+  // Publish Closing Programme Feedback Summary (Overall + Per-Department)
   const handlePublishFeedback = async (isAuto = false) => {
     setFeedbackPublishing(true);
     try {
       const summaryPayload = computeFeedbackSummary(rawFeedbacks, 'App Admin');
       await publishOverallFeedbackSummary(summaryPayload);
+
+      // Also publish per-department feedback summaries
+      for (const dept of departments) {
+        const deptFeedbacks = rawFeedbacks.filter((f) => f.department === dept.id);
+        if (deptFeedbacks.length > 0) {
+          const deptPayload = computeFeedbackSummary(deptFeedbacks, 'App Admin');
+          const deptRef = doc(db, 'feedbackSummaries', dept.id);
+          await setDoc(deptRef, {
+            ...deptPayload,
+            updatedAt: serverTimestamp(),
+          });
+        }
+      }
+
       if (!isAuto) {
         notify(
-          `Closing Feedback Summary published successfully (N=${summaryPayload.n} responses, ${summaryPayload.pD2Anonymous?.length || 0} anonymous quotes).`,
+          `Closing Feedback Summary published successfully (N=${summaryPayload.n} responses, ${summaryPayload.pD2Anonymous?.length || 0} anonymous quotes across ${departments.length} departments).`,
           'success'
         );
       }

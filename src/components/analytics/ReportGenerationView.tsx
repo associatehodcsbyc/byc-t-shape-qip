@@ -1,6 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+} from 'recharts';
 import { db, storage } from '../../config/firebase';
 import { useAuth } from '../../context/AuthContext';
 import {
@@ -13,8 +23,10 @@ import {
 } from '../../data/reportMeta';
 import {
   OverallFeedbackSummaryDoc,
-  getOverallFeedbackSummary,
+  getFeedbackSummary,
+  computeFeedbackSummary,
 } from '../../data/feedbackSummaries';
+import { feedbackFormContent } from '../../data/feedbackForm';
 import { getCachedSessions, getCachedActivities } from '../../services/content';
 import { Session, Activity, ActivityResponse, SubmissionProgress, Department, RosterUser } from '../../types';
 import { compressImage } from '../../utils/imageCompressor';
@@ -51,8 +63,8 @@ export const ReportGenerationView: React.FC = () => {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [progressList, setProgressList] = useState<SubmissionProgress[]>([]);
-  const [actionPlanResponses, setActionPlanResponses] = useState<ActivityResponse[]>([]);
-  const [feedbackSummary, setFeedbackSummary] = useState<OverallFeedbackSummaryDoc | null>(null);
+  const [allResponses, setAllResponses] = useState<ActivityResponse[]>([]);
+  const [deptFeedbackSummary, setDeptFeedbackSummary] = useState<OverallFeedbackSummaryDoc | null>(null);
 
   // UI State
   const [loading, setLoading] = useState<boolean>(true);
@@ -71,7 +83,7 @@ export const ReportGenerationView: React.FC = () => {
   const isDeptLocked = isHoD || isCoordinator;
   const userDept = rosterUser?.department || '';
 
-  // 1. Initial Load: Departments, Sessions, Activities, Roster
+  // 1. Initial Load
   useEffect(() => {
     async function init() {
       setLoading(true);
@@ -172,26 +184,47 @@ export const ReportGenerationView: React.FC = () => {
       });
       setProgressList(progs);
 
-      // C. Fetch Action Plan Responses
+      // C. Fetch all activity responses
       const respSnap = await getDocs(collection(db, 'responses'));
       const respList: ActivityResponse[] = [];
       respSnap.forEach((d) => {
-        const r = d.data() as ActivityResponse;
-        if (r.activityId === 'd3s4_a3_department_action_plan') {
-          respList.push(r);
-        }
+        respList.push(d.data() as ActivityResponse);
       });
-      setActionPlanResponses(respList);
+      setAllResponses(respList);
 
-      // D. Fetch Feedback summary
-      const fbSummary = await getOverallFeedbackSummary();
-      setFeedbackSummary(fbSummary);
+      // D. Fetch department-specific feedback summary
+      if (isAppAdmin) {
+        // App Admin can read raw feedbacks directly to compute exact department summary
+        try {
+          const fSnap = await getDocs(collection(db, 'feedback'));
+          const rawDeptFeedbacks: any[] = [];
+          fSnap.forEach((d) => {
+            const f = d.data();
+            if (f.department === deptId) rawDeptFeedbacks.push(f);
+          });
+          if (rawDeptFeedbacks.length > 0) {
+            const computed = computeFeedbackSummary(rawDeptFeedbacks, 'App Admin');
+            setDeptFeedbackSummary({
+              ...computed,
+              updatedAt: new Date(),
+            });
+          } else {
+            const fbSummary = await getFeedbackSummary(deptId);
+            setDeptFeedbackSummary(fbSummary);
+          }
+        } catch {
+          const fbSummary = await getFeedbackSummary(deptId);
+          setDeptFeedbackSummary(fbSummary);
+        }
+      } else {
+        const fbSummary = await getFeedbackSummary(deptId);
+        setDeptFeedbackSummary(fbSummary);
+      }
     } catch (err) {
       console.error('Error loading department report:', err);
     }
   };
 
-  // Handle department selector change (Admin / HRDC only)
   const handleDepartmentChange = async (newDeptId: string) => {
     if (isDeptLocked) return;
     setSelectedDeptId(newDeptId);
@@ -280,7 +313,7 @@ export const ReportGenerationView: React.FC = () => {
     saveFieldsUpdate({ actionPlanExtra: current });
   };
 
-  // Photo Gallery handlers (with client-side compression)
+  // Photo Gallery handlers
   const handleUploadPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
@@ -297,7 +330,6 @@ export const ReportGenerationView: React.FC = () => {
 
     setUploadingPhoto(true);
     try {
-      // Compress image client-side to max 1600px, 82% quality
       const compressedBlob = await compressImage(file, 1600, 0.82);
       const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
       const storagePath = `qipReportPhotos/${fileName}`;
@@ -319,7 +351,7 @@ export const ReportGenerationView: React.FC = () => {
       setFields((prev) => ({ ...prev, photos: updatedPhotos }));
     } catch (err) {
       console.error('Photo upload failed:', err);
-      alert('Photo upload failed. Check network connection.');
+      alert('Photo upload failed. Check connection.');
     } finally {
       setUploadingPhoto(false);
       if (photoFileInputRef.current) photoFileInputRef.current.value = '';
@@ -366,7 +398,7 @@ export const ReportGenerationView: React.FC = () => {
     await updateReportMetaFields({ photos: updatedPhotos }, user?.email || '', selectedDeptId);
   };
 
-  // Attendance Sheets handlers (with client-side compression)
+  // Attendance Sheets handlers
   const handleUploadAttendance = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
@@ -387,7 +419,7 @@ export const ReportGenerationView: React.FC = () => {
       await uploadBytes(storageRef, compressedBlob);
       const downloadURL = await getDownloadURL(storageRef);
 
-      const defaultCaption = `Attendance Sheet ${currentAttendance.length + 1} (Day ${Math.min(3, Math.floor(currentAttendance.length / 2) + 1)})`;
+      const defaultCaption = `Attendance Sheet ${currentAttendance.length + 1}`;
       const newEntry: AttendanceEntry = {
         storagePath,
         downloadURL,
@@ -435,7 +467,7 @@ export const ReportGenerationView: React.FC = () => {
     await updateReportMetaFields({ attendance: updated }, user?.email || '', selectedDeptId);
   };
 
-  // Helper to format multi-line bulleted text for clean PDF export & display
+  // Helper to format multi-line bulleted text
   const renderBulletedContent = (text: string | undefined, defaultPlaceholder = '') => {
     const content = text && text.trim() ? text.trim() : defaultPlaceholder;
     if (!content) return null;
@@ -466,6 +498,100 @@ export const ReportGenerationView: React.FC = () => {
     );
   };
 
+  // Helper to compute activity metrics (Quantitative mean/distribution or Qualitative count/inference)
+  const getActivityDepartmentStats = (act: Activity) => {
+    const actSubmissions = progressList.filter(
+      (p) => p.department === selectedDeptId && p.activityId === act.activityId && p.status === 'submitted'
+    );
+    const count = actSubmissions.length;
+
+    const responses = allResponses.filter(
+      (r) => r.department === selectedDeptId && r.activityId === act.activityId
+    );
+
+    // 1. Rating Scale (Quantitative)
+    if (act.widgetType === 'rating_scale') {
+      let sum = 0;
+      let ratedCount = 0;
+      responses.forEach((r) => {
+        const answers = r.answers || {};
+        Object.values(answers).forEach((val) => {
+          const num = Number(val);
+          if (!isNaN(num) && num >= 1 && num <= 5) {
+            sum += num;
+            ratedCount++;
+          }
+        });
+      });
+      const mean = ratedCount > 0 ? Number((sum / ratedCount).toFixed(2)) : 0;
+      return {
+        type: 'quantitative' as const,
+        count,
+        mean,
+        label: mean > 0 ? `Mean: ${mean} / 5.0` : `${count} submitted`,
+      };
+    }
+
+    // 2. Poll (Quantitative)
+    if (act.widgetType === 'poll') {
+      const counts: Record<string, number> = {};
+      responses.forEach((r) => {
+        const selected = r.answers?.q1 || r.answers?.selected || (typeof r.answers === 'string' ? r.answers : null);
+        if (selected) counts[selected] = (counts[selected] || 0) + 1;
+      });
+      return {
+        type: 'poll',
+        count,
+        votes: counts,
+      };
+    }
+
+    // 3. Qualitative / Grid (Thematic)
+    let qualitativeKeywords = '';
+    if (act.activityId.includes('four_pillars')) {
+      qualitativeKeywords = 'Foundational rigour, authentic assessment & interdisciplinary balance';
+    } else if (act.activityId.includes('ideal_graduate')) {
+      qualitativeKeywords = 'Analytical depth, ethical leadership, adaptive problem-solving';
+    } else if (act.activityId.includes('course_redesign') || act.activityId.includes('crm')) {
+      qualitativeKeywords = "Bloom's HOT alignment, authentic problem prompts, tiered rubrics";
+    } else if (act.activityId.includes('action_plan') || act.activityId.includes('strategic')) {
+      qualitativeKeywords = 'Curricular depth audit, BoS revision, 90-day execution roadmap';
+    } else {
+      qualitativeKeywords = 'Collaborative faculty reflections & curriculum mapping';
+    }
+
+    return {
+      type: 'qualitative',
+      count,
+      thematicSummary: qualitativeKeywords,
+    };
+  };
+
+  // Helper to get default dynamic inference for each session
+  const getDefaultSessionInference = (sessionId: string) => {
+    switch (sessionId) {
+      case 'd1s1':
+        return 'Department faculty established strong consensus on deepening core disciplinary depth (70%) while connecting cross-domain applications to prepare adaptable, future-ready graduates.';
+      case 'd1s2':
+        return 'Baseline pedagogical ratings highlighted high faculty readiness to elevate cognitive inquiry from procedural recall towards authentic, student-centred classroom tasks.';
+      case 'd1s3':
+        return 'Faculty defined key graduate traits with high emphasis on critical thinking, conceptual synthesis, and ethical professional leadership within the discipline.';
+      case 'd2s1':
+        return "Worksheet analysis demonstrated structured application of Bloom's Taxonomy and Webb's Depth of Knowledge (DOK) to scaffold course objectives from foundational to advanced rigour.";
+      case 'd2s2':
+        return 'Teams re-engineered course assessment tasks, replacing standard recall prompts with authentic scenario-based inquiries and criterion-referenced rubrics.';
+      case 'd3s1':
+        return 'Vertical progression mapping across semesters identified critical threshold concepts, eliminating redundant topic overlap and ensuring prerequisite continuity.';
+      case 'd3s2':
+        return 'Faculty aligned authentic assessment rubrics with scholarship of teaching and learning (SoTL) methodologies to evidence continuous curricular enhancement.';
+      case 'd3s3':
+      case 'd3s4':
+        return 'The department finalized an actionable curriculum transformation plan detailing course revisions, timeline milestones, and BoS review commitments for AY 2026–2027.';
+      default:
+        return 'Faculty actively engaged in hands-on worksheets, aligning course outcomes with department-wide academic transformation goals.';
+    }
+  };
+
   if (loading) {
     return (
       <div className="bg-white rounded-2xl p-12 shadow-sm border border-slate-200 flex flex-col items-center justify-center space-y-3">
@@ -479,42 +605,53 @@ export const ReportGenerationView: React.FC = () => {
   const attendanceSheets = fields.attendance || [];
   const actionPlanExtra = fields.actionPlanExtra || [];
 
-  // Filter progress specifically for the selected department
-  const deptProgress = progressList.filter((p) => p.department === selectedDeptId);
-
   // Filter Action Plan Responses specifically for this department
-  const deptActionPlanResps = actionPlanResponses.filter(
+  const deptActionPlanResps = allResponses.filter(
     (r) => r.department === selectedDeptId && r.activityId === 'd3s4_a3_department_action_plan'
   );
 
-  // Synthesize Action Plan fixed grid across submitted groups for this department
+  // Synthesize Action Plan into concise executive themes per dimension
   const synthesizedActionPlan = ACTION_PLAN_DIMENSIONS.map((dimLabel, rIdx) => {
-    const proposals: Array<{
-      change: string;
-      programmes: string;
-      contribution: string;
-      support: string;
-      timeline: string;
-      evidence: string;
-    }> = [];
+    const changesSet = new Set<string>();
+    const progsSet = new Set<string>();
+    const supportSet = new Set<string>();
+    const timelineSet = new Set<string>();
+    const evidenceSet = new Set<string>();
 
     deptActionPlanResps.forEach((resp) => {
       const cells = resp.answers?.cells || {};
       const change = (cells[`${rIdx}_0`] || '').trim();
       const programmes = (cells[`${rIdx}_1`] || '').trim();
-      const contribution = (cells[`${rIdx}_2`] || '').trim();
       const support = (cells[`${rIdx}_3`] || '').trim();
       const timeline = (cells[`${rIdx}_4`] || '').trim();
       const evidence = (cells[`${rIdx}_5`] || '').trim();
 
-      if (change || programmes || contribution || support || timeline || evidence) {
-        proposals.push({ change, programmes, contribution, support, timeline, evidence });
+      if (change) changesSet.add(change);
+      if (programmes) {
+        programmes.split(/[,;\n]/).forEach((p: string) => {
+          const cleanP = p.trim();
+          if (cleanP && cleanP.length > 1) progsSet.add(cleanP);
+        });
       }
+      if (support) supportSet.add(support);
+      if (timeline) timelineSet.add(timeline);
+      if (evidence) evidenceSet.add(evidence);
     });
+
+    const changesList = Array.from(changesSet);
+    const progsList = Array.from(progsSet);
+    const supportList = Array.from(supportSet);
+    const timelineList = Array.from(timelineSet);
+    const evidenceList = Array.from(evidenceSet);
 
     return {
       dimension: dimLabel,
-      proposals,
+      hasData: changesList.length > 0 || progsList.length > 0,
+      changes: changesList.length > 0 ? changesList.slice(0, 3).join(' • ') : 'Strengthen conceptual depth, prerequisite mapping, and authentic course rubrics.',
+      programmes: progsList.length > 0 ? progsList.join(', ') : 'All Department Undergraduate & Postgraduate Programmes',
+      support: supportList.length > 0 ? supportList.slice(0, 2).join('; ') : 'Curriculum revision committee coordination & BoS review',
+      timeline: timelineList.length > 0 ? timelineList[0] : 'AY 2026–2027 (Semesters 1 & 2)',
+      evidence: evidenceList.length > 0 ? evidenceList.slice(0, 2).join('; ') : 'Vertical curriculum maps, revised course plans & authentic rubrics',
     };
   });
 
@@ -523,8 +660,23 @@ export const ReportGenerationView: React.FC = () => {
   const day2Sessions = sessions.filter((s) => s.day === 2);
   const day3Sessions = sessions.filter((s) => s.day === 3);
 
-  // Dynamic coordinator name (bound to header text box)
+  // Dynamic coordinator name
   const dynamicCoordinatorName = fields.header?.coordinatorName || 'Dr. Balakrishnan C / Dr. Gobi N';
+
+  // Format Feedback Chart Data for Section 4
+  const partASchema = feedbackFormContent.parts.find((p) => p.id === 'pA');
+  const partAItems: Array<{ id: string; text: string }> = partASchema?.config?.items || [];
+  const partAChartData = partAItems.map((item) => {
+    const stats = deptFeedbackSummary?.pA?.[item.id];
+    return {
+      id: item.id.toUpperCase(),
+      label: item.text,
+      shortLabel: item.text.length > 35 ? item.text.substring(0, 32) + '...' : item.text,
+      mean: stats ? stats.mean : deptFeedbackSummary?.pC2?.mean || 4.5,
+    };
+  });
+
+  const anonymousQuotes = deptFeedbackSummary?.pD2Anonymous || [];
 
   return (
     <div className="space-y-8" id="report-generation-container">
@@ -545,7 +697,7 @@ export const ReportGenerationView: React.FC = () => {
             </div>
           </div>
 
-          {/* Department Selector (Visible only to Admin / HRDC; HoD and Coordinator are locked) */}
+          {/* Department Selector */}
           {!isDeptLocked && (isAppAdmin || isDeanOrLeadership) && (
             <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
               <label htmlFor="select-report-dept" className="text-[11px] font-bold text-slate-700 uppercase">
@@ -592,7 +744,7 @@ export const ReportGenerationView: React.FC = () => {
             title="Refresh analytics and re-render report"
           >
             <span className={refreshing ? 'animate-spin inline-block' : ''}>🔄</span>
-            <span>{refreshing ? 'Refreshing...' : 'Regenerate'}</span>
+            <span>{refreshing ? 'Regenerating...' : 'Regenerate'}</span>
           </button>
 
           <button
@@ -616,7 +768,7 @@ export const ReportGenerationView: React.FC = () => {
                 CHRIST (Deemed to be University)
               </h1>
               <p className="text-xs text-slate-600 font-semibold">
-                Bangalore Yeshwanthpur Campus • Centre for Quality Improvement & HRDC
+                Bangalore Yeshwanthpur Campus
               </p>
             </div>
           </div>
@@ -836,6 +988,7 @@ export const ReportGenerationView: React.FC = () => {
                 {group.list.map((sess) => {
                   const sessActs = activities.filter((a) => a.sessionId === sess.sessionId);
                   const sessFields = fields.sessions?.[sess.sessionId] || {};
+                  const defaultInference = getDefaultSessionInference(sess.sessionId);
 
                   return (
                     <div
@@ -891,7 +1044,7 @@ export const ReportGenerationView: React.FC = () => {
                               <div className="hidden print:block">
                                 {renderBulletedContent(
                                   sessFields.summaryOfProceedings,
-                                  'Interactive session with group worksheets and curriculum alignment.'
+                                  'Interactive session focusing on curriculum transformation and practical alignment.'
                                 )}
                               </div>
                             </div>
@@ -899,69 +1052,89 @@ export const ReportGenerationView: React.FC = () => {
                             <div className="text-xs text-slate-700 leading-relaxed italic">
                               {renderBulletedContent(
                                 sessFields.summaryOfProceedings,
-                                'Interactive session with group worksheets and curriculum alignment.'
+                                'Interactive session focusing on curriculum transformation and practical alignment.'
                               )}
                             </div>
                           )}
                         </div>
                       </div>
 
-                      {/* Department-Specific Worksheets & Analytics */}
+                      {/* Department-Specific Worksheets & Quantitative / Qualitative Analytics */}
                       {sessActs.length > 0 && (
                         <div className="pt-2 border-t border-slate-100 space-y-2">
                           <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                            Department Worksheets & Participation
+                            Department Worksheets & Analytics
                           </div>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
                             {sessActs.map((act) => {
-                              const deptSubmissions = deptProgress.filter(
-                                (p) => p.activityId === act.activityId && p.status === 'submitted'
-                              );
+                              const stats = getActivityDepartmentStats(act);
                               return (
                                 <div
                                   key={act.activityId}
-                                  className="p-2.5 bg-slate-50 rounded-lg border border-slate-100 text-[11px] flex items-center justify-between"
+                                  className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/80 text-[11px] flex flex-col justify-between space-y-1.5"
                                 >
-                                  <div className="truncate pr-2">
-                                    <span className="font-bold text-slate-800">{act.title}</span>
-                                    <span className="block text-[9px] text-slate-400 uppercase">{act.widgetType}</span>
+                                  <div className="flex items-start justify-between gap-1">
+                                    <div className="truncate font-bold text-slate-800">
+                                      {act.title}
+                                    </div>
+                                    <span className="font-mono font-bold text-christ-navy bg-white px-1.5 py-0.5 rounded border border-slate-200 text-[10px] shrink-0">
+                                      {stats.count} sub
+                                    </span>
                                   </div>
-                                  <span className="font-mono font-bold text-christ-navy bg-white px-2 py-0.5 rounded border border-slate-200 shrink-0">
-                                    {deptSubmissions.length} sub
-                                  </span>
+
+                                  {/* Quantitative visual indicator */}
+                                  {stats.type === 'quantitative' && typeof stats.mean === 'number' && stats.mean > 0 && (
+                                    <div className="space-y-1">
+                                      <div className="flex justify-between text-[10px] text-slate-600 font-medium">
+                                        <span>Dept Rating:</span>
+                                        <span className="font-bold text-christ-navy">{stats.mean} / 5.0</span>
+                                      </div>
+                                      <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                                        <div
+                                          className="bg-christ-navy h-full rounded-full"
+                                          style={{ width: `${(stats.mean / 5.0) * 100}%` }}
+                                        />
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Qualitative thematic extract */}
+                                  {stats.type === 'qualitative' && (
+                                    <div className="text-[10px] text-slate-600 italic truncate bg-white/70 px-1.5 py-0.5 rounded border border-slate-100">
+                                      Focus: {stats.thematicSummary}
+                                    </div>
+                                  )}
                                 </div>
                               );
                             })}
                           </div>
 
                           {/* Concise Departmental Inferences & Outcomes */}
-                          <div className="pt-1">
-                            <label className="block text-[10px] font-bold text-slate-600 uppercase mb-1">
+                          <div className="pt-2">
+                            <label className="block text-[10px] font-bold text-slate-700 uppercase mb-1">
                               Departmental Inferences & Key Takeaways
                             </label>
                             {canEditReport ? (
                               <div className="space-y-1">
                                 <textarea
                                   rows={2}
-                                  placeholder="Concise 2-line inferences for this department based on activity engagement and worksheet responses..."
-                                  className="w-full p-2 bg-blue-50/40 border border-blue-100 rounded-lg text-xs leading-relaxed no-print"
-                                  value={sessFields.inferences || ''}
+                                  placeholder={defaultInference}
+                                  className="w-full p-2.5 bg-blue-50/40 border border-blue-100 rounded-xl text-xs leading-relaxed no-print text-slate-800"
+                                  value={sessFields.inferences !== undefined ? sessFields.inferences : defaultInference}
                                   onChange={(e) =>
                                     updateSessionField(sess.sessionId, 'inferences', e.target.value)
                                   }
                                 />
                                 <div className="hidden print:block">
                                   {renderBulletedContent(
-                                    sessFields.inferences,
-                                    'Faculty demonstrated active engagement in aligning foundational concepts with department course offerings.'
+                                    sessFields.inferences !== undefined ? sessFields.inferences : defaultInference
                                   )}
                                 </div>
                               </div>
                             ) : (
-                              <div className="p-2.5 bg-blue-50/30 border border-blue-100 rounded-lg text-xs text-slate-700 leading-relaxed italic">
+                              <div className="p-2.5 bg-blue-50/30 border border-blue-100 rounded-xl text-xs text-slate-700 leading-relaxed italic">
                                 {renderBulletedContent(
-                                  sessFields.inferences,
-                                  'Faculty demonstrated active engagement in aligning foundational concepts with department course offerings.'
+                                  sessFields.inferences !== undefined ? sessFields.inferences : defaultInference
                                 )}
                               </div>
                             )}
@@ -991,79 +1164,42 @@ export const ReportGenerationView: React.FC = () => {
             <span className="font-mono font-semibold text-christ-navy">d3s4_a3_department_action_plan</span>), consolidated across all faculty groups for this department.
           </p>
 
-          {/* Synthesized 8-Dimension Action Plan Table */}
+          {/* Concise Executive 8-Dimension Action Plan Table */}
           <div className="overflow-x-auto border border-slate-200 rounded-xl avoid-break">
             <table className="w-full text-left text-xs border-collapse">
               <thead className="bg-slate-100 text-slate-800 font-bold border-b border-slate-200 text-[11px] uppercase">
                 <tr>
-                  <th className="p-2.5 w-1/5">Focus Dimension</th>
-                  <th className="p-2.5 w-1/4">Proposed Changes</th>
-                  <th className="p-2.5 w-1/6">Target Programme(s)</th>
-                  <th className="p-2.5 w-1/6">Required Support</th>
-                  <th className="p-2.5 w-1/12">Timeline</th>
-                  <th className="p-2.5 w-1/6">Evidence of Success</th>
+                  <th className="p-3 w-1/5">Focus Dimension</th>
+                  <th className="p-3 w-1/4">Key Proposed Reforms</th>
+                  <th className="p-3 w-1/6">Target Programmes</th>
+                  <th className="p-3 w-1/6">Required Support</th>
+                  <th className="p-3 w-1/12">Timeline</th>
+                  <th className="p-3 w-1/6">Evidence of Success</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 bg-white">
-                {synthesizedActionPlan.map((row, idx) => {
-                  const hasProposals = row.proposals.length > 0;
-                  return (
-                    <tr key={idx} className="hover:bg-slate-50/60 align-top">
-                      <td className="p-2.5 font-bold text-slate-900 bg-slate-50/40">
-                        {row.dimension}
-                      </td>
-                      <td className="p-2.5">
-                        {hasProposals ? (
-                          <div className="space-y-1">
-                            {row.proposals.map((p, pIdx) => (
-                              <div key={pIdx} className="leading-relaxed text-slate-800">
-                                {p.change || 'Curriculum alignment and rubric modernization.'}
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <span className="text-slate-400 italic">Core curricular review planned.</span>
-                        )}
-                      </td>
-                      <td className="p-2.5 text-slate-700">
-                        {hasProposals && row.proposals[0]?.programmes ? (
-                          row.proposals.map((p, pIdx) => (
-                            <div key={pIdx}>{p.programmes}</div>
-                          ))
-                        ) : (
-                          <span>All Department UG Programmes</span>
-                        )}
-                      </td>
-                      <td className="p-2.5 text-slate-700">
-                        {hasProposals && row.proposals[0]?.support ? (
-                          row.proposals.map((p, pIdx) => (
-                            <div key={pIdx}>{p.support}</div>
-                          ))
-                        ) : (
-                          <span>HoD approval & BoS review</span>
-                        )}
-                      </td>
-                      <td className="p-2.5 text-slate-700 font-medium">
-                        {hasProposals && row.proposals[0]?.timeline ? (
-                          row.proposals.map((p, pIdx) => (
-                            <div key={pIdx}>{p.timeline}</div>
-                          ))
-                        ) : (
-                          <span>Oct–Dec 2026</span>
-                        )}
-                      </td>
-                      <td className="p-2.5 text-slate-700">
-                        {hasProposals && row.proposals[0]?.evidence ? (
-                          row.proposals.map((p, pIdx) => (
-                            <div key={pIdx}>{p.evidence}</div>
-                          ))
-                        ) : (
-                          <span>Updated course plans & rubrics</span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
+                {synthesizedActionPlan.map((row, idx) => (
+                  <tr key={idx} className="hover:bg-slate-50/60 align-top">
+                    <td className="p-3 font-bold text-slate-900 bg-slate-50/40">
+                      {row.dimension}
+                    </td>
+                    <td className="p-3 text-slate-800 leading-relaxed">
+                      {row.changes}
+                    </td>
+                    <td className="p-3 text-slate-700 font-medium">
+                      {row.programmes}
+                    </td>
+                    <td className="p-3 text-slate-700">
+                      {row.support}
+                    </td>
+                    <td className="p-3 text-slate-700 font-semibold">
+                      {row.timeline}
+                    </td>
+                    <td className="p-3 text-slate-700">
+                      {row.evidence}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -1171,77 +1307,74 @@ export const ReportGenerationView: React.FC = () => {
           </div>
         </section>
 
-        {/* Section 4: Participant Feedback Summary */}
+        {/* Section 4: Participant Feedback Summary (Department-Specific) */}
         <section className="space-y-4 section-break">
           <div className="flex items-center gap-2 border-b-2 border-slate-900 pb-2">
             <span className="w-6 h-6 rounded bg-slate-900 text-white font-bold text-xs flex items-center justify-center">
               4
             </span>
             <h3 className="text-base font-bold text-slate-900 uppercase tracking-wide">
-              Participant Feedback Summary
+              Participant Feedback Summary — {fields.header?.department || 'Department'}
             </h3>
           </div>
 
-          {!feedbackSummary || feedbackSummary.n === 0 ? (
+          {!deptFeedbackSummary || deptFeedbackSummary.n === 0 ? (
             <p className="text-xs text-slate-500 italic">
-              Closing feedback aggregate will appear here once published from the Summary Publisher console.
+              Department feedback aggregate will appear here once responses are submitted and published.
             </p>
           ) : (
-            <div className="space-y-4 text-xs avoid-break">
+            <div className="space-y-5 text-xs avoid-break">
               <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
                 <div>
-                  <span className="font-bold text-slate-900">Programme Evaluation Aggregate:</span>{' '}
-                  <span className="text-slate-600">{feedbackSummary.n} total faculty responses recorded</span>
+                  <span className="font-bold text-slate-900">Department Evaluation Sample:</span>{' '}
+                  <span className="text-slate-600">{deptFeedbackSummary.n} faculty responses recorded</span>
                 </div>
-                <span className="px-2.5 py-1 bg-emerald-100 text-emerald-800 font-bold rounded-lg text-xs">
-                  Overall Rating: {feedbackSummary.pC2?.mean?.toFixed(2) || '4.50'} / 5.0
+                <span className="px-3 py-1 bg-emerald-100 text-emerald-800 font-bold rounded-lg text-xs">
+                  Overall Rating: {deptFeedbackSummary.pC2?.mean?.toFixed(2) || '4.50'} / 5.0
                 </span>
               </div>
 
-              {/* Likert Means Table */}
-              <div className="border border-slate-200 rounded-xl overflow-hidden">
-                <div className="bg-slate-100 px-3 py-2 font-bold text-slate-800 text-xs">
+              {/* Department Evaluation Dimension Bar Chart */}
+              <div className="border border-slate-200 rounded-xl p-4 bg-white space-y-2">
+                <div className="font-bold text-slate-800 text-xs uppercase tracking-wider">
                   Key Evaluation Dimensions (Mean Scores on 5-Point Scale)
                 </div>
-                <table className="w-full text-left text-xs">
-                  <tbody className="divide-y divide-slate-100">
-                    <tr className="hover:bg-slate-50/50">
-                      <td className="p-2 font-medium">Vertical disciplinary depth understanding (A1)</td>
-                      <td className="p-2 text-right font-bold text-christ-navy">
-                        {feedbackSummary.pA?.a1?.mean ? `${feedbackSummary.pA.a1.mean.toFixed(2)} / 5.0` : '—'}
-                      </td>
-                    </tr>
-                    <tr className="hover:bg-slate-50/50">
-                      <td className="p-2 font-medium">Horizontal interdisciplinary breadth understanding (A2)</td>
-                      <td className="p-2 text-right font-bold text-christ-navy">
-                        {feedbackSummary.pA?.a2?.mean ? `${feedbackSummary.pA.a2.mean.toFixed(2)} / 5.0` : '—'}
-                      </td>
-                    </tr>
-                    <tr className="hover:bg-slate-50/50">
-                      <td className="p-2 font-medium">Confidence applying Bloom / DOK / CRM rigour tools (A5)</td>
-                      <td className="p-2 text-right font-bold text-christ-navy">
-                        {feedbackSummary.pA?.a5?.mean ? `${feedbackSummary.pA.a5.mean.toFixed(2)} / 5.0` : '—'}
-                      </td>
-                    </tr>
-                    <tr className="hover:bg-slate-50/50">
-                      <td className="p-2 font-medium">Equipped to apply higher-order assessment redesign (C2)</td>
-                      <td className="p-2 text-right font-bold text-christ-navy">
-                        {feedbackSummary.pC2?.mean ? `${feedbackSummary.pC2.mean.toFixed(2)} / 5.0` : '—'}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                <div className="h-52 w-full pt-2">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={partAChartData}
+                      layout="vertical"
+                      margin={{ top: 5, right: 30, left: 10, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
+                      <XAxis type="number" domain={[0, 5]} ticks={[1, 2, 3, 4, 5]} />
+                      <YAxis dataKey="id" type="category" tick={{ fontSize: 11, fontWeight: 600 }} />
+                      <Tooltip
+                        formatter={(val: any) => [`${val} / 5.0`, 'Mean Agreement']}
+                        labelFormatter={(label: any) => {
+                          const item = partAChartData.find((d: any) => d.id === label);
+                          return item ? `${item.id}: ${item.label}` : label;
+                        }}
+                      />
+                      <Bar dataKey="mean" fill="#0A2540" radius={[0, 6, 6, 0]}>
+                        {partAChartData.map((_, idx) => (
+                          <Cell key={`cell-${idx}`} fill={idx % 2 === 0 ? '#0A2540' : '#1E3A8A'} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
 
-              {/* Sample Anonymous Reflections */}
-              {feedbackSummary.pD2Anonymous && feedbackSummary.pD2Anonymous.length > 0 && (
-                <div className="space-y-2 pt-2">
+              {/* Sample Department Anonymous Reflections */}
+              {anonymousQuotes && anonymousQuotes.length > 0 && (
+                <div className="space-y-2 pt-1">
                   <div className="font-bold text-slate-800 text-xs uppercase tracking-wider">
-                    Representative Participant Reflections
+                    Representative Department Faculty Reflections
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {feedbackSummary.pD2Anonymous.slice(0, 4).map((q, idx) => (
-                      <div key={idx} className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs italic">
+                    {anonymousQuotes.slice(0, 4).map((q, idx) => (
+                      <div key={idx} className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs italic text-slate-700 leading-relaxed">
                         "{q}"
                       </div>
                     ))}

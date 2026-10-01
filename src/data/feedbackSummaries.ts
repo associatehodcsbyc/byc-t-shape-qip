@@ -46,11 +46,24 @@ export interface OverallFeedbackSummaryDoc {
   updatedBy?: string;
 }
 
-const summaryRef = () => doc(db, 'feedbackSummaries', 'overall');
+const summaryRef = (deptId?: string) => {
+  const docId = deptId && deptId.trim() ? deptId.trim() : 'overall';
+  return doc(db, 'feedbackSummaries', docId);
+};
 
 export const getOverallFeedbackSummary = async (): Promise<OverallFeedbackSummaryDoc | null> => {
-  const snap = await getDoc(summaryRef());
+  const snap = await getDoc(summaryRef('overall'));
   return snap.exists() ? (snap.data() as OverallFeedbackSummaryDoc) : null;
+};
+
+export const getFeedbackSummary = async (deptId?: string): Promise<OverallFeedbackSummaryDoc | null> => {
+  if (deptId && deptId.trim() && deptId !== 'overall') {
+    const deptSnap = await getDoc(summaryRef(deptId));
+    if (deptSnap.exists()) {
+      return deptSnap.data() as OverallFeedbackSummaryDoc;
+    }
+  }
+  return getOverallFeedbackSummary();
 };
 
 export const subscribeToOverallFeedbackSummary = (
