@@ -3,14 +3,16 @@ import { Header } from '../components/Header';
 import { useAuth } from '../context/AuthContext';
 import { ActivityAnalytics } from '../components/analytics/ActivityAnalytics';
 import { SessionSummaryView } from '../components/analytics/SessionSummaryView';
+import { FeedbackAnalysisView } from '../components/analytics/FeedbackAnalysisView';
 import { SummaryPublisher } from '../components/admin/SummaryPublisher';
+import { ReportGenerationView } from '../components/analytics/ReportGenerationView';
 
 export const AnalyticsPage: React.FC = () => {
   const { isAppAdmin } = useAuth();
-  const [activeTab, setActiveTab] = useState<'activity' | 'session' | 'publisher'>('activity');
+  const [activeTab, setActiveTab] = useState<'activity' | 'session' | 'feedback' | 'report' | 'publisher'>('activity');
 
   return (
-    <div className="flex-1 bg-slate-50 flex flex-col">
+    <div className="flex-1 bg-slate-50 flex flex-col min-h-screen">
       <Header />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
@@ -40,6 +42,30 @@ export const AnalyticsPage: React.FC = () => {
             📋 Session Summary Reports
           </button>
 
+          <button
+            onClick={() => setActiveTab('feedback')}
+            id="tab-feedback-analysis"
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
+              activeTab === 'feedback'
+                ? 'bg-amber-600 text-white shadow-sm'
+                : 'text-amber-800 hover:text-amber-950 hover:bg-amber-50'
+            }`}
+          >
+            📝 Feedback Analysis
+          </button>
+
+          <button
+            onClick={() => setActiveTab('report')}
+            id="tab-report-generation"
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
+              activeTab === 'report'
+                ? 'bg-slate-900 text-white shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+          >
+            📑 Report Generation
+          </button>
+
           {isAppAdmin && (
             <button
               onClick={() => setActiveTab('publisher')}
@@ -58,6 +84,8 @@ export const AnalyticsPage: React.FC = () => {
         {/* Tab Content */}
         {activeTab === 'activity' && <ActivityAnalytics />}
         {activeTab === 'session' && <SessionSummaryView />}
+        {activeTab === 'feedback' && <FeedbackAnalysisView />}
+        {activeTab === 'report' && <ReportGenerationView />}
         {activeTab === 'publisher' && isAppAdmin && <SummaryPublisher />}
       </main>
     </div>

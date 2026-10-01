@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, connectAuthEmulator } from 'firebase/auth';
+import { getStorage, connectStorageEmulator } from 'firebase/storage';
 import {
   initializeFirestore,
   persistentLocalCache,
@@ -39,11 +40,13 @@ try {
 }
 
 export const db = firestoreDb;
+export const storage = getStorage(app);
 
 // Use connectAuthEmulator/connectFirestoreEmulator only when VITE_USE_EMULATORS=true
 if (isEmulator) {
   connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
   connectFirestoreEmulator(db, '127.0.0.1', 8080);
+  connectStorageEmulator(storage, '127.0.0.1', 9199);
 }
 
 // Note: App Check will be initialized in Phase 6

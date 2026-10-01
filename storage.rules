@@ -1,6 +1,67 @@
 rules_version = '2';
+
+// ============================================================================
+// QIP Workshop App (CHRIST BYC) - Firebase Storage Security Rules
+// ----------------------------------------------------------------------------
+// Added for the Report Generation photo gallery only. Storage is a SEPARATE
+// rules engine from Firestore - it does not automatically inherit anything
+// from firestore.rules. This file cross-checks the same `roster` collection
+// via firestore.get()/firestore.exists(), mirroring the role logic already
+// used throughout firestore.rules (isActive, canEditReport), so there is only
+// one source of truth for who is who.
+// ============================================================================
+
 service firebase.storage {
   match /b/{bucket}/o {
+
+    function email() {
+      return request.auth.token.email.lower();
+    }
+
+    function isChristAccount() {
+      return request.auth != null
+        && request.auth.token.email is string
+        && email().matches('^[a-z0-9._%+-]+@christuniversity[.]in$')
+        && request.auth.token.firebase.sign_in_provider == 'google.com'
+        && request.auth.token.email_verified == true;
+    }
+
+    function rosterDoc() {
+      return firestore.get(/databases/(default)/documents/roster/$(email())).data;
+    }
+
+    function isActive() {
+      return isChristAccount()
+        && firestore.exists(/databases/(default)/documents/roster/$(email()))
+        && rosterDoc().active == true;
+    }
+
+    // Mirrors canEditReport() in firestore.rules exactly: App Admin, QIP
+    // Coordinator, any department HoD. Dean/Associate Dean/HRDC and Resource
+    // Person stay read-only, same as the report's text boxes.
+    function canEditReport() {
+      return isActive() && (
+        (rosterDoc().role == 'admin'
+          && rosterDoc().adminType in ['app_admin', 'app-admin'])
+        || rosterDoc().role in ['coordinator', 'qip_coordinator']
+        || rosterDoc().role == 'hod'
+      );
+    }
+
+    // ---------- Report photo gallery ----------
+    // Path: qipReportPhotos/{autoId}-{originalFilename}
+    // The matching caption/credit/order metadata lives in Firestore at
+    // reportMeta.fields.photos[] (see PHOTO_UPLOAD_ADDENDUM.md) - Storage
+    // holds only the binary file.
+    match /qipReportPhotos/{fileName} {
+      allow read: if isActive();
+      allow write: if canEditReport()
+        && request.resource.size < 8 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if canEditReport();
+    }
+
+    // ---------- Everything else is denied ----------
     match /{allPaths=**} {
       allow read, write: if false;
     }

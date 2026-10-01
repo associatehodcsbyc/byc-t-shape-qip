@@ -28,6 +28,7 @@ import {
   serverTimestamp,
   type Firestore,
 } from 'firebase/firestore';
+import { ref, uploadBytes, deleteObject } from 'firebase/storage';
 import {
   authUsers,
   rosterData,
@@ -77,6 +78,11 @@ beforeAll(async () => {
       rules: readFileSync(resolve(__dirname, '../firestore.rules'), 'utf8'),
       host: '127.0.0.1',
       port: 8080,
+    },
+    storage: {
+      rules: readFileSync(resolve(__dirname, '../storage.rules'), 'utf8'),
+      host: '127.0.0.1',
+      port: 9199,
     },
   });
 });
@@ -1055,4 +1061,354 @@ describe('QIP Workshop — Firestore Security Rules', () => {
     const db = authedDb('not_in_roster');
     await assertFails(getDoc(doc(db, 'config', 'app')));
   });
+
+  // =========================================================================
+  // Addendum Tests: Feedback, FeedbackSummaries, ReportMeta (F1-F10)
+  // =========================================================================
+
+  // -------------------------------------------------------------------------
+  // F1. A participant can create their own feedback/{email} draft and flip it to submitted.
+  // -------------------------------------------------------------------------
+  it('F1. Participant can create feedback draft and submit it', async () => {
+    const db = authedDb('cs_part1');
+    const fbRef = doc(db, 'feedback', 'part1.cs@christuniversity.in');
+
+    // Create draft
+    await assertSucceeds(
+      setDoc(fbRef, {
+        email: 'part1.cs@christuniversity.in',
+        uid: 'uid-cs-part1',
+        name: 'CS Participant 1',
+        department: 'computer-science',
+        role: 'participant',
+        answers: { pA: { a1: 4 } },
+        status: 'draft',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      })
+    );
+
+    // Submit
+    await assertSucceeds(
+      updateDoc(fbRef, {
+        answers: { pA: { a1: 5 } },
+        status: 'submitted',
+        updatedAt: serverTimestamp(),
+        submittedAt: serverTimestamp(),
+      })
+    );
+  });
+
+  // -------------------------------------------------------------------------
+  // F2. Coordinator and Resource Person can each create their own feedback.
+  // -------------------------------------------------------------------------
+  it('F2. Coordinator and Resource Person can create their own feedback', async () => {
+    // Coordinator
+    const dbC = authedDb('coordinator');
+    await assertSucceeds(
+      setDoc(doc(dbC, 'feedback', 'coordinator@christuniversity.in'), {
+        email: 'coordinator@christuniversity.in',
+        uid: 'uid-coordinator',
+        name: 'QIP Coordinator',
+        department: 'computer-science',
+        role: 'coordinator',
+        answers: { pA: { a1: 5 } },
+        status: 'draft',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      })
+    );
+
+    // Resource Person
+    const dbR = authedDb('res_person');
+    await assertSucceeds(
+      setDoc(doc(dbR, 'feedback', 'resperson@christuniversity.in'), {
+        email: 'resperson@christuniversity.in',
+        uid: 'uid-resperson',
+        name: 'Resource Person',
+        department: 'computer-science',
+        role: 'resource_person',
+        answers: { pA: { a1: 4 } },
+        status: 'draft',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      })
+    );
+  });
+
+  // -------------------------------------------------------------------------
+  // F3. Participant cannot read another's feedback; App Admin can read any.
+  // -------------------------------------------------------------------------
+  it('F3. Participant cannot read another feedback; App Admin can', async () => {
+    // Seed feedback for part1
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      const db = ctx.firestore();
+      await setDoc(doc(db, 'feedback', 'part1.cs@christuniversity.in'), {
+        email: 'part1.cs@christuniversity.in', uid: 'uid-cs-part1', name: 'CS P1',
+        department: 'computer-science', role: 'participant',
+        answers: {}, status: 'draft', createdAt: new Date(), updatedAt: new Date(),
+      });
+    });
+
+    // Part2 cannot read Part1's feedback
+    const dbP2 = authedDb('cs_part2');
+    await assertFails(getDoc(doc(dbP2, 'feedback', 'part1.cs@christuniversity.in')));
+
+    // App Admin CAN
+    const dbAdmin = authedDb('app_admin');
+    await assertSucceeds(getDoc(doc(dbAdmin, 'feedback', 'part1.cs@christuniversity.in')));
+  });
+
+  // -------------------------------------------------------------------------
+  // F4. HoD, Dean/AD/HRDC, Resource Person cannot get/list individual feedback — only feedbackSummaries/overall.
+  // -------------------------------------------------------------------------
+  it('F4. HoD/Dean/RP cannot read individual feedback but can read feedbackSummaries', async () => {
+    // Seed feedback + feedbackSummaries
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      const db = ctx.firestore();
+      await setDoc(doc(db, 'feedback', 'part1.cs@christuniversity.in'), {
+        email: 'part1.cs@christuniversity.in', uid: 'uid-cs-part1', name: 'CS P1',
+        department: 'computer-science', role: 'participant',
+        answers: {}, status: 'draft', createdAt: new Date(), updatedAt: new Date(),
+      });
+      await setDoc(doc(db, 'feedbackSummaries', 'overall'), {
+        n: 10, updatedAt: new Date(),
+      });
+    });
+
+    // HoD cannot read individual feedback
+    const dbHoD = authedDb('cs_hod');
+    await assertFails(getDoc(doc(dbHoD, 'feedback', 'part1.cs@christuniversity.in')));
+    // HoD CAN read feedbackSummaries
+    await assertSucceeds(getDoc(doc(dbHoD, 'feedbackSummaries', 'overall')));
+
+    // Dean cannot read feedback
+    const dbDean = authedDb('dean');
+    await assertFails(getDoc(doc(dbDean, 'feedback', 'part1.cs@christuniversity.in')));
+    // Dean CAN read feedbackSummaries (isAdmin)
+    await assertSucceeds(getDoc(doc(dbDean, 'feedbackSummaries', 'overall')));
+
+    // Resource Person cannot read feedback
+    const dbRP = authedDb('res_person');
+    await assertFails(getDoc(doc(dbRP, 'feedback', 'part1.cs@christuniversity.in')));
+    // RP CAN read feedbackSummaries
+    await assertSucceeds(getDoc(doc(dbRP, 'feedbackSummaries', 'overall')));
+  });
+
+  // -------------------------------------------------------------------------
+  // F5. Only App Admin can write feedbackSummaries/overall; others can read but not write.
+  // -------------------------------------------------------------------------
+  it('F5. Only App Admin can write feedbackSummaries/overall', async () => {
+    const dbAdmin = authedDb('app_admin');
+    await assertSucceeds(
+      setDoc(doc(dbAdmin, 'feedbackSummaries', 'overall'), {
+        n: 15, updatedAt: serverTimestamp(),
+      })
+    );
+
+    // Coordinator cannot write
+    const dbC = authedDb('coordinator');
+    await assertFails(
+      setDoc(doc(dbC, 'feedbackSummaries', 'overall'), {
+        n: 99, updatedAt: serverTimestamp(),
+      })
+    );
+
+    // HoD cannot write
+    const dbHoD = authedDb('cs_hod');
+    await assertFails(
+      setDoc(doc(dbHoD, 'feedbackSummaries', 'overall'), {
+        n: 99, updatedAt: serverTimestamp(),
+      })
+    );
+  });
+
+  // -------------------------------------------------------------------------
+  // F6. Participant cannot update feedback once status == 'submitted'.
+  // -------------------------------------------------------------------------
+  it('F6. Participant cannot update feedback once submitted', async () => {
+    // Seed submitted feedback
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      const db = ctx.firestore();
+      await setDoc(doc(db, 'feedback', 'part1.cs@christuniversity.in'), {
+        email: 'part1.cs@christuniversity.in', uid: 'uid-cs-part1', name: 'CS P1',
+        department: 'computer-science', role: 'participant',
+        answers: { pA: { a1: 5 } }, status: 'submitted',
+        createdAt: new Date(), updatedAt: new Date(), submittedAt: new Date(),
+      });
+    });
+
+    const db = authedDb('cs_part1');
+    await assertFails(
+      updateDoc(doc(db, 'feedback', 'part1.cs@christuniversity.in'), {
+        answers: { pA: { a1: 1 } },
+        status: 'draft',
+        updatedAt: serverTimestamp(),
+      })
+    );
+  });
+
+  // -------------------------------------------------------------------------
+  // F7. Participant cannot spoof role or department during feedback creation.
+  // -------------------------------------------------------------------------
+  it('F7. Participant cannot spoof role or department in feedback', async () => {
+    const db = authedDb('cs_part1');
+
+    // Wrong role
+    await assertFails(
+      setDoc(doc(db, 'feedback', 'part1.cs@christuniversity.in'), {
+        email: 'part1.cs@christuniversity.in',
+        uid: 'uid-cs-part1',
+        name: 'CS Participant 1',
+        department: 'computer-science',
+        role: 'admin', // WRONG
+        answers: {},
+        status: 'draft',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      })
+    );
+
+    // Wrong department
+    await assertFails(
+      setDoc(doc(db, 'feedback', 'part1.cs@christuniversity.in'), {
+        email: 'part1.cs@christuniversity.in',
+        uid: 'uid-cs-part1',
+        name: 'CS Participant 1',
+        department: 'commerce', // WRONG
+        role: 'participant',
+        answers: {},
+        status: 'draft',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      })
+    );
+  });
+
+  // -------------------------------------------------------------------------
+  // F8. canEditReport() roles can write reportMeta/main; Dean/RP are read-only.
+  // -------------------------------------------------------------------------
+  it('F8. canEditReport roles can write reportMeta; Dean/RP cannot', async () => {
+    const reportData = {
+      fields: { hodObservations: 'test' },
+      updatedAt: serverTimestamp(),
+    };
+
+    // App Admin CAN
+    const dbAdmin = authedDb('app_admin');
+    await assertSucceeds(
+      setDoc(doc(dbAdmin, 'reportMeta', 'main'), {
+        ...reportData,
+        updatedBy: 'appadmin@christuniversity.in',
+      })
+    );
+
+    // Coordinator CAN
+    const dbC = authedDb('coordinator');
+    await assertSucceeds(
+      setDoc(doc(dbC, 'reportMeta', 'main'), {
+        ...reportData,
+        updatedBy: 'coordinator@christuniversity.in',
+      })
+    );
+
+    // HoD CAN
+    const dbHoD = authedDb('cs_hod');
+    await assertSucceeds(
+      setDoc(doc(dbHoD, 'reportMeta', 'main'), {
+        ...reportData,
+        updatedBy: 'hod.cs@christuniversity.in',
+      })
+    );
+
+    // Dean CANNOT write
+    const dbDean = authedDb('dean');
+    await assertFails(
+      setDoc(doc(dbDean, 'reportMeta', 'main'), {
+        ...reportData,
+        updatedBy: 'dean@christuniversity.in',
+      })
+    );
+
+    // Dean CAN read
+    await assertSucceeds(getDoc(doc(dbDean, 'reportMeta', 'main')));
+
+    // Resource Person CANNOT write
+    const dbRP = authedDb('res_person');
+    await assertFails(
+      setDoc(doc(dbRP, 'reportMeta', 'main'), {
+        ...reportData,
+        updatedBy: 'resperson@christuniversity.in',
+      })
+    );
+
+    // Resource Person CAN read
+    await assertSucceeds(getDoc(doc(dbRP, 'reportMeta', 'main')));
+  });
+
+  // -------------------------------------------------------------------------
+  // F9. Participant cannot read or write reportMeta at all.
+  // -------------------------------------------------------------------------
+  it('F9. Participant cannot read or write reportMeta', async () => {
+    // Seed reportMeta
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      const db = ctx.firestore();
+      await setDoc(doc(db, 'reportMeta', 'main'), {
+        fields: {}, updatedBy: 'appadmin@christuniversity.in', updatedAt: new Date(),
+      });
+    });
+
+    const db = authedDb('cs_part1');
+    await assertFails(getDoc(doc(db, 'reportMeta', 'main')));
+    await assertFails(
+      setDoc(doc(db, 'reportMeta', 'main'), {
+        fields: { hacked: true },
+        updatedBy: 'part1.cs@christuniversity.in',
+        updatedAt: serverTimestamp(),
+      })
+    );
+  });
+
+  // -------------------------------------------------------------------------
+  // F10. Unauthenticated request is rejected on all three new collections.
+  // -------------------------------------------------------------------------
+  it('F10. Unauthenticated access denied on feedback, feedbackSummaries, reportMeta', async () => {
+    const unauthedDb = testEnv.unauthenticatedContext().firestore() as unknown as Firestore;
+
+    await assertFails(getDoc(doc(unauthedDb, 'feedback', 'part1.cs@christuniversity.in')));
+    await assertFails(getDoc(doc(unauthedDb, 'feedbackSummaries', 'overall')));
+    await assertFails(getDoc(doc(unauthedDb, 'reportMeta', 'main')));
+
+    await assertFails(
+      setDoc(doc(unauthedDb, 'feedback', 'anon@christuniversity.in'), {
+        email: 'anon@christuniversity.in', uid: 'x', name: 'X',
+        department: 'cs', role: 'participant', answers: {},
+        status: 'draft', createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+      })
+    );
+  });
+
+  // -------------------------------------------------------------------------
+  // Storage Photo Gallery Tests (Addendum Phase 3B)
+  // -------------------------------------------------------------------------
+  describe('Storage Photo Gallery', () => {
+    it('S1. non-canEditReport() account upload attempt is denied, and canEditReport() account upload succeeds', async () => {
+      // Participant (non-canEditReport)
+      const partStorage = authedContext('cs_part1').storage();
+      const partRef = ref(partStorage as any, 'qipReportPhotos/123-test.png');
+      const dummyFile = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]); // Fake PNG header
+      const blob = new Blob([dummyFile], { type: 'image/png' });
+
+      await assertFails(uploadBytes(partRef as any, blob as any));
+
+      // App Admin (canEditReport)
+      const adminStorage = authedContext('app_admin').storage();
+      const adminRef = ref(adminStorage as any, 'qipReportPhotos/123-test.png');
+      await assertSucceeds(uploadBytes(adminRef as any, blob as any));
+
+      // Cleanup
+      await assertSucceeds(deleteObject(adminRef as any));
+    });
+  });
+
 });

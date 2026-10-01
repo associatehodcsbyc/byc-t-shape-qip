@@ -9,6 +9,14 @@ import {
   fetchPublishedSummaries,
   subscribeToConfidentialResponses,
 } from '../../services/summaryPublisher';
+import { FeedbackDoc } from '../../data/feedback';
+import {
+  OverallFeedbackSummaryDoc,
+  subscribeToAllRawFeedbacks,
+  subscribeToOverallFeedbackSummary,
+  publishOverallFeedbackSummary,
+  computeFeedbackSummary,
+} from '../../data/feedbackSummaries';
 import defaultActivities from '../../../seed/activities.json';
 
 export const SummaryPublisher: React.FC = () => {
@@ -22,7 +30,13 @@ export const SummaryPublisher: React.FC = () => {
   const [statusMessage, setStatusMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [lastAutoRun, setLastAutoRun] = useState<Date | null>(null);
 
+  // Closing Feedback publisher state
+  const [rawFeedbacks, setRawFeedbacks] = useState<FeedbackDoc[]>([]);
+  const [overallFeedbackSummary, setOverallFeedbackSummary] = useState<OverallFeedbackSummaryDoc | null>(null);
+  const [feedbackPublishing, setFeedbackPublishing] = useState<boolean>(false);
+
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const feedbackDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // 1. Fetch departments and activities
   useEffect(() => {
@@ -59,18 +73,30 @@ export const SummaryPublisher: React.FC = () => {
     );
   }, [activities]);
 
-  // 2. Real-time subscription to confidential responses (App Admin only)
+  // 2. Real-time subscription to confidential responses and raw feedbacks (App Admin only)
   useEffect(() => {
     if (!isAppAdmin) return;
 
-    const unsub = subscribeToConfidentialResponses((responses) => {
+    const unsubResponses = subscribeToConfidentialResponses((responses) => {
       setConfidentialResponses(responses);
     });
 
-    return () => unsub();
+    const unsubFeedbacks = subscribeToAllRawFeedbacks((feedbacks) => {
+      setRawFeedbacks(feedbacks);
+    });
+
+    const unsubFeedbackSummary = subscribeToOverallFeedbackSummary((summary) => {
+      setOverallFeedbackSummary(summary);
+    });
+
+    return () => {
+      unsubResponses();
+      unsubFeedbacks();
+      unsubFeedbackSummary();
+    };
   }, [isAppAdmin]);
 
-  // 3. Debounced Auto-Publish every 60 seconds
+  // 3. Debounced Auto-Publish for confidential responses
   useEffect(() => {
     if (!isAppAdmin || departments.length === 0 || confidentialActivities.length === 0) return;
 
@@ -93,6 +119,29 @@ export const SummaryPublisher: React.FC = () => {
       }
     };
   }, [confidentialResponses, departments, confidentialActivities, isAppAdmin]);
+
+  // 4. Debounced Auto-Publish for closing feedback
+  useEffect(() => {
+    if (!isAppAdmin || rawFeedbacks.length === 0) return;
+
+    if (feedbackDebounceTimerRef.current) {
+      clearTimeout(feedbackDebounceTimerRef.current);
+    }
+
+    feedbackDebounceTimerRef.current = setTimeout(async () => {
+      try {
+        await handlePublishFeedback(true);
+      } catch (err) {
+        console.error('Feedback auto-publish failed:', err);
+      }
+    }, 30000); // 30 seconds
+
+    return () => {
+      if (feedbackDebounceTimerRef.current) {
+        clearTimeout(feedbackDebounceTimerRef.current);
+      }
+    };
+  }, [rawFeedbacks, isAppAdmin]);
 
   const notify = (text: string, type: 'success' | 'error' = 'success') => {
     setStatusMessage({ text, type });
@@ -164,6 +213,28 @@ export const SummaryPublisher: React.FC = () => {
     }
   };
 
+  // Publish Closing Programme Feedback Summary
+  const handlePublishFeedback = async (isAuto = false) => {
+    setFeedbackPublishing(true);
+    try {
+      const summaryPayload = computeFeedbackSummary(rawFeedbacks, 'App Admin');
+      await publishOverallFeedbackSummary(summaryPayload);
+      if (!isAuto) {
+        notify(
+          `Closing Feedback Summary published successfully (N=${summaryPayload.n} responses, ${summaryPayload.pD2Anonymous?.length || 0} anonymous quotes).`,
+          'success'
+        );
+      }
+    } catch (err: any) {
+      console.error('Error publishing feedback summary:', err);
+      if (!isAuto) {
+        notify(`Failed to publish feedback summary: ${err.message}`, 'error');
+      }
+    } finally {
+      setFeedbackPublishing(false);
+    }
+  };
+
   const formatTimestamp = (ts: any) => {
     if (!ts) return 'Never';
     try {
@@ -213,6 +284,61 @@ export const SummaryPublisher: React.FC = () => {
           >
             {publishingKey === 'all' ? 'Publishing All...' : '⚡ Publish All Now'}
           </button>
+        </div>
+      </div>
+
+      {/* Closing Feedback Summary Publisher Card (SPEC Addendum §D4) */}
+      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl p-6 shadow-md border border-indigo-800/80 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="space-y-2 max-w-2xl">
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-0.5 rounded text-xs font-bold bg-amber-400 text-slate-950 uppercase tracking-wider">
+              Addendum §D4
+            </span>
+            <span className="text-xs text-indigo-200">
+              Closing Programme Feedback (feedbackSummaries/overall)
+            </span>
+          </div>
+          <h3 className="text-xl font-bold tracking-tight">
+            Programme-Wide Feedback Aggregator
+          </h3>
+          <p className="text-xs text-indigo-200 leading-relaxed">
+            Aggregates Likert scale averages (pA/pC2), stacked evaluation distributions (pB), assessment poll counts (pC1), checklist selections (pD1), and shuffles anonymous participant recommendations (pD2). Published without minimum suppression to serve the combined BYC report.
+          </p>
+          <div className="flex flex-wrap items-center gap-4 text-xs pt-1">
+            <div className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-lg">
+              <span className="text-indigo-300">Raw Responses Received:</span>
+              <span className="font-extrabold text-white">{rawFeedbacks.length}</span>
+            </div>
+            <div className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-lg">
+              <span className="text-indigo-300">Published Sample (N):</span>
+              <span className="font-extrabold text-amber-300">{overallFeedbackSummary?.n ?? 0}</span>
+            </div>
+            <div className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-lg">
+              <span className="text-indigo-300">Last Published:</span>
+              <span className="font-semibold text-white">{formatTimestamp(overallFeedbackSummary?.updatedAt)}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-end gap-2 shrink-0 w-full sm:w-auto">
+          <button
+            onClick={() => handlePublishFeedback(false)}
+            disabled={feedbackPublishing}
+            id="btn-publish-feedback-summary"
+            className="w-full sm:w-auto px-5 py-3 bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-extrabold rounded-xl shadow-lg transition disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {feedbackPublishing ? (
+              <>
+                <div className="w-3.5 h-3.5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                Publishing Feedback...
+              </>
+            ) : (
+              '⚡ Publish Feedback Summary Now'
+            )}
+          </button>
+          <span className="text-[10px] text-indigo-300">
+            Auto-syncs every 30s on new responses
+          </span>
         </div>
       </div>
 

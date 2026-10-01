@@ -9,8 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run --exclude tests/rules.test.ts",
     "test:rules": "vitest run tests/rules.test.ts",
-    "test:rules:emu": "firebase emulators:exec --only firestore --project demo-byc-qip \"npm run test:rules\"",
-    "dev:emu": "firebase emulators:exec --only auth,firestore --project demo-byc-qip \"node scripts/seed-emulator.mjs && vite --mode emulator\"",
+    "test:rules:emu": "firebase emulators:exec --only firestore,storage --project demo-byc-qip \"npm run test:rules\"",
+    "dev:emu": "firebase emulators:exec --only auth,firestore,storage --project demo-byc-qip \"node scripts/seed-emulator.mjs && vite --mode emulator\"",
     "prepare": "husky"
   },
   "dependencies": {

@@ -11,6 +11,7 @@ const HoDLanding = lazy(() => import('./pages/HoDLanding').then((m) => ({ defaul
 const AdminLanding = lazy(() => import('./pages/AdminLanding').then((m) => ({ default: m.AdminLanding })));
 const ActivityRunnerPage = lazy(() => import('./pages/ActivityRunnerPage').then((m) => ({ default: m.ActivityRunnerPage })));
 const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage').then((m) => ({ default: m.AnalyticsPage })));
+const FeedbackPage = lazy(() => import('./pages/FeedbackPage').then((m) => ({ default: m.FeedbackPage })));
 
 const PageLoader: React.FC = () => (
   <div className="flex-1 flex flex-col items-center justify-center p-12 space-y-3 min-h-[50vh]">
@@ -102,6 +103,15 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={['hod', 'coordinator', 'admin', 'resource_person']}>
                     <AnalyticsPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/feedback"
+                element={
+                  <ProtectedRoute allowedRoles={['participant', 'hod', 'coordinator', 'admin', 'resource_person']}>
+                    <FeedbackPage />
                   </ProtectedRoute>
                 }
               />

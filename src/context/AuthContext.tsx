@@ -20,6 +20,7 @@ interface AuthContextType {
   isAppAdmin: boolean;
   isDeanOrLeadership: boolean;
   canManageGates: boolean;
+  canEditReport: boolean;
   reloadRoster: () => Promise<void>;
 }
 
@@ -105,6 +106,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isDeanOrLeadership = isAdmin && normAdminType !== 'app_admin';
   // Central gate control: Only QIP Coordinator and App Admin can enable/lock/disable activities
   const canManageGates = (isCoordinator || isAppAdmin) && !isDeanOrLeadership;
+  
+  const canEditReport = isAppAdmin || isCoordinator || isHoDStrict;
 
   return (
     <AuthContext.Provider
@@ -124,6 +127,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAppAdmin,
         isDeanOrLeadership,
         canManageGates,
+        canEditReport,
         reloadRoster,
       }}
     >

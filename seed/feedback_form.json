@@ -1,0 +1,100 @@
+{
+  "id": "closing_programme_feedback",
+  "title": "Closing Programme Feedback",
+  "subtitle": "Shaping Future-Ready Graduates: T-Shaped Learning, Academic Rigour and Academic Transformation (28–30 Sept 2026)",
+  "instructions": "This closing feedback takes about 8–10 minutes. It is the same form for Participants, the QIP Coordinator and Resource Persons — answer from your own vantage point on the programme. Your name and role are recorded so the QIP Coordinator can follow up if needed, but individual answers are seen only by you and the App Admin; everyone else sees only the combined, anonymised summary in Analytics & Reports.",
+  "widgetType": "composite",
+  "estimatedMinutes": 10,
+  "parts": [
+    {
+      "id": "pA",
+      "label": "A. T-Shaped Learning & Curriculum Direction",
+      "widgetType": "rating_scale",
+      "config": {
+        "scale": { "min": 1, "max": 5, "labels": ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"] },
+        "items": [
+          { "id": "a1", "text": "This programme deepened my understanding of vertical disciplinary depth." },
+          { "id": "a2", "text": "This programme deepened my understanding of horizontal breadth and interdisciplinary connections." },
+          { "id": "a3", "text": "I can now explain the 70:30 (depth : breadth) principle to a colleague." },
+          { "id": "a4", "text": "I have a clearer picture of where my own department currently sits on the depth-vs-breadth spectrum." },
+          { "id": "a5", "text": "I am confident applying at least one of Bloom's Revised Taxonomy, Webb's Depth of Knowledge, or the Cognitive Rigour Matrix as a diagnostic tool." }
+        ]
+      }
+    },
+    {
+      "id": "pB",
+      "label": "B. Programme Delivery & Facilitation",
+      "widgetType": "choice_matrix",
+      "config": {
+        "options": ["Excellent", "Good", "Satisfactory", "Needs Improvement"],
+        "evidence": true,
+        "items": [
+          { "id": "b1", "text": "Day 1 sessions — Foundations: The T-Shaped Graduate, Academic Rigour and Departmental Diagnosis" },
+          { "id": "b2", "text": "Day 2 sessions — Hands-On Curriculum Redesign I: From Higher-Order Thinking to Depth of Knowledge" },
+          { "id": "b3", "text": "Day 3 sessions — Hands-On Curriculum Redesign II: Vertical Progression, Authentic Assessment and Institutionalising Change" },
+          { "id": "b4", "text": "Pacing and time management across the three days" },
+          { "id": "b5", "text": "Clarity and usefulness of handouts / working documents" }
+        ]
+      }
+    },
+    {
+      "id": "pC1",
+      "label": "C. Higher-Order Thinking & Scholarship of Teaching and Learning",
+      "widgetType": "poll",
+      "config": {
+        "prompt": "Which part of the programme most changed how you think about assessment design?",
+        "options": [
+          { "id": "o1", "text": "Bloom's / Webb's DOK / Cognitive Rigour Matrix mapping" },
+          { "id": "o2", "text": "Authentic, higher-order assessment task design" },
+          { "id": "o3", "text": "SoTL and documenting curricular change" },
+          { "id": "o4", "text": "The departmental curriculum action-planning session" }
+        ]
+      }
+    },
+    {
+      "id": "pC2",
+      "widgetType": "rating_scale",
+      "config": {
+        "scale": { "min": 1, "max": 5, "labels": ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"] },
+        "items": [
+          { "id": "c2", "text": "I feel equipped to apply at least one higher-order / authentic assessment idea from this programme in my own context (teaching, coordinating, or facilitating)." }
+        ]
+      }
+    },
+    {
+      "id": "pD1",
+      "label": "D. Overall Programme Feedback",
+      "widgetType": "checklist",
+      "config": {
+        "prompt": "Which elements worked best for you? (select all that apply)",
+        "options": [
+          { "id": "e1", "text": "Case studies and worked examples" },
+          { "id": "e2", "text": "Hands-on curriculum redesign time" },
+          { "id": "e3", "text": "Peer / group discussion" },
+          { "id": "e4", "text": "Resource person expertise" },
+          { "id": "e5", "text": "Pacing and time management" },
+          { "id": "e6", "text": "Materials and handouts" },
+          { "id": "e7", "text": "Venue and logistics" }
+        ],
+        "other": true
+      }
+    },
+    {
+      "id": "pD2",
+      "widgetType": "free_text",
+      "config": {
+        "prompt": "What is the one change that would most improve a future run of this QIP?",
+        "maxChars": 500,
+        "anonymous": true
+      }
+    },
+    {
+      "id": "pD3",
+      "widgetType": "free_text",
+      "config": {
+        "prompt": "Any other comments or appreciation you'd like to record?",
+        "maxChars": 500
+      }
+    }
+  ]
+}

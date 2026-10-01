@@ -62,6 +62,14 @@ service cloud.firestore {
     }
     function myDept()       { return me().department; }
 
+    // ---------- New helper: who may EDIT the QIP report's text fields ----------
+    // Deliberately narrower than isAdmin(): Dean / Associate Dean / HRDC stay view-only,
+    // exactly as in the rest of this app. App Admin, the QIP Coordinator, and any
+    // department HoD may edit.
+    function canEditReport() {
+      return isActive() && (isAppAdmin() || isCoordinator() || me().role == 'hod');
+    }
+
     // ---------- Activity gate ----------
     function statePath(dept, activityId) {
       return /databases/$(database)/documents/activityState/$(dept + '__' + activityId);
@@ -139,7 +147,7 @@ service cloud.firestore {
       // Activity state controls gate open/locked status; readable by all active workshop users
       allow read: if isActive();
 
-      allow create, update: if (isHoD() || isAdmin())
+      allow create, update: if (isHoDOf(request.resource.data.department) || isAppAdmin())
         && stateId == request.resource.data.department + '__' + request.resource.data.activityId
         && request.resource.data.keys().hasOnly(
              ['department', 'activityId', 'sessionId', 'enabled', 'locked',
@@ -277,6 +285,68 @@ service cloud.firestore {
         && request.resource.data.at == request.time;
       allow read: if isAdmin();
       allow update, delete: if false;
+    }
+
+    // ---------- Closing programme feedback (Participants, HoDs, QIP Coordinator, Resource Persons) ----------
+    // Doc ID = lowercase email. One identical form for every role. Self-locks once 'submitted'.
+    function validFeedbackShape() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(
+               ['email', 'uid', 'name', 'department', 'role', 'answers',
+                'status', 'createdAt', 'updatedAt', 'submittedAt'])
+        && d.role in ['participant', 'hod', 'coordinator', 'qip_coordinator', 'resource_person']
+        && d.answers is map
+        && d.answers.size() <= 60
+        && d.status in ['draft', 'submitted']
+        && d.updatedAt == request.time;
+    }
+
+    match /feedback/{fEmail} {
+      allow get: if isActive() && (fEmail == email() || isAppAdmin());
+      allow list: if isAppAdmin();
+
+      allow create: if isActive()
+        && fEmail == email()
+        && request.resource.data.email == email()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.department == myDept()
+        && request.resource.data.role == me().role
+        && request.resource.data.createdAt == request.time
+        && validFeedbackShape();
+
+      allow update: if isActive()
+        && resource.data.email == email()
+        && resource.data.status == 'draft'
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['answers', 'status', 'updatedAt', 'submittedAt', 'name'])
+        && validFeedbackShape();
+
+      allow delete: if false;
+    }
+
+    // ---------- Published aggregate of the closing feedback (programme-wide, not per-department) ----------
+    match /feedbackSummaries/{sumId} {
+      allow read: if isActive() && (isAdmin() || isHoD() || isResourcePerson());
+      allow create, update: if isAppAdmin()
+        && sumId == 'overall'
+        && request.resource.data.n is int
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if isAppAdmin();
+    }
+
+    // ---------- Editable QIP report fields ----------
+    match /reportMeta/{docId} {
+      allow read: if isActive() && (canEditReport() || isAdmin() || isResourcePerson());
+
+      allow create, update: if canEditReport()
+        && docId == 'main'
+        && request.resource.data.updatedBy == email()
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.keys().hasOnly(['fields', 'updatedBy', 'updatedAt'])
+        && request.resource.data.fields is map
+        && request.resource.data.fields.size() <= 200;
+
+      allow delete: if false;
     }
 
     // ---------- Everything else is denied ----------

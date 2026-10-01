@@ -29,6 +29,8 @@ export const authUsers: Record<string, AuthUser> = {
   dean:        { email: 'dean@christuniversity.in',         uid: 'uid-dean',        email_verified: true, sign_in_provider: 'google.com' },
   assoc_dean:  { email: 'assoc.dean@christuniversity.in',   uid: 'uid-assoc-dean',  email_verified: true, sign_in_provider: 'google.com' },
   hrdc:        { email: 'hrdc@christuniversity.in',         uid: 'uid-hrdc',        email_verified: true, sign_in_provider: 'google.com' },
+  coordinator: { email: 'coordinator@christuniversity.in',   uid: 'uid-coordinator', email_verified: true, sign_in_provider: 'google.com' },
+  res_person:  { email: 'resperson@christuniversity.in',     uid: 'uid-resperson',   email_verified: true, sign_in_provider: 'google.com' },
   inactive:    { email: 'inactive@christuniversity.in',     uid: 'uid-inactive',    email_verified: true, sign_in_provider: 'google.com' },
   not_in_roster: { email: 'nobody@christuniversity.in',     uid: 'uid-nobody',      email_verified: true, sign_in_provider: 'google.com' },
   gmail_user:  { email: 'hacker@gmail.com',                 uid: 'uid-gmail',       email_verified: true, sign_in_provider: 'google.com' },
@@ -47,6 +49,8 @@ export const rosterData: Record<string, Record<string, unknown>> = {
   'dean@christuniversity.in':       { email: 'dean@christuniversity.in',       name: 'Dean',              department: 'computer-science', role: 'admin',       adminType: 'dean',           active: true,  uploadedBy: 'appadmin@christuniversity.in', uploadedAt: new Date() },
   'assoc.dean@christuniversity.in': { email: 'assoc.dean@christuniversity.in', name: 'Associate Dean',    department: 'computer-science', role: 'admin',       adminType: 'associate_dean', active: true,  uploadedBy: 'appadmin@christuniversity.in', uploadedAt: new Date() },
   'hrdc@christuniversity.in':       { email: 'hrdc@christuniversity.in',       name: 'HRDC Admin',        department: 'computer-science', role: 'admin',       adminType: 'hrdc',           active: true,  uploadedBy: 'appadmin@christuniversity.in', uploadedAt: new Date() },
+  'coordinator@christuniversity.in': { email: 'coordinator@christuniversity.in', name: 'QIP Coordinator',   department: 'computer-science', role: 'coordinator', adminType: null,             active: true,  uploadedBy: 'appadmin@christuniversity.in', uploadedAt: new Date() },
+  'resperson@christuniversity.in':   { email: 'resperson@christuniversity.in',   name: 'Resource Person',   department: 'computer-science', role: 'resource_person', adminType: null,         active: true,  uploadedBy: 'appadmin@christuniversity.in', uploadedAt: new Date() },
   'inactive@christuniversity.in':   { email: 'inactive@christuniversity.in',   name: 'Inactive User',     department: 'computer-science', role: 'participant', adminType: null, active: false, uploadedBy: 'appadmin@christuniversity.in', uploadedAt: new Date() },
 };
 

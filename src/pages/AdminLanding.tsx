@@ -49,9 +49,18 @@ export const AdminLanding: React.FC = () => {
                 </p>
               </div>
             </div>
-            <span className="bg-amber-200 text-amber-900 text-xs font-bold px-3 py-1 rounded-full border border-amber-300">
-              Full Access
-            </span>
+            <div className="flex items-center gap-2">
+              <a
+                href="/feedback"
+                id="btn-admin-feedback"
+                className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold transition shadow-sm"
+              >
+                📝 Test Feedback Form
+              </a>
+              <span className="bg-amber-200 text-amber-900 text-xs font-bold px-3 py-1 rounded-full border border-amber-300">
+                Full Access
+              </span>
+            </div>
           </div>
         )}
 

@@ -18,6 +18,7 @@ import {
 } from '../services/content';
 import { subscribeToDepartmentActivityStates } from '../services/activityState';
 import { isMatchingDepartment } from '../utils/department';
+import { getMyFeedback } from '../data/feedback';
 
 export const ParticipantLanding: React.FC = () => {
   const { user, rosterUser } = useAuth();
@@ -32,6 +33,21 @@ export const ParticipantLanding: React.FC = () => {
   const [activityStates, setActivityStates] = useState<Map<string, ActivityState>>(new Map());
   const [userProgress, setUserProgress] = useState<Map<string, SubmissionProgress>>(new Map());
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  const [feedbackStatus, setFeedbackStatus] = useState<'not_started' | 'draft' | 'submitted'>('not_started');
+
+  useEffect(() => {
+    async function checkFeedback() {
+      try {
+        const fb = await getMyFeedback();
+        if (fb) {
+          setFeedbackStatus(fb.status || 'draft');
+        }
+      } catch (err) {
+        console.error('Check feedback error:', err);
+      }
+    }
+    checkFeedback();
+  }, [emailLower]);
 
   // 1. Instant cache with background revalidation
   useEffect(() => {
@@ -204,6 +220,50 @@ export const ParticipantLanding: React.FC = () => {
               📄 Working Document
             </button>
           </div>
+        </div>
+
+        {/* Closing Programme Feedback Callout Card */}
+        <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-300/60 rounded-2xl p-5 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="px-2 py-0.5 bg-amber-500 text-slate-900 rounded text-[10px] font-extrabold uppercase tracking-wide">
+                Mandatory HRDC Submission
+              </span>
+              <span className="text-xs font-semibold text-amber-950">
+                Programme Concluded 30 Sept 2026
+              </span>
+            </div>
+            <h3 className="text-sm font-bold text-slate-900">
+              Closing Programme Feedback (8–10 mins)
+            </h3>
+            <p className="text-xs text-slate-600 max-w-2xl">
+              Please share your valuable evaluation of T-Shaped Learning, curriculum rigour, and session delivery.
+            </p>
+          </div>
+
+          <button
+            onClick={() => navigate('/feedback')}
+            id="btn-open-feedback"
+            className={`px-5 py-2.5 rounded-xl text-xs font-bold transition shadow-sm shrink-0 flex items-center gap-2 ${
+              feedbackStatus === 'submitted'
+                ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200'
+                : 'bg-slate-900 text-white hover:bg-slate-800 active:scale-95'
+            }`}
+          >
+            {feedbackStatus === 'submitted' ? (
+              <>
+                <span>✅</span> View Submitted Feedback
+              </>
+            ) : feedbackStatus === 'draft' ? (
+              <>
+                <span>✏️</span> Resume Feedback (Draft)
+              </>
+            ) : (
+              <>
+                <span>📝</span> Fill Closing Feedback
+              </>
+            )}
+          </button>
         </div>
 
         {/* Live Activity In Progress Alert Banner (Instant Jump) */}

@@ -152,6 +152,13 @@ export const Header: React.FC = () => {
                   My Activities
                 </a>
               )}
+              <a
+                href="/feedback"
+                id="header-feedback-link"
+                className="px-2.5 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 transition border border-amber-400/30 font-bold"
+              >
+                📝 Feedback
+              </a>
             </nav>
 
             <div className="text-right hidden sm:block">
